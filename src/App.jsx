@@ -13,12 +13,14 @@ import GSTReco from "./pages/GSTReco";
 import AIChat from "./pages/AIChat";
 import Pricing from "./pages/Pricing";
 import Compliance from "./pages/Compliance";
+import Consultations from "./pages/Consultations";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientDocuments from "./pages/ClientDocuments";
 import ClientMessages from "./pages/ClientMessages";
 import ClientReports from "./pages/ClientReports";
 import ClientBilling from "./pages/ClientBilling";
+import ClientMeetings from "./pages/ClientMeetings";
 
 const queryClient = new QueryClient();
 
@@ -38,10 +40,12 @@ const App = () => (
           <Route path="/ai-chat" element={<AppShell><AIChat /></AppShell>} />
           <Route path="/pricing" element={<AppShell><Pricing /></AppShell>} />
           <Route path="/compliance" element={<AppShell><Compliance /></AppShell>} />
+          <Route path="/consultations" element={<AppShell><Consultations /></AppShell>} />
           
           {/* Client Dashboard */}
           <Route path="/client" element={<ClientAppShell><ClientDashboard /></ClientAppShell>} />
           <Route path="/client/documents" element={<ClientAppShell><ClientDocuments /></ClientAppShell>} />
+          <Route path="/client/meetings" element={<ClientAppShell><ClientMeetings /></ClientAppShell>} />
           <Route path="/client/messages" element={<ClientAppShell><ClientMessages /></ClientAppShell>} />
           <Route path="/client/reports" element={<ClientAppShell><ClientReports /></ClientAppShell>} />
           <Route path="/client/billing" element={<ClientAppShell><ClientBilling /></ClientAppShell>} />
