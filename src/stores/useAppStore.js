@@ -1,10 +1,7 @@
-import { useSyncExternalStore } from 'react';
-import { createStore } from 'zustand/vanilla';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const identity = (s) => s;
-
-const store = createStore(
+export const useAppStore = create(
   persist(
     (set, get) => ({
       // Sidebar state
@@ -55,21 +52,3 @@ const store = createStore(
     }
   )
 );
-
-/**
- * React hook wrapper around a vanilla Zustand store.
- * This avoids "Invalid hook call" issues that can occur when a dependency bundles
- * its own React instance.
- */
-export function useAppStore(selector = identity) {
-  return useSyncExternalStore(
-    store.subscribe,
-    () => selector(store.getState()),
-    () => selector(store.getState())
-  );
-}
-
-// Convenience helpers (Zustand-like API surface)
-useAppStore.getState = store.getState;
-useAppStore.setState = store.setState;
-useAppStore.subscribe = store.subscribe;
