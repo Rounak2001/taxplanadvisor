@@ -14,6 +14,9 @@ import AIChat from "./pages/AIChat";
 import Pricing from "./pages/Pricing";
 import Compliance from "./pages/Compliance";
 import Consultations from "./pages/Consultations";
+import FinancialInsights from "./pages/FinancialInsights";
+import Marketplace from "./pages/Marketplace";
+import PrivacyRights from "./pages/PrivacyRights";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientDocuments from "./pages/ClientDocuments";
@@ -41,6 +44,7 @@ const App = () => (
           <Route path="/pricing" element={<AppShell><Pricing /></AppShell>} />
           <Route path="/compliance" element={<AppShell><Compliance /></AppShell>} />
           <Route path="/consultations" element={<AppShell><Consultations /></AppShell>} />
+          <Route path="/insights" element={<AppShell><FinancialInsights /></AppShell>} />
           
           {/* Client Dashboard */}
           <Route path="/client" element={<ClientAppShell><ClientDashboard /></ClientAppShell>} />
@@ -49,6 +53,9 @@ const App = () => (
           <Route path="/client/messages" element={<ClientAppShell><ClientMessages /></ClientAppShell>} />
           <Route path="/client/reports" element={<ClientAppShell><ClientReports /></ClientAppShell>} />
           <Route path="/client/billing" element={<ClientAppShell><ClientBilling /></ClientAppShell>} />
+          <Route path="/client/marketplace" element={<ClientAppShell><Marketplace /></ClientAppShell>} />
+          <Route path="/client/privacy" element={<ClientAppShell><PrivacyRights /></ClientAppShell>} />
+          <Route path="/client/insights" element={<ClientAppShell><FinancialInsights /></ClientAppShell>} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

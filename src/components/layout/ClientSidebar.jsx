@@ -9,6 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Video,
+  Brain,
+  Store,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -17,11 +20,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const navItems = [
   { to: '/client', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
   { to: '/client/documents', icon: FolderOpen, label: 'My Documents' },
   { to: '/client/meetings', icon: Video, label: 'My Meetings' },
   { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
   { to: '/client/reports', icon: FileText, label: 'My Reports' },
+  { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
   { to: '/client/billing', icon: CreditCard, label: 'Billing' },
+  { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
 ];
 
 export function ClientSidebar() {
