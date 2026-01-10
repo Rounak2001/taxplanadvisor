@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Video,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -29,6 +30,7 @@ const navGroups = [
     items: [
       { to: '/clients', icon: Users, label: 'Clients' },
       { to: '/vault', icon: FolderOpen, label: 'Smart Vault' },
+      { to: '/consultations', icon: Video, label: 'Consultations' },
     ],
   },
   {
