@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { ClientAppShell } from "@/components/layout/ClientAppShell";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import Vault from "./pages/Vault";
@@ -34,8 +35,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public Landing Page */}
+          <Route path="/" element={<Landing />} />
+          
           {/* Consultant Dashboard */}
-          <Route path="/" element={<AppShell><Dashboard /></AppShell>} />
+          <Route path="/dashboard" element={<AppShell><Dashboard /></AppShell>} />
           <Route path="/clients" element={<AppShell><Clients /></AppShell>} />
           <Route path="/vault" element={<AppShell><Vault /></AppShell>} />
           <Route path="/cma-maker" element={<AppShell><CMAMaker /></AppShell>} />
