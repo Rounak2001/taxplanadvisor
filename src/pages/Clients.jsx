@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Phone, MessageSquare, Filter } from 'lucide-react';
+import { Search, Plus, Phone, MessageSquare, Filter, Video, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -15,23 +14,26 @@ import { ActivityTimeline } from '@/components/clients/ActivityTimeline';
 import { ClientDetails } from '@/components/clients/ClientDetails';
 import { WhatsAppChat } from '@/components/clients/WhatsAppChat';
 import { CallDialer } from '@/components/clients/CallDialer';
+import { SmartOnboardingModal } from '@/components/clients/SmartOnboardingModal';
+import { MeetingScheduler } from '@/components/clients/MeetingScheduler';
 import { useAppStore } from '@/stores/useAppStore';
 import { mockClients, mockActivities } from '@/lib/mockData';
+import { toast } from 'sonner';
 
 export default function Clients() {
-  const { 
-    consultantId, 
-    activeClientId, 
-    setActiveClientId,
-    chatOpen,
-    setChatOpen,
-    dialerOpen,
-    setDialerOpen,
-  } = useAppStore();
+  const consultantId = useAppStore((state) => state.consultantId);
+  const activeClientId = useAppStore((state) => state.activeClientId);
+  const setActiveClientId = useAppStore((state) => state.setActiveClientId);
+  const chatOpen = useAppStore((state) => state.chatOpen);
+  const setChatOpen = useAppStore((state) => state.setChatOpen);
+  const dialerOpen = useAppStore((state) => state.dialerOpen);
+  const setDialerOpen = useAppStore((state) => state.setDialerOpen);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [activityFilter, setActivityFilter] = useState('all');
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [schedulerOpen, setSchedulerOpen] = useState(false);
 
   // Filter clients based on consultantId (RLS-ready)
   const filteredClients = useMemo(() => {
@@ -62,6 +64,21 @@ export default function Clients() {
       .filter((a) => activityFilter === 'all' || a.type === activityFilter);
   }, [activeClient, activityFilter]);
 
+  const handleOnboardingComplete = (formData) => {
+    console.log('New client onboarded:', formData);
+    toast.success(`${formData.businessName} onboarded successfully!`);
+  };
+
+  const handleMeetingScheduled = (meetingData) => {
+    console.log('Meeting scheduled:', meetingData);
+    toast.success(`Meeting scheduled with ${meetingData.clientName}`);
+  };
+
+  const handleCallLogged = (outcomeData) => {
+    console.log('Call logged:', outcomeData);
+    toast.success('Call logged to timeline');
+  };
+
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col">
       {/* Page Header */}
@@ -72,10 +89,16 @@ export default function Clients() {
             Unified view of client communications and activities
           </p>
         </div>
-        <Button>
-          <Plus size={16} strokeWidth={1.5} className="mr-2" />
-          Add Client
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setOnboardingOpen(true)}>
+            <Sparkles size={16} strokeWidth={1.5} className="mr-2 text-primary" />
+            Smart Onboard
+          </Button>
+          <Button onClick={() => setOnboardingOpen(true)}>
+            <Plus size={16} strokeWidth={1.5} className="mr-2" />
+            Add Client
+          </Button>
+        </div>
       </div>
 
       {/* Three Column Layout */}
@@ -155,9 +178,7 @@ export default function Clients() {
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => {
-                  setChatOpen(true);
-                }}
+                onClick={() => setChatOpen(true)}
               >
                 <MessageSquare size={16} strokeWidth={1.5} className="mr-2" />
                 WhatsApp
@@ -165,12 +186,18 @@ export default function Clients() {
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => {
-                  setDialerOpen(true);
-                }}
+                onClick={() => setDialerOpen(true)}
               >
                 <Phone size={16} strokeWidth={1.5} className="mr-2" />
                 Call
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setSchedulerOpen(true)}
+              >
+                <Video size={16} strokeWidth={1.5} className="mr-2" />
+                Schedule
               </Button>
             </div>
           )}
@@ -199,11 +226,27 @@ export default function Clients() {
         consultantId={consultantId}
       />
 
-      {/* Call Dialer Drawer */}
+      {/* Call Dialer Drawer with Outcome Logging */}
       <CallDialer
         open={dialerOpen}
         onClose={() => setDialerOpen(false)}
         client={activeClient}
+        onCallLogged={handleCallLogged}
+      />
+
+      {/* Smart Onboarding Modal */}
+      <SmartOnboardingModal
+        open={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+        onComplete={handleOnboardingComplete}
+      />
+
+      {/* Meeting Scheduler */}
+      <MeetingScheduler
+        open={schedulerOpen}
+        onClose={() => setSchedulerOpen(false)}
+        client={activeClient}
+        onSchedule={handleMeetingScheduled}
       />
     </div>
   );
