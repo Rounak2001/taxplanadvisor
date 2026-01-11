@@ -12,7 +12,10 @@ const pageVariants = {
 };
 
 export function AppShell({ children }) {
-  const { sidebarCollapsed, commandPaletteOpen, setCommandPaletteOpen } = useAppStore();
+  // Use individual selectors for better stability
+  const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed);
+  const commandPaletteOpen = useAppStore((state) => state.commandPaletteOpen);
+  const setCommandPaletteOpen = useAppStore((state) => state.setCommandPaletteOpen);
 
   // Command+K keyboard shortcut
   useEffect(() => {

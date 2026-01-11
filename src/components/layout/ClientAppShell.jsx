@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ClientSidebar } from './ClientSidebar';
 import { ClientTopBar } from './ClientTopBar';
@@ -12,7 +11,8 @@ const pageVariants = {
 };
 
 export function ClientAppShell({ children }) {
-  const { sidebarCollapsed } = useAppStore();
+  // Use individual selector for better stability
+  const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed);
 
   return (
     <div className="min-h-screen bg-background">
