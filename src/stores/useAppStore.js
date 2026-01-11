@@ -1,8 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { useSyncExternalStore } from "react";
+import { createStore } from "zustand/vanilla";
+import { persist } from "zustand/middleware";
 
-// Create the store outside React to avoid hook context issues
-const appStore = create(
+// Vanilla (non-React) store to avoid React instance mismatch issues.
+// We then build our own hook using React's useSyncExternalStore.
+const appStore = createStore(
   persist(
     (set) => ({
       // Sidebar state
@@ -11,16 +13,16 @@ const appStore = create(
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
 
       // Tax Year context
-      taxYear: 'FY 2024-25',
+      taxYear: "FY 2024-25",
       setTaxYear: (year) => set({ taxYear: year }),
-      taxYearOptions: ['FY 2024-25', 'FY 2023-24', 'FY 2022-23', 'FY 2021-22'],
+      taxYearOptions: ["FY 2024-25", "FY 2023-24", "FY 2022-23", "FY 2021-22"],
 
       // Active client in Client 360
       activeClientId: null,
       setActiveClientId: (clientId) => set({ activeClientId: clientId }),
 
       // Current consultant (for RLS-ready data isolation)
-      consultantId: 'consultant_001',
+      consultantId: "consultant_001",
       setConsultantId: (id) => set({ consultantId: id }),
 
       // Table preferences
@@ -44,7 +46,7 @@ const appStore = create(
       setActiveChatClientId: (clientId) => set({ activeChatClientId: clientId }),
     }),
     {
-      name: 'taxplan-app-store',
+      name: "taxplan-app-store",
       partialize: (state) => ({
         sidebarCollapsed: state.sidebarCollapsed,
         taxYear: state.taxYear,
@@ -54,5 +56,14 @@ const appStore = create(
   )
 );
 
-// Export the hook
-export const useAppStore = appStore;
+function baseUseAppStore(selector = (s) => s) {
+  return useSyncExternalStore(
+    appStore.subscribe,
+    () => selector(appStore.getState()),
+    () => selector(appStore.getState())
+  );
+}
+
+// Keep the old API shape: useAppStore() is a hook, but also has getState/setState/subscribe.
+export const useAppStore = Object.assign(baseUseAppStore, appStore);
+export { appStore };

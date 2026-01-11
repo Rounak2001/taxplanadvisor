@@ -106,6 +106,12 @@ const calculators = [
   }
 ];
 
+const calculatorTheme = {
+  primary: { bg: 'bg-primary/10', text: 'text-primary' },
+  destructive: { bg: 'bg-destructive/10', text: 'text-destructive' },
+  success: { bg: 'bg-success/10', text: 'text-success' },
+};
+
 // Trust Logos
 const trustLogos = [
   'Deloitte', 'KPMG', 'Grant Thornton', 'BDO India', 'Walker Chandiok',
@@ -564,29 +570,35 @@ function CalculatorSection() {
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {calculators.map((calc, i) => (
-            <motion.div
-              key={calc.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Card className="h-full bento-card border-2 group hover:border-primary/50">
-                <CardContent className="p-8 text-center">
-                  <div className={`w-16 h-16 mx-auto rounded-2xl bg-${calc.color}/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                    <calc.icon className={`w-8 h-8 text-${calc.color}`} />
-                  </div>
-                  <h3 className="font-serif text-xl font-bold mb-3">{calc.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-6">{calc.description}</p>
-                  <Button className="w-full rounded-xl gap-2">
-                    {calc.cta}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+          {calculators.map((calc, i) => {
+            const theme = calculatorTheme[calc.color] ?? calculatorTheme.primary;
+
+            return (
+              <motion.div
+                key={calc.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Card className="h-full bento-card border-2 group hover:border-primary/50">
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className={`w-16 h-16 mx-auto rounded-2xl ${theme.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}
+                    >
+                      <calc.icon className={`w-8 h-8 ${theme.text}`} />
+                    </div>
+                    <h3 className="font-serif text-xl font-bold mb-3">{calc.title}</h3>
+                    <p className="text-muted-foreground text-sm mb-6">{calc.description}</p>
+                    <Button className="w-full rounded-xl gap-2">
+                      {calc.cta}
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
