@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useAppStore = create(
+// Create the store outside React to avoid hook context issues
+const appStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Sidebar state
       sidebarCollapsed: false,
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -52,3 +53,6 @@ export const useAppStore = create(
     }
   )
 );
+
+// Export the hook
+export const useAppStore = appStore;
