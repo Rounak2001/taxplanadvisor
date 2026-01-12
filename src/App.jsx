@@ -25,6 +25,7 @@ import ClientMessages from "./pages/ClientMessages";
 import ClientReports from "./pages/ClientReports";
 import ClientBilling from "./pages/ClientBilling";
 import ClientMeetings from "./pages/ClientMeetings";
+import MarketplaceLeads from "./pages/MarketplaceLeads";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/compliance" element={<AppShell><Compliance /></AppShell>} />
           <Route path="/consultations" element={<AppShell><Consultations /></AppShell>} />
           <Route path="/insights" element={<AppShell><FinancialInsights /></AppShell>} />
+          <Route path="/marketplace-leads" element={<AppShell><MarketplaceLeads /></AppShell>} />
           
           {/* Client Dashboard */}
           <Route path="/client" element={<ClientAppShell><ClientDashboard /></ClientAppShell>} />
