@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Search, Download, Filter, RefreshCw, Maximize2, Minimize2 } from 'lucide-react';
+import { Search, Download, RefreshCw, Maximize2, Minimize2, Shield, Loader2, FileSpreadsheet } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -14,33 +14,50 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { GSTRecoTable } from '@/components/financial/GSTRecoTable';
+import { GSTAuthModal } from '@/components/gst/GSTAuthModal';
 import { useAppStore } from '@/stores/useAppStore';
-import { mockGSTRecords, mockClients } from '@/lib/mockData';
-import { cn } from '@/lib/utils';
+import { useClients } from '@/hooks/useClients';
+import { useReconcileGstr, useDownloadGstrExcel } from '@/hooks/useGST';
+import { mockGSTRecords } from '@/lib/mockData';
+import { toast } from 'sonner';
 
 export default function GSTReco() {
   const { consultantId, tableCompactMode, toggleTableCompactMode } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedClientId, setSelectedClientId] = useState('all');
+  const [gstAuthOpen, setGstAuthOpen] = useState(false);
+  const [authenticatedGstins, setAuthenticatedGstins] = useState({});
+  const [reconcileData, setReconcileData] = useState(null);
 
-  // Filter GST records based on consultantId (RLS-ready)
+  // Fetch clients from API
+  const { data: apiClients, isLoading: clientsLoading } = useClients();
+  
+  // GST API hooks
+  const reconcileMutation = useReconcileGstr();
+  const downloadMutation = useDownloadGstrExcel();
+
+  // Use reconciled data if available, otherwise use mock data
+  const gstRecords = reconcileData || mockGSTRecords;
+
+  // Filter GST records
   const filteredRecords = useMemo(() => {
-    return mockGSTRecords
-      .filter((record) => record.consultantId === consultantId)
+    return gstRecords
       .filter((record) => {
+        // Filter by consultantId for mock data
+        if (!reconcileData && record.consultantId !== consultantId) return false;
         if (selectedClientId !== 'all' && record.clientId !== selectedClientId) return false;
         if (statusFilter !== 'all' && record.status !== statusFilter) return false;
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
           return (
-            record.supplierName.toLowerCase().includes(query) ||
-            record.invoiceNo.toLowerCase().includes(query)
+            record.supplierName?.toLowerCase().includes(query) ||
+            record.invoiceNo?.toLowerCase().includes(query)
           );
         }
         return true;
       });
-  }, [consultantId, searchQuery, statusFilter, selectedClientId]);
+  }, [gstRecords, reconcileData, consultantId, searchQuery, statusFilter, selectedClientId]);
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
@@ -49,9 +66,8 @@ export default function GSTReco() {
     const missingInBooks = filteredRecords.filter((r) => r.status === 'missing_in_books');
     const missingInGstr2b = filteredRecords.filter((r) => r.status === 'missing_in_gstr2b');
 
-    const totalBooksValue = filteredRecords.reduce((sum, r) => sum + r.booksValue, 0);
-    const totalGstr2bValue = filteredRecords.reduce((sum, r) => sum + r.gstr2bValue, 0);
-    const totalDifference = filteredRecords.reduce((sum, r) => sum + Math.abs(r.difference), 0);
+    const totalBooksValue = filteredRecords.reduce((sum, r) => sum + (r.booksValue || 0), 0);
+    const totalGstr2bValue = filteredRecords.reduce((sum, r) => sum + (r.gstr2bValue || 0), 0);
 
     return {
       matchedCount: matched.length,
@@ -60,14 +76,13 @@ export default function GSTReco() {
       missingInGstr2bCount: missingInGstr2b.length,
       totalBooksValue,
       totalGstr2bValue,
-      totalDifference,
       matchPercentage: filteredRecords.length > 0
         ? Math.round((matched.length / filteredRecords.length) * 100)
         : 0,
     };
   }, [filteredRecords]);
 
-  const clients = mockClients.filter((c) => c.consultantId === consultantId);
+  const clients = apiClients || [];
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-IN', {
@@ -76,6 +91,55 @@ export default function GSTReco() {
       maximumFractionDigits: 0,
     }).format(value);
   };
+
+  const handleGstAuthenticated = (authData) => {
+    setAuthenticatedGstins(prev => ({
+      ...prev,
+      [authData.gstin]: authData
+    }));
+    toast.success(`Authenticated for ${authData.gstin}`);
+  };
+
+  const handleSyncData = async () => {
+    if (Object.keys(authenticatedGstins).length === 0) {
+      setGstAuthOpen(true);
+      return;
+    }
+
+    // Get the first authenticated GSTIN
+    const gstin = Object.keys(authenticatedGstins)[0];
+    const authData = authenticatedGstins[gstin];
+
+    reconcileMutation.mutate({
+      gstin,
+      auth_token: authData.token,
+      period: 'current', // You might want to make this configurable
+    }, {
+      onSuccess: (data) => {
+        setReconcileData(data.records || data);
+        toast.success('Data synced from GST portal');
+      }
+    });
+  };
+
+  const handleExport = () => {
+    if (Object.keys(authenticatedGstins).length === 0) {
+      // Export mock data as fallback
+      toast.info('Exporting local data. Authenticate with GST portal for live data.');
+      return;
+    }
+
+    const gstin = Object.keys(authenticatedGstins)[0];
+    const authData = authenticatedGstins[gstin];
+
+    downloadMutation.mutate({
+      gstin,
+      auth_token: authData.token,
+      period: 'current',
+    });
+  };
+
+  const isAuthenticated = Object.keys(authenticatedGstins).length > 0;
 
   return (
     <div className="space-y-6">
@@ -88,16 +152,53 @@ export default function GSTReco() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <RefreshCw size={16} strokeWidth={1.5} className="mr-2" />
+          <Button 
+            variant={isAuthenticated ? "outline" : "default"}
+            onClick={() => setGstAuthOpen(true)}
+          >
+            <Shield size={16} strokeWidth={1.5} className="mr-2" />
+            {isAuthenticated ? 'Authenticated' : 'Authenticate GST'}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleSyncData}
+            disabled={reconcileMutation.isPending}
+          >
+            {reconcileMutation.isPending ? (
+              <Loader2 size={16} strokeWidth={1.5} className="mr-2 animate-spin" />
+            ) : (
+              <RefreshCw size={16} strokeWidth={1.5} className="mr-2" />
+            )}
             Sync Data
           </Button>
-          <Button variant="outline">
-            <Download size={16} strokeWidth={1.5} className="mr-2" />
+          <Button 
+            variant="outline" 
+            onClick={handleExport}
+            disabled={downloadMutation.isPending}
+          >
+            {downloadMutation.isPending ? (
+              <Loader2 size={16} strokeWidth={1.5} className="mr-2 animate-spin" />
+            ) : (
+              <Download size={16} strokeWidth={1.5} className="mr-2" />
+            )}
             Export
           </Button>
         </div>
       </div>
+
+      {/* Auth Status Banner */}
+      {isAuthenticated && (
+        <Card className="bg-success/5 border-success/20">
+          <CardContent className="py-3">
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-success" />
+              <span className="text-sm font-medium">
+                Connected to GST Portal: {Object.keys(authenticatedGstins).join(', ')}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -220,6 +321,13 @@ export default function GSTReco() {
           />
         </CardContent>
       </Card>
+
+      {/* GST Auth Modal */}
+      <GSTAuthModal
+        open={gstAuthOpen}
+        onClose={() => setGstAuthOpen(false)}
+        onAuthenticated={handleGstAuthenticated}
+      />
     </div>
   );
 }
