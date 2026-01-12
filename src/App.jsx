@@ -8,6 +8,7 @@ import { ClientAppShell } from "@/components/layout/ClientAppShell";
 import { AuthProvider } from "@/hooks/useAuth.jsx";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import ClientLogin from "./pages/ClientLogin";
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import Vault from "./pages/Vault";
@@ -42,6 +43,7 @@ const App = () => (
             {/* Public Pages */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/client-login" element={<ClientLogin />} />
             
             {/* Consultant Dashboard */}
             <Route path="/dashboard" element={<AppShell><Dashboard /></AppShell>} />
