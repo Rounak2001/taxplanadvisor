@@ -53,10 +53,17 @@ export default function AIChat() {
   const handleSendMessage = async (content) => {
     if (!content.trim()) return;
 
+    // Validate input
+    const trimmedContent = content.trim();
+    if (trimmedContent.length > 2000) {
+      toast.error('Message is too long. Maximum 2000 characters.');
+      return;
+    }
+
     const userMessage = {
       id: Date.now().toString(),
       role: 'user',
-      content: content.trim(),
+      content: trimmedContent,
       timestamp: new Date().toISOString(),
     };
 
@@ -65,37 +72,50 @@ export default function AIChat() {
     setIsTyping(true);
 
     try {
-      if (useApi) {
-        // Call Django API
-        const conversationHistory = messages.map(m => ({
+      // Always try API first
+      const conversationHistory = messages
+        .filter(m => m.id !== '1') // Skip initial greeting for API
+        .map(m => ({
           role: m.role,
           content: m.content
         }));
-        
-        const response = await sendChatMessage(content.trim(), conversationHistory);
-        
-        const aiResponse = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.response || response.message || response.reply || JSON.stringify(response),
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, aiResponse]);
+      
+      const response = await sendChatMessage(trimmedContent, conversationHistory);
+      
+      // Handle different response formats from Django
+      let responseContent = '';
+      if (typeof response === 'string') {
+        responseContent = response;
+      } else if (response.response) {
+        responseContent = response.response;
+      } else if (response.message) {
+        responseContent = response.message;
+      } else if (response.reply) {
+        responseContent = response.reply;
+      } else if (response.content) {
+        responseContent = response.content;
+      } else if (response.answer) {
+        responseContent = response.answer;
       } else {
-        // Fallback to mock response
-        setTimeout(() => {
-          const aiResponse = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: generateMockResponse(content),
-            timestamp: new Date().toISOString(),
-          };
-          setMessages((prev) => [...prev, aiResponse]);
-        }, 1500);
+        responseContent = JSON.stringify(response, null, 2);
       }
+      
+      const aiResponse = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, aiResponse]);
     } catch (error) {
       console.error('Chat API error:', error);
-      toast.error('Failed to get response. Using offline mode.');
+      
+      // Show more descriptive error
+      if (error.message?.includes('fetch')) {
+        toast.error('Cannot connect to server. Check your internet or CORS settings.');
+      } else {
+        toast.error(error.message || 'Failed to get response');
+      }
       
       // Fallback to mock on error
       const aiResponse = {
