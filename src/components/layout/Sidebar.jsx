@@ -18,11 +18,13 @@ import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
+import { TrendingUp } from 'lucide-react';
+
 const navGroups = [
   {
     label: 'Overview',
     items: [
-      { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       { to: '/insights', icon: LayoutDashboard, label: 'Financial Insights' },
     ],
   },
@@ -32,6 +34,7 @@ const navGroups = [
       { to: '/clients', icon: Users, label: 'Clients' },
       { to: '/vault', icon: FolderOpen, label: 'Smart Vault' },
       { to: '/consultations', icon: Video, label: 'Consultations' },
+      { to: '/marketplace-leads', icon: TrendingUp, label: 'Marketplace Leads' },
     ],
   },
   {

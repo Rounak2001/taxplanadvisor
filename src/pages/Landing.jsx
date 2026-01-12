@@ -16,6 +16,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { UserTypeToggle } from '@/components/landing/UserTypeToggle';
+import { ITRMarketplaceSection } from '@/components/landing/ITRMarketplaceSection';
+import { FindAProSection } from '@/components/landing/FindAProSection';
 
 // Animation variants
 const fadeInUp = {
