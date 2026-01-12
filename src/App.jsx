@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { ClientAppShell } from "@/components/layout/ClientAppShell";
+import { AuthProvider } from "@/hooks/useAuth.jsx";
 import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import Vault from "./pages/Vault";
@@ -31,42 +33,45 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public Landing Page */}
-          <Route path="/" element={<Landing />} />
-          
-          {/* Consultant Dashboard */}
-          <Route path="/dashboard" element={<AppShell><Dashboard /></AppShell>} />
-          <Route path="/clients" element={<AppShell><Clients /></AppShell>} />
-          <Route path="/vault" element={<AppShell><Vault /></AppShell>} />
-          <Route path="/cma-maker" element={<AppShell><CMAMaker /></AppShell>} />
-          <Route path="/gst-reco" element={<AppShell><GSTReco /></AppShell>} />
-          <Route path="/ai-chat" element={<AppShell><AIChat /></AppShell>} />
-          <Route path="/pricing" element={<AppShell><Pricing /></AppShell>} />
-          <Route path="/compliance" element={<AppShell><Compliance /></AppShell>} />
-          <Route path="/consultations" element={<AppShell><Consultations /></AppShell>} />
-          <Route path="/insights" element={<AppShell><FinancialInsights /></AppShell>} />
-          <Route path="/marketplace-leads" element={<AppShell><MarketplaceLeads /></AppShell>} />
-          
-          {/* Client Dashboard */}
-          <Route path="/client" element={<ClientAppShell><ClientDashboard /></ClientAppShell>} />
-          <Route path="/client/documents" element={<ClientAppShell><ClientDocuments /></ClientAppShell>} />
-          <Route path="/client/meetings" element={<ClientAppShell><ClientMeetings /></ClientAppShell>} />
-          <Route path="/client/messages" element={<ClientAppShell><ClientMessages /></ClientAppShell>} />
-          <Route path="/client/reports" element={<ClientAppShell><ClientReports /></ClientAppShell>} />
-          <Route path="/client/billing" element={<ClientAppShell><ClientBilling /></ClientAppShell>} />
-          <Route path="/client/marketplace" element={<ClientAppShell><Marketplace /></ClientAppShell>} />
-          <Route path="/client/privacy" element={<ClientAppShell><PrivacyRights /></ClientAppShell>} />
-          <Route path="/client/insights" element={<ClientAppShell><FinancialInsights /></ClientAppShell>} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public Pages */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Consultant Dashboard */}
+            <Route path="/dashboard" element={<AppShell><Dashboard /></AppShell>} />
+            <Route path="/clients" element={<AppShell><Clients /></AppShell>} />
+            <Route path="/vault" element={<AppShell><Vault /></AppShell>} />
+            <Route path="/cma-maker" element={<AppShell><CMAMaker /></AppShell>} />
+            <Route path="/gst-reco" element={<AppShell><GSTReco /></AppShell>} />
+            <Route path="/ai-chat" element={<AppShell><AIChat /></AppShell>} />
+            <Route path="/pricing" element={<AppShell><Pricing /></AppShell>} />
+            <Route path="/compliance" element={<AppShell><Compliance /></AppShell>} />
+            <Route path="/consultations" element={<AppShell><Consultations /></AppShell>} />
+            <Route path="/insights" element={<AppShell><FinancialInsights /></AppShell>} />
+            <Route path="/marketplace-leads" element={<AppShell><MarketplaceLeads /></AppShell>} />
+            
+            {/* Client Dashboard */}
+            <Route path="/client" element={<ClientAppShell><ClientDashboard /></ClientAppShell>} />
+            <Route path="/client/documents" element={<ClientAppShell><ClientDocuments /></ClientAppShell>} />
+            <Route path="/client/meetings" element={<ClientAppShell><ClientMeetings /></ClientAppShell>} />
+            <Route path="/client/messages" element={<ClientAppShell><ClientMessages /></ClientAppShell>} />
+            <Route path="/client/reports" element={<ClientAppShell><ClientReports /></ClientAppShell>} />
+            <Route path="/client/billing" element={<ClientAppShell><ClientBilling /></ClientAppShell>} />
+            <Route path="/client/marketplace" element={<ClientAppShell><Marketplace /></ClientAppShell>} />
+            <Route path="/client/privacy" element={<ClientAppShell><PrivacyRights /></ClientAppShell>} />
+            <Route path="/client/insights" element={<ClientAppShell><FinancialInsights /></ClientAppShell>} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
