@@ -14,9 +14,9 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "zustand"],
+    dedupe: ["react", "react-dom", "zustand", "@tanstack/react-query"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "zustand"],
+    include: ["react", "react-dom", "zustand", "@tanstack/react-query"],
   },
 }));
