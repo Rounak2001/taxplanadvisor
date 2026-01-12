@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Send, Bot, User, Sparkles, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Bot, User, Sparkles, Copy, ThumbsUp, ThumbsDown, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
+import { sendChatMessage } from '@/lib/api/chat';
+import { toast } from 'sonner';
 
 const suggestedPrompts = [
   'What are the GST filing deadlines for this quarter?',
@@ -38,6 +40,15 @@ export default function AIChat() {
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [useApi, setUseApi] = useState(true); // Toggle between API and mock
+  const scrollRef = useRef(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping]);
 
   const handleSendMessage = async (content) => {
     if (!content.trim()) return;
@@ -53,8 +64,40 @@ export default function AIChat() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      if (useApi) {
+        // Call Django API
+        const conversationHistory = messages.map(m => ({
+          role: m.role,
+          content: m.content
+        }));
+        
+        const response = await sendChatMessage(content.trim(), conversationHistory);
+        
+        const aiResponse = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.response || response.message || response.reply || JSON.stringify(response),
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, aiResponse]);
+      } else {
+        // Fallback to mock response
+        setTimeout(() => {
+          const aiResponse = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: generateMockResponse(content),
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, aiResponse]);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Chat API error:', error);
+      toast.error('Failed to get response. Using offline mode.');
+      
+      // Fallback to mock on error
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -62,8 +105,9 @@ export default function AIChat() {
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const generateMockResponse = (query) => {

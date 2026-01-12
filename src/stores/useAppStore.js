@@ -1,10 +1,7 @@
-import { useSyncExternalStore } from "react";
-import { createStore } from "zustand/vanilla";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Vanilla (non-React) store to avoid React instance mismatch issues.
-// We then build our own hook using React's useSyncExternalStore.
-const appStore = createStore(
+export const useAppStore = create(
   persist(
     (set) => ({
       // Sidebar state
@@ -55,15 +52,3 @@ const appStore = createStore(
     }
   )
 );
-
-function baseUseAppStore(selector = (s) => s) {
-  return useSyncExternalStore(
-    appStore.subscribe,
-    () => selector(appStore.getState()),
-    () => selector(appStore.getState())
-  );
-}
-
-// Keep the old API shape: useAppStore() is a hook, but also has getState/setState/subscribe.
-export const useAppStore = Object.assign(baseUseAppStore, appStore);
-export { appStore };
