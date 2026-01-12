@@ -16,6 +16,7 @@ import { WhatsAppChat } from '@/components/clients/WhatsAppChat';
 import { CallDialer } from '@/components/clients/CallDialer';
 import { SmartOnboardingModal } from '@/components/clients/SmartOnboardingModal';
 import { MeetingScheduler } from '@/components/clients/MeetingScheduler';
+import { CAOnboardingWizard } from '@/components/onboarding/CAOnboardingWizard';
 import { useAppStore } from '@/stores/useAppStore';
 import { mockClients, mockActivities } from '@/lib/mockData';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ export default function Clients() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [activityFilter, setActivityFilter] = useState('all');
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [proOnboardingOpen, setProOnboardingOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
 
   // Filter clients based on consultantId (RLS-ready)
@@ -90,9 +92,9 @@ export default function Clients() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setOnboardingOpen(true)}>
+          <Button variant="outline" onClick={() => setProOnboardingOpen(true)}>
             <Sparkles size={16} strokeWidth={1.5} className="mr-2 text-primary" />
-            Smart Onboard
+            Lovable Pro Onboard
           </Button>
           <Button onClick={() => setOnboardingOpen(true)}>
             <Plus size={16} strokeWidth={1.5} className="mr-2" />
@@ -247,6 +249,12 @@ export default function Clients() {
         onClose={() => setSchedulerOpen(false)}
         client={activeClient}
         onSchedule={handleMeetingScheduled}
+      />
+
+      {/* Lovable Pro Onboarding Wizard */}
+      <CAOnboardingWizard
+        isOpen={proOnboardingOpen}
+        onClose={() => setProOnboardingOpen(false)}
       />
     </div>
   );

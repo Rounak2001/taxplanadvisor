@@ -957,6 +957,8 @@ export default function Landing() {
         <Navigation />
         <main>
           <HeroSection />
+          <ITRMarketplaceSection />
+          <FindAProSection />
           <BentoGridSection />
           <CalculatorSection />
           <TrustSection />

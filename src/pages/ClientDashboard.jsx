@@ -4,6 +4,7 @@ import { ActionItemsCard } from '@/components/client/ActionItemsCard';
 import { UpcomingPaymentCard } from '@/components/client/UpcomingPaymentCard';
 import { MilestoneTracker } from '@/components/client/MilestoneTracker';
 import { QuickUploadDropzone } from '@/components/client/QuickUploadDropzone';
+import { EmbeddedOffersCard } from '@/components/marketplace/EmbeddedOffersCard';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,10 +45,15 @@ export default function ClientDashboard() {
         <UpcomingPaymentCard type="GST" amount={45000} dueDate="2026-01-20" />
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <MilestoneTracker />
-        <QuickUploadDropzone />
+      {/* Three Column Layout with Embedded Offers Sidebar */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <MilestoneTracker />
+          <QuickUploadDropzone />
+        </div>
+        <div>
+          <EmbeddedOffersCard />
+        </div>
       </div>
     </motion.div>
   );
