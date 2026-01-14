@@ -4,7 +4,9 @@ import { ActionItemsCard } from '@/components/client/ActionItemsCard';
 import { UpcomingPaymentCard } from '@/components/client/UpcomingPaymentCard';
 import { MilestoneTracker } from '@/components/client/MilestoneTracker';
 import { QuickUploadDropzone } from '@/components/client/QuickUploadDropzone';
+import { ClientProfileCard } from '@/components/client/ClientProfileCard';
 import { EmbeddedOffersCard } from '@/components/marketplace/EmbeddedOffersCard';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -17,6 +19,10 @@ const containerVariants = {
 };
 
 export default function ClientDashboard() {
+  const { user } = useAuthStore();
+  const advisorName = user?.advisor?.name || 'Loading...';
+  const isPanLinked = user?.advisor?.pan_linked;
+
   return (
     <motion.div
       variants={containerVariants}
@@ -31,12 +37,20 @@ export default function ClientDashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-2xl font-bold text-foreground">
-          Welcome back, Rounak 👋
+          Welcome back, {user?.full_name || 'User'} 👋
         </h1>
         <p className="text-muted-foreground mt-1">
-          Here's an overview of your tax filing status for AY 2025-26
+          Your assigned CA: <span className="font-semibold text-primary">{advisorName}</span>
+          {isPanLinked !== undefined && (
+            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isPanLinked ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}>
+              {isPanLinked ? 'PAN Linked' : 'PAN Pending'}
+            </span>
+          )}
         </p>
       </motion.div>
+
+      {/* Client Profile Section */}
+      <ClientProfileCard />
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

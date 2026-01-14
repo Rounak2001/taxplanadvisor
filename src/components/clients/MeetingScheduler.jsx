@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, Video, Calendar, Clock, Link as LinkIcon, 
+import {
+  X, Video, Calendar, Clock, Link as LinkIcon,
   CheckCircle2, Copy, Send, User, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,17 +48,17 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
-    
+
     // Add empty cells for days before the first day of month
     for (let i = 0; i < firstDay.getDay(); i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let d = 1; d <= lastDay.getDate(); d++) {
       days.push(new Date(year, month, d));
     }
-    
+
     return days;
   };
 
@@ -80,15 +80,15 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('en-IN', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
   };
 
-  const generatedLink = `meet.taxplan.in/${client?.id?.slice(-6) || 'abc123'}`;
+  const generatedLink = `meet.taxplan.in/${String(client?.id || 'abc123').slice(-6)}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`https://${generatedLink}`);
@@ -173,7 +173,7 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
                         <ChevronRight size={16} />
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-7 gap-1 text-center mb-2">
                       {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
                         <div key={day} className="text-xs text-muted-foreground py-1">
@@ -181,7 +181,7 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="grid grid-cols-7 gap-1">
                       {days.map((date, index) => (
                         <button
@@ -193,8 +193,8 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
                             !date && 'invisible',
                             date && isDateDisabled(date) && 'text-muted-foreground/40 cursor-not-allowed',
                             date && !isDateDisabled(date) && 'hover:bg-muted cursor-pointer',
-                            selectedDate?.toDateString() === date?.toDateString() && 
-                              'bg-primary text-primary-foreground hover:bg-primary'
+                            selectedDate?.toDateString() === date?.toDateString() &&
+                            'bg-primary text-primary-foreground hover:bg-primary'
                           )}
                         >
                           {date?.getDate()}
@@ -237,9 +237,9 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
                       <p className="font-medium text-sm">{formatDate(selectedDate)}</p>
                       <p className="text-xs text-muted-foreground">{selectedTime}</p>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="ml-auto"
                       onClick={() => setStep(1)}
                     >
@@ -318,8 +318,8 @@ export function MeetingScheduler({ open, onClose, client, onSchedule }) {
                   <Button variant="outline" onClick={onClose}>
                     Cancel
                   </Button>
-                  <Button 
-                    onClick={() => setStep(2)} 
+                  <Button
+                    onClick={() => setStep(2)}
                     disabled={!selectedDate || !selectedTime}
                   >
                     Continue
