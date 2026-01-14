@@ -1,5 +1,6 @@
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { Search, Bell, ChevronDown, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,9 +13,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAppStore } from '@/stores/useAppStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export function ClientTopBar() {
   const { sidebarCollapsed } = useAppStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  // Get initials from user name
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   return (
     <motion.header
@@ -28,8 +43,8 @@ export function ClientTopBar() {
         <div className="flex items-center gap-4 flex-1 max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input 
-              placeholder="Search documents, reports..." 
+            <Input
+              placeholder="Search documents, reports..."
               className="pl-10 bg-secondary/50 border-0 focus-visible:ring-1"
             />
           </div>
@@ -50,12 +65,12 @@ export function ClientTopBar() {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" />
                   <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                    RP
+                    {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-xs text-muted-foreground">Client</span>
-                  <span className="text-sm font-medium">Rounak Patel</span>
+                  <span className="text-sm font-medium">{user?.full_name || 'User'}</span>
                 </div>
                 <ChevronDown size={16} className="text-muted-foreground" />
               </Button>
@@ -67,7 +82,11 @@ export function ClientTopBar() {
               <DropdownMenuItem>Documents</DropdownMenuItem>
               <DropdownMenuItem>Billing</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

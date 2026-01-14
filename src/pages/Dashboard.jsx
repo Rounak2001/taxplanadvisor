@@ -12,49 +12,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/useAppStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { mockClients, mockDocuments, mockActivities } from '@/lib/mockData';
+import { AssignedClientsCard } from '@/components/consultant/AssignedClientsCard';
 import { cn } from '@/lib/utils';
-
-const stats = [
-  {
-    title: 'Total Clients',
-    value: '24',
-    change: '+3',
-    changeType: 'positive',
-    icon: Users,
-  },
-  {
-    title: 'Documents Pending',
-    value: '12',
-    change: '-5',
-    changeType: 'positive',
-    icon: FileCheck,
-  },
-  {
-    title: 'GST Filings Due',
-    value: '8',
-    change: '+2',
-    changeType: 'negative',
-    icon: Calendar,
-  },
-  {
-    title: 'Revenue This Month',
-    value: '₹2.4L',
-    change: '+18%',
-    changeType: 'positive',
-    icon: TrendingUp,
-  },
-];
-
-const upcomingDeadlines = [
-  { client: 'Rajesh Kumar Industries', task: 'GST Filing', date: 'Jan 20', priority: 'high' },
-  { client: 'Sharma Textiles Pvt Ltd', task: 'TDS Return', date: 'Jan 25', priority: 'medium' },
-  { client: 'Singh Pharmaceuticals', task: 'Advance Tax', date: 'Jan 31', priority: 'high' },
-  { client: 'Patel Electronics', task: 'ITR Filing', date: 'Feb 15', priority: 'low' },
-];
 
 export default function Dashboard() {
   const { taxYear, consultantId } = useAppStore();
+  const { user } = useAuthStore();
+
+  const stats = [
+    {
+      title: 'My Workload',
+      value: `${user?.stats?.current_load || 0} / ${user?.stats?.max_capacity || 10}`,
+      change: `${user?.stats?.current_load || 0} clients`,
+      changeType: 'positive',
+      icon: Users,
+    },
+    {
+      title: 'Services Offered',
+      value: user?.stats?.services?.length || 0,
+      change: user?.stats?.services?.join(', ') || 'N/A',
+      changeType: 'positive',
+      icon: FileCheck,
+    },
+    {
+      title: 'GST Filings Due',
+      value: '8',
+      change: '+2',
+      changeType: 'negative',
+      icon: Calendar,
+    },
+    {
+      title: 'Revenue This Month',
+      value: '₹2.4L',
+      change: '+18%',
+      changeType: 'positive',
+      icon: TrendingUp,
+    },
+  ];
+
+  const upcomingDeadlines = [
+    { client: 'Rajesh Kumar Industries', task: 'GST Filing', date: 'Jan 20', priority: 'high' },
+    { client: 'Sharma Textiles Pvt Ltd', task: 'TDS Return', date: 'Jan 25', priority: 'medium' },
+    { client: 'Singh Pharmaceuticals', task: 'Advance Tax', date: 'Jan 31', priority: 'high' },
+    { client: 'Patel Electronics', task: 'ITR Filing', date: 'Feb 15', priority: 'low' },
+  ];
 
   const activeClients = mockClients.filter(
     (c) => c.consultantId === consultantId && c.status === 'active'
@@ -72,7 +75,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening with your practice.</p>
+          <p className="text-muted-foreground">Welcome back, {user?.full_name || 'Consultant'}! Here's your practice status.</p>
         </div>
         <Badge variant="outline" className="text-sm">
           {taxYear}
@@ -232,6 +235,9 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Assigned Clients Section */}
+      <AssignedClientsCard />
     </div>
   );
 }

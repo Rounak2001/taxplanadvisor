@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { 
+import {
   MessageCircle, Play, Shield, ScanText, FolderLock, Phone, FileSpreadsheet,
   Gauge, Calculator, ChevronDown, ChevronRight, CheckCircle2, Star, Lock,
   Menu, X, ArrowRight, Sparkles, Building2, Users, Award, Zap
@@ -19,6 +19,8 @@ import {
 import { UserTypeToggle } from '@/components/landing/UserTypeToggle';
 import { ITRMarketplaceSection } from '@/components/landing/ITRMarketplaceSection';
 import { FindAProSection } from '@/components/landing/FindAProSection';
+import { LoginModal } from '@/components/auth/LoginModal';
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 
 // Animation variants
 const fadeInUp = {
@@ -161,7 +163,7 @@ function Navigation() {
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Advisor</span>
           </div>
         </Link>
-        
+
         <div className="hidden lg:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Features
@@ -178,9 +180,11 @@ function Navigation() {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link to="/dashboard">Login</Link>
-          </Button>
+          <LoginModal
+            trigger={
+              <Button variant="ghost">Login</Button>
+            }
+          />
           <Button className="gap-2 rounded-xl" asChild>
             <Link to="/dashboard">
               <MessageCircle className="w-4 h-4" />
@@ -189,9 +193,9 @@ function Navigation() {
           </Button>
         </div>
 
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="lg:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -201,7 +205,7 @@ function Navigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
@@ -213,9 +217,11 @@ function Navigation() {
             <a href="#for-cas" className="block py-2 text-sm font-medium">For CAs</a>
             <a href="#faq" className="block py-2 text-sm font-medium">FAQ</a>
             <div className="pt-4 border-t space-y-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/dashboard">Login</Link>
-              </Button>
+              <LoginModal
+                trigger={
+                  <Button variant="outline" className="w-full">Login</Button>
+                }
+              />
               <Button className="w-full gap-2" asChild>
                 <Link to="/dashboard">
                   <MessageCircle className="w-4 h-4" />
@@ -240,7 +246,7 @@ function HeroSection() {
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
 
       <div className="container relative mx-auto px-4 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial="initial"
           animate="animate"
@@ -252,8 +258,8 @@ function HeroSection() {
               India's #1 Tax-Tech Platform
             </Badge>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             variants={fadeInUp}
             className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
           >
@@ -262,8 +268,8 @@ function HeroSection() {
               Sanctuary
             </span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             variants={fadeInUp}
             className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
@@ -273,7 +279,7 @@ function HeroSection() {
         </motion.div>
 
         {/* Dual-Path Cards */}
-        <motion.div 
+        <motion.div
           className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto"
           initial="initial"
           animate="animate"
@@ -331,17 +337,14 @@ function HeroSection() {
                     </li>
                   ))}
                 </ul>
-                <Button variant="secondary" className="w-full rounded-xl gap-2" size="lg">
-                  Secure My Documents
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                <GoogleLoginButton className="w-full" variant="secondary" />
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
 
         {/* CTAs */}
-        <motion.div 
+        <motion.div
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12"
           variants={fadeInUp}
           initial="initial"
@@ -358,7 +361,7 @@ function HeroSection() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 mt-16 max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -386,7 +389,7 @@ function BentoGridSection() {
   return (
     <section id="features" className="py-20 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -408,7 +411,7 @@ function BentoGridSection() {
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto">
           {/* Large Card - AI-OCR */}
-          <motion.div 
+          <motion.div
             className="md:col-span-2 lg:col-span-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -445,7 +448,7 @@ function BentoGridSection() {
                         <div className="h-2 w-full bg-muted rounded mb-1" />
                         <div className="h-2 w-2/3 bg-muted rounded" />
                       </div>
-                      <motion.div 
+                      <motion.div
                         className="absolute -right-4 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium shadow-lg"
                         animate={{ x: [0, 5, 0] }}
                         transition={{ repeat: Infinity, duration: 2 }}
@@ -554,7 +557,7 @@ function CalculatorSection() {
   return (
     <section id="calculators" className="py-20 lg:py-28">
       <div className="container mx-auto px-4 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -613,7 +616,7 @@ function TrustSection() {
   return (
     <section className="py-16 lg:py-20 bg-secondary text-secondary-foreground overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8 mb-12">
-        <motion.div 
+        <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -632,11 +635,11 @@ function TrustSection() {
       <div className="relative">
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-secondary to-transparent z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-secondary to-transparent z-10" />
-        
+
         <div className="flex animate-ticker">
           {[...trustLogos, ...trustLogos].map((logo, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className="flex-shrink-0 mx-8 lg:mx-12 py-4 px-6 rounded-xl bg-secondary-foreground/10 text-secondary-foreground/80 font-medium"
             >
               {logo}
@@ -647,7 +650,7 @@ function TrustSection() {
 
       {/* Security Badges */}
       <div className="container mx-auto px-4 lg:px-8 mt-12">
-        <motion.div 
+        <motion.div
           className="flex flex-wrap justify-center items-center gap-6 lg:gap-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -699,7 +702,7 @@ function ForCAsSection() {
               Grow Your Practice <span className="text-primary">Digitally</span>
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              Join India's largest network of verified CAs. Get matched with clients, 
+              Join India's largest network of verified CAs. Get matched with clients,
               streamline your workflow, and build your brand on our platform.
             </p>
 
@@ -751,7 +754,7 @@ function ForCAsSection() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-muted rounded-xl">
                     <div className="text-2xl font-bold text-primary">250+</div>
@@ -787,7 +790,7 @@ function FAQSection() {
   return (
     <section id="faq" className="py-20 lg:py-28 bg-muted/30">
       <div className="container mx-auto px-4 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -805,7 +808,7 @@ function FAQSection() {
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -813,8 +816,8 @@ function FAQSection() {
         >
           <Accordion type="single" collapsible className="space-y-4">
             {faqItems.map((item, i) => (
-              <AccordionItem 
-                key={i} 
+              <AccordionItem
+                key={i}
                 value={`item-${i}`}
                 className="bg-card border-2 rounded-2xl px-6 data-[state=open]:border-primary/50 transition-colors"
               >
@@ -838,7 +841,7 @@ function CTASection() {
   return (
     <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4 lg:px-8">
-        <motion.div 
+        <motion.div
           className="relative max-w-4xl mx-auto text-center p-12 lg:p-16 rounded-3xl bg-gradient-to-br from-primary to-emerald-dark overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

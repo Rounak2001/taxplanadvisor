@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Search, Plus, Phone, MessageSquare, Filter, Video, Sparkles } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Plus, Phone, MessageSquare, Filter, Video, Sparkles, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,8 +18,9 @@ import { SmartOnboardingModal } from '@/components/clients/SmartOnboardingModal'
 import { MeetingScheduler } from '@/components/clients/MeetingScheduler';
 import { CAOnboardingWizard } from '@/components/onboarding/CAOnboardingWizard';
 import { useAppStore } from '@/stores/useAppStore';
-import { mockClients, mockActivities } from '@/lib/mockData';
+import { mockActivities } from '@/lib/mockData';
 import { toast } from 'sonner';
+import api from '@/api/axios';
 
 export default function Clients() {
   const consultantId = useAppStore((state) => state.consultantId);
@@ -37,26 +38,54 @@ export default function Clients() {
   const [proOnboardingOpen, setProOnboardingOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
 
-  // Filter clients based on consultantId (RLS-ready)
+  // Real client data from backend
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch clients from backend on mount
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await api.get('/consultant/clients/');
+        // Transform backend data to match frontend structure
+        const transformedClients = response.data.clients.map(client => ({
+          id: client.id,
+          name: client.full_name,
+          pan: client.pan_number || 'N/A',
+          phone: client.phone_number || 'N/A',
+          email: client.email || 'N/A',
+          status: client.is_onboarded ? 'active' : 'pending',
+          consultantId: consultantId, // All fetched clients belong to current consultant
+        }));
+        setClients(transformedClients);
+      } catch (error) {
+        console.error('Failed to fetch clients:', error);
+        toast.error('Failed to load clients');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClients();
+  }, [consultantId]);
+
+  // Filter clients based on search and status
   const filteredClients = useMemo(() => {
-    return mockClients
-      .filter((client) => client.consultantId === consultantId)
-      .filter((client) => {
-        if (statusFilter !== 'all' && client.status !== statusFilter) return false;
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          return (
-            client.name.toLowerCase().includes(query) ||
-            client.pan.toLowerCase().includes(query) ||
-            client.gstin?.toLowerCase().includes(query)
-          );
-        }
-        return true;
-      });
-  }, [consultantId, searchQuery, statusFilter]);
+    return clients.filter((client) => {
+      if (statusFilter !== 'all' && client.status !== statusFilter) return false;
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          client.name.toLowerCase().includes(query) ||
+          client.pan?.toLowerCase().includes(query) ||
+          client.email?.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    });
+  }, [clients, searchQuery, statusFilter]);
 
   const activeClient = activeClientId
-    ? mockClients.find((c) => c.id === activeClientId)
+    ? clients.find((c) => c.id === activeClientId)
     : filteredClients[0];
 
   const clientActivities = useMemo(() => {
