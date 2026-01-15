@@ -1,47 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface AppState {
-  // Sidebar state
-  sidebarCollapsed: boolean;
-  toggleSidebar: () => void;
-  setSidebarCollapsed: (collapsed: boolean) => void;
-
-  // Tax Year context
-  taxYear: string;
-  setTaxYear: (year: string) => void;
-  taxYearOptions: string[];
-
-  // Active client in Client 360
-  activeClientId: string | null;
-  setActiveClientId: (clientId: string | null) => void;
-
-  // Current consultant (for RLS-ready data isolation)
-  consultantId: string;
-  setConsultantId: (id: string) => void;
-
-  // Table preferences
-  tableCompactMode: boolean;
-  toggleTableCompactMode: () => void;
-
-  // Command palette
-  commandPaletteOpen: boolean;
-  setCommandPaletteOpen: (open: boolean) => void;
-
-  // Call dialer
-  dialerOpen: boolean;
-  setDialerOpen: (open: boolean) => void;
-  activeCallClientId: string | null;
-  setActiveCallClientId: (clientId: string | null) => void;
-
-  // WhatsApp chat
-  chatOpen: boolean;
-  setChatOpen: (open: boolean) => void;
-  activeChatClientId: string | null;
-  setActiveChatClientId: (clientId: string | null) => void;
-}
-
-export const useAppStore = create<AppState>()(
+export const useAppStore = create()(
   persist(
     (set) => ({
       // Sidebar state

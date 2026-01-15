@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { toggleVariants } from "@/components/ui/toggle";
 
 const ToggleGroupContext = React.createContext({
-<<<<<<< HEAD
   size: "default",
   variant: "default",
 });
@@ -14,22 +13,11 @@ const ToggleGroup = React.forwardRef(({ className, variant, size, children, ...p
   <ToggleGroupPrimitive.Root ref={ref} className={cn("flex items-center justify-center gap-1", className)} {...props}>
     <ToggleGroupContext.Provider value={{ variant, size }}>{children}</ToggleGroupContext.Provider>
   </ToggleGroupPrimitive.Root>
-=======
-    size: "default",
-    variant: "default",
-});
-
-const ToggleGroup = React.forwardRef(({ className, variant, size, children, ...props }, ref) => (
-    <ToggleGroupPrimitive.Root ref={ref} className={cn("flex items-center justify-center gap-1", className)} {...props}>
-        <ToggleGroupContext.Provider value={{ variant, size }}>{children}</ToggleGroupContext.Provider>
-    </ToggleGroupPrimitive.Root>
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
 ));
 
 ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
 
 const ToggleGroupItem = React.forwardRef(({ className, children, variant, size, ...props }, ref) => {
-<<<<<<< HEAD
   const context = React.useContext(ToggleGroupContext);
 
   return (
@@ -47,25 +35,6 @@ const ToggleGroupItem = React.forwardRef(({ className, children, variant, size, 
       {children}
     </ToggleGroupPrimitive.Item>
   );
-=======
-    const context = React.useContext(ToggleGroupContext);
-
-    return (
-        <ToggleGroupPrimitive.Item
-            ref={ref}
-            className={cn(
-                toggleVariants({
-                    variant: context.variant || variant,
-                    size: context.size || size,
-                }),
-                className,
-            )}
-            {...props}
-        >
-            {children}
-        </ToggleGroupPrimitive.Item>
-    );
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
 });
 
 ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
