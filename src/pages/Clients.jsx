@@ -1,34 +1,35 @@
-<<<<<<< HEAD
-import { useState, useMemo } from 'react';
-=======
-import { useState, useMemo, useEffect } from 'react';
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
-import { Search, Plus, Phone, MessageSquare, Filter, Video, Sparkles, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo } from "react";
+import {
+  Search,
+  Plus,
+  Phone,
+  MessageSquare,
+  Filter,
+  Video,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { ClientList } from '@/components/clients/ClientList';
-import { ActivityTimeline } from '@/components/clients/ActivityTimeline';
-import { ClientDetails } from '@/components/clients/ClientDetails';
-import { WhatsAppChat } from '@/components/clients/WhatsAppChat';
-import { CallDialer } from '@/components/clients/CallDialer';
-import { SmartOnboardingModal } from '@/components/clients/SmartOnboardingModal';
-import { MeetingScheduler } from '@/components/clients/MeetingScheduler';
-import { CAOnboardingWizard } from '@/components/onboarding/CAOnboardingWizard';
-import { useAppStore } from '@/stores/useAppStore';
-<<<<<<< HEAD
-import { useClients } from '@/hooks/useClients';
-=======
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
-import { mockActivities } from '@/lib/mockData';
-import { toast } from 'sonner';
-import api from '@/api/axios';
+} from "@/components/ui/select";
+import { ClientList } from "@/components/clients/ClientList";
+import { ActivityTimeline } from "@/components/clients/ActivityTimeline";
+import { ClientDetails } from "@/components/clients/ClientDetails";
+import { WhatsAppChat } from "@/components/clients/WhatsAppChat";
+import { CallDialer } from "@/components/clients/CallDialer";
+import { SmartOnboardingModal } from "@/components/clients/SmartOnboardingModal";
+import { MeetingScheduler } from "@/components/clients/MeetingScheduler";
+import { CAOnboardingWizard } from "@/components/onboarding/CAOnboardingWizard";
+import { useAppStore } from "@/stores/useAppStore";
+import { useClients } from "@/hooks/useClients";
+import { mockActivities } from "@/lib/mockData";
+import { toast } from "sonner";
 
 export default function Clients() {
   const consultantId = useAppStore((state) => state.consultantId);
@@ -39,105 +40,59 @@ export default function Clients() {
   const dialerOpen = useAppStore((state) => state.dialerOpen);
   const setDialerOpen = useAppStore((state) => state.setDialerOpen);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [activityFilter, setActivityFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [proOnboardingOpen, setProOnboardingOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
 
-<<<<<<< HEAD
   // Fetch clients from real API
   const { data: apiClients, isLoading, error } = useClients();
 
   // Filter clients based on search and status
   const filteredClients = useMemo(() => {
     const clients = apiClients || [];
-=======
-  // Real client data from backend
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch clients from backend on mount
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await api.get('/consultant/clients/');
-        // Transform backend data to match frontend structure
-        const transformedClients = response.data.clients.map(client => ({
-          id: client.id,
-          name: client.full_name,
-          pan: client.pan_number || 'N/A',
-          phone: client.phone_number || 'N/A',
-          email: client.email || 'N/A',
-          status: client.is_onboarded ? 'active' : 'pending',
-          consultantId: consultantId, // All fetched clients belong to current consultant
-        }));
-        setClients(transformedClients);
-      } catch (error) {
-        console.error('Failed to fetch clients:', error);
-        toast.error('Failed to load clients');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClients();
-  }, [consultantId]);
-
-  // Filter clients based on search and status
-  const filteredClients = useMemo(() => {
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
     return clients.filter((client) => {
-      if (statusFilter !== 'all' && client.status !== statusFilter) return false;
+      if (statusFilter !== "all" && client.status !== statusFilter) return false;
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
-<<<<<<< HEAD
           client.name?.toLowerCase().includes(query) ||
           client.pan?.toLowerCase().includes(query) ||
           client.gstin?.toLowerCase().includes(query) ||
-=======
-          client.name.toLowerCase().includes(query) ||
-          client.pan?.toLowerCase().includes(query) ||
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
           client.email?.toLowerCase().includes(query)
         );
       }
       return true;
     });
-<<<<<<< HEAD
   }, [apiClients, searchQuery, statusFilter]);
 
   const activeClient = activeClientId
     ? filteredClients.find((c) => c.id === activeClientId)
-=======
-  }, [clients, searchQuery, statusFilter]);
-
-  const activeClient = activeClientId
-    ? clients.find((c) => c.id === activeClientId)
->>>>>>> cdbc0ff (added auth and conversion to ts, tsx)
     : filteredClients[0];
 
   const clientActivities = useMemo(() => {
     if (!activeClient) return [];
     return mockActivities
       .filter((a) => a.clientId === activeClient.id)
-      .filter((a) => activityFilter === 'all' || a.type === activityFilter);
+      .filter((a) => activityFilter === "all" || a.type === activityFilter);
   }, [activeClient, activityFilter]);
 
   const handleOnboardingComplete = (formData) => {
-    console.log('New client onboarded:', formData);
+    console.log("New client onboarded:", formData);
     toast.success(`${formData.businessName} onboarded successfully!`);
   };
 
   const handleMeetingScheduled = (meetingData) => {
-    console.log('Meeting scheduled:', meetingData);
+    console.log("Meeting scheduled:", meetingData);
     toast.success(`Meeting scheduled with ${meetingData.clientName}`);
   };
 
   const handleCallLogged = (outcomeData) => {
-    console.log('Call logged:', outcomeData);
-    toast.success('Call logged to timeline');
+    console.log("Call logged:", outcomeData);
+    toast.success("Call logged to timeline");
   };
 
   return (
@@ -220,7 +175,7 @@ export default function Clients() {
             <div>
               <h2 className="font-semibold">Activity Timeline</h2>
               <p className="text-sm text-muted-foreground">
-                {activeClient?.name || 'Select a client'}
+                {activeClient?.name || "Select a client"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -239,10 +194,7 @@ export default function Clients() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            <ActivityTimeline
-              activities={clientActivities}
-              clientId={activeClient?.id}
-            />
+            <ActivityTimeline activities={clientActivities} clientId={activeClient?.id} />
           </div>
           {/* Quick Action Bar */}
           {activeClient && (
@@ -278,10 +230,7 @@ export default function Clients() {
         {/* Right Column - Client Details */}
         <div className="col-span-4 flex flex-col bg-card rounded-lg border border-border overflow-hidden">
           {activeClient ? (
-            <ClientDetails
-              client={activeClient}
-              consultantId={consultantId}
-            />
+            <ClientDetails client={activeClient} consultantId={consultantId} />
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               Select a client to view details
