@@ -8,6 +8,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
+import { chatService } from '@/api/chatService';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const suggestedPrompts = [
   'What are the GST filing deadlines for this quarter?',
@@ -38,9 +41,10 @@ export default function AIChat() {
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState([]);
 
   const handleSendMessage = async (content) => {
-    if (!content.trim()) return;
+    if (!content.trim() || isTyping) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -51,72 +55,33 @@ export default function AIChat() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
+    setSuggestedQuestions([]);
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await chatService.sendMessage(content.trim());
+      
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateMockResponse(content),
+        content: response.response || 'No response received',
         timestamp: new Date().toISOString(),
       };
+      
       setMessages((prev) => [...prev, aiResponse]);
+      setSuggestedQuestions(response.follow_ups || []);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '❌ Could not reach the server. Please try again.',
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateMockResponse = (query) => {
-    if (query.toLowerCase().includes('gst')) {
-      return `For GST filing deadlines in the current quarter:
-
-**GSTR-1 (Outward Supplies)**
-• Monthly filers: 11th of the following month
-• Quarterly filers (QRMP): 13th of the month following the quarter
-
-**GSTR-3B (Summary Return)**
-• Monthly filers: 20th of the following month
-• Quarterly filers: 22nd/24th of the month following the quarter
-
-**Key Dates for January 2025:**
-• GSTR-1: January 11, 2025
-• GSTR-3B: January 20, 2025
-
-Would you like me to set reminders for your clients or help with any specific filing?`;
     }
-
-    if (query.toLowerCase().includes('80c')) {
-      return `**Section 80C Deductions for FY 2024-25**
-
-Maximum deduction limit: **₹1,50,000**
-
-**Eligible Investments:**
-• Employee Provident Fund (EPF)
-• Public Provident Fund (PPF)
-• Life Insurance Premium
-• ELSS Mutual Funds (3-year lock-in)
-• NSC (National Savings Certificate)
-• 5-year Tax Saving FD
-• Sukanya Samriddhi Yojana
-• Home Loan Principal Repayment
-• Tuition Fees (2 children max)
-
-**Pro Tip:** ELSS funds offer the shortest lock-in period among 80C investments while providing equity exposure for wealth creation.
-
-Shall I help calculate optimal 80C investment allocation for any of your clients?`;
-    }
-
-    return `Thank you for your query. Based on the current tax regulations and your question about "${query.slice(0, 50)}...", here's what you need to know:
-
-This is a simulated response. In the full version, I would provide:
-
-1. **Detailed explanation** of the relevant tax provisions
-2. **Step-by-step guidance** for compliance
-3. **Relevant deadlines** and timelines
-4. **Documentation requirements**
-5. **Links to official resources** (if applicable)
-
-Is there anything specific about this topic you'd like me to elaborate on?`;
   };
 
   const handleKeyPress = (e) => {
@@ -180,8 +145,39 @@ Is there anything specific about this topic you'd like me to elaborate on?`;
                       : 'bg-primary text-primary-foreground'
                   )}
                 >
-                  <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                    {message.content}
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ node, ...props }) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline hover:opacity-80"
+                          />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p className="mb-2 last:mb-0" {...props} />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul className="pl-4 my-2 list-disc space-y-1" {...props} />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol className="pl-4 my-2 list-decimal space-y-1" {...props} />
+                        ),
+                        code: ({ node, inline, ...props }) => (
+                          inline
+                            ? <code className="px-1.5 py-0.5 rounded text-xs bg-background/50" {...props} />
+                            : <code className="block p-3 my-2 rounded-lg bg-background/50 text-xs overflow-x-auto" {...props} />
+                        ),
+                        strong: ({ node, ...props }) => (
+                          <strong className="font-semibold" {...props} />
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
                   </div>
                   
                   {message.role === 'assistant' && (
@@ -243,23 +239,39 @@ Is there anything specific about this topic you'd like me to elaborate on?`;
 
       {/* Sidebar - Suggested Prompts */}
       <div className="w-80 shrink-0">
-        <Card>
+        <Card className="mt-4">
           <CardHeader>
             <CardTitle className="text-base">Suggested Questions</CardTitle>
             <CardDescription>Click to ask instantly</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {suggestedPrompts.map((prompt, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="w-full justify-start text-left h-auto py-3 px-4"
-                onClick={() => handleSendMessage(prompt)}
-              >
-                <Sparkles size={14} strokeWidth={1.5} className="mr-2 shrink-0 text-primary" />
-                <span className="text-sm">{prompt}</span>
-              </Button>
-            ))}
+            {suggestedQuestions.length > 0 ? (
+              suggestedQuestions.map((prompt, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-3 px-4 whitespace-normal"
+                  onClick={() => handleSendMessage(prompt)}
+                  disabled={isTyping}
+                >
+                  <Sparkles size={14} strokeWidth={1.5} className="mr-2 shrink-0 text-primary" />
+                  <span className="text-sm break-words">{prompt}</span>
+                </Button>
+              ))
+            ) : (
+              suggestedPrompts.map((prompt, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-3 px-4 whitespace-normal"
+                  onClick={() => handleSendMessage(prompt)}
+                  disabled={isTyping}
+                >
+                  <Sparkles size={14} strokeWidth={1.5} className="mr-2 shrink-0 text-primary" />
+                  <span className="text-sm break-words">{prompt}</span>
+                </Button>
+              ))
+            )}
           </CardContent>
         </Card>
 
