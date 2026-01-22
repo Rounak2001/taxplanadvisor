@@ -25,7 +25,7 @@ const navGroups = [
     label: 'Overview',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/insights', icon: LayoutDashboard, label: 'Financial Insights' },
+      // { to: '/insights', icon: LayoutDashboard, label: 'Financial Insights' },
     ],
   },
   {

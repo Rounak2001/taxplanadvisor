@@ -21,6 +21,18 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
+// Force logout and redirect to landing page
+const forceLogout = () => {
+    // Clear any local storage
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+
+    // Redirect to landing page (only if not already there)
+    if (window.location.pathname !== '/') {
+        window.location.href = '/';
+    }
+};
+
 // Response interceptor for handling 401s (token expiry)
 api.interceptors.response.use(
     (response) => response,
@@ -32,12 +44,11 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // If we're hitting the refresh endpoint itself and it failed, logout
+        // If we're hitting the refresh endpoint itself and it failed, force logout
         if (originalRequest.url.includes('/auth/token/refresh/')) {
             isRefreshing = false;
-            // Clear auth state and redirect to login
-            console.error('Refresh token expired. Please login again.');
-            // You can dispatch a global logout action here if needed
+            console.error('Refresh token expired. Redirecting to login.');
+            forceLogout();
             return Promise.reject(error);
         }
 
@@ -68,12 +79,12 @@ api.interceptors.response.use(
             // Retry the original request
             return api(originalRequest);
         } catch (refreshError) {
-            // Refresh failed
+            // Refresh failed - session is completely dead
             isRefreshing = false;
             processQueue(refreshError, null);
 
-            // Clear any auth state and redirect to login
-            console.error('Session expired. Please login again.');
+            console.error('Session expired. Redirecting to login.');
+            forceLogout();
 
             return Promise.reject(refreshError);
         }
