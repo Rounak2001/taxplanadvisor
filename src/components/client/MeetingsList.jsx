@@ -4,16 +4,23 @@ import { Video, Calendar, Clock, Play, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import api from '@/api/axios';
 import { cn } from '@/lib/utils';
 
 export function MeetingsList({ onJoinMeeting }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth(); // Already imported useAuth in my thought, wait let me check imports
 
   useEffect(() => {
     fetchBookings();
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
+    return () => clearInterval(timer);
   }, []);
 
   const fetchBookings = async () => {
@@ -60,6 +67,25 @@ export function MeetingsList({ onJoinMeeting }) {
     const startInMin = startHour * 60 + startMin;
     const endInMin = endHour * 60 + endMin;
     return endInMin - startInMin;
+  };
+
+  const isJoinable = (meetingDateStr, startTimeStr) => {
+    const meetingDateTime = new Date(`${meetingDateStr}T${startTimeStr}`);
+    const tenMinutesBefore = new Date(meetingDateTime.getTime() - 10 * 60000);
+    const endDateTime = new Date(meetingDateTime.getTime() + 30 * 60000); // 30 mins duration
+
+    return currentTime >= tenMinutesBefore && currentTime <= endDateTime;
+  };
+
+  const handleJoinClick = (meeting) => {
+    if (isJoinable(meeting.booking_date, meeting.start_time)) {
+      navigate(`/meeting/${meeting.id}`);
+    } else {
+      toast({
+        title: "Meeting not started",
+        description: "You can join 10 minutes before the scheduled time.",
+      });
+    }
   };
 
   const formatTime = (time24) => {
@@ -124,7 +150,9 @@ export function MeetingsList({ onJoinMeeting }) {
                         {calculateDuration(meeting.start_time, meeting.end_time)} min
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{meeting.consultant_name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {user?.role === 'CONSULTANT' ? `Client: ${meeting.client_name}` : `Consultant: ${meeting.consultant_name}`}
+                    </p>
                     {meeting.notes && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                         Note: {meeting.notes}
@@ -132,7 +160,16 @@ export function MeetingsList({ onJoinMeeting }) {
                     )}
                   </div>
                 </div>
-                <Button onClick={() => onJoinMeeting?.(meeting)}>
+                <Button
+                  onClick={() => handleJoinClick(meeting)}
+                  disabled={!isJoinable(meeting.booking_date, meeting.start_time)}
+                  className={cn(
+                    "transition-all duration-300",
+                    isJoinable(meeting.booking_date, meeting.start_time)
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
+                      : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+                  )}
+                >
                   <Video size={16} strokeWidth={1.5} className="mr-2" />
                   Join Meeting
                 </Button>
@@ -201,7 +238,9 @@ export function MeetingsList({ onJoinMeeting }) {
                         {meeting.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{meeting.consultant_name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {user?.role === 'CONSULTANT' ? `Client: ${meeting.client_name}` : `Consultant: ${meeting.consultant_name}`}
+                    </p>
                   </div>
                 </div>
               </motion.div>

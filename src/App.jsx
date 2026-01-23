@@ -30,6 +30,7 @@ import ClientReports from "./pages/ClientReports";
 import ClientBilling from "./pages/ClientBilling";
 import ClientMeetings from "./pages/ClientMeetings";
 import MarketplaceLeads from "./pages/MarketplaceLeads";
+import MeetingRoom from "./components/video/MeetingRoom";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,9 @@ const App = () => (
             <Route path="/client/marketplace" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><Marketplace /></ClientAppShell></ProtectedRoute>} />
             <Route path="/client/privacy" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><PrivacyRights /></ClientAppShell></ProtectedRoute>} />
             <Route path="/client/insights" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><FinancialInsights /></ClientAppShell></ProtectedRoute>} />
+
+            {/* Video Meeting Room */}
+            <Route path="/meeting/:bookingId" element={<ProtectedRoute><MeetingRoom /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
