@@ -18,11 +18,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { FileUp, Send, User, FileText, MessageSquare } from 'lucide-react';
 import { documentService } from '@/api/documentService';
 import { toast } from 'sonner';
 
-export function RequestDocumentModal({ isOpen, onClose, clients = [], onSuccess }) {
-    const [selectedClientId, setSelectedClientId] = useState('');
+export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedClientId: preSelectedClientId, onSuccess }) {
+    const [selectedClientId, setSelectedClientId] = useState(preSelectedClientId?.toString() || '');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,70 +46,116 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], onSuccess 
     };
 
     const handleClose = () => {
-        setSelectedClientId('');
+        setSelectedClientId(preSelectedClientId?.toString() || '');
         setTitle('');
         setDescription('');
         setIsSubmitting(false);
         onClose();
     };
 
+    const selectedClient = clients.find(c => c.id.toString() === selectedClientId);
+
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[425px] glass">
-                <DialogHeader>
-                    <DialogTitle>Request Document</DialogTitle>
-                    <DialogDescription>
-                        Select a client and specify what document they need to upload.
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="space-y-3">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <FileUp className="h-6 w-6 text-emerald-600" />
+                    </div>
+                    <DialogTitle className="text-center text-xl">Request Document</DialogTitle>
+                    <DialogDescription className="text-center">
+                        Send a document request to your client. They'll be notified to upload the required file.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="client">Client</Label>
+                <div className="space-y-4 py-4">
+                    {/* Client Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="client" className="text-sm font-medium flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            Select Client
+                        </Label>
                         <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                            <SelectTrigger id="client">
-                                <SelectValue placeholder="Select a client" />
+                            <SelectTrigger id="client" className="h-11">
+                                <SelectValue placeholder="Choose a client..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {clients.map(client => (
                                     <SelectItem key={client.id} value={client.id.toString()}>
-                                        {client.full_name || client.username}
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                                                {(client.full_name || client.email || 'U').charAt(0).toUpperCase()}
+                                            </div>
+                                            <span>{client.full_name || client.email}</span>
+                                        </div>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="title">Document Title</Label>
+                    {/* Document Title */}
+                    <div className="space-y-2">
+                        <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            Document Title
+                        </Label>
                         <Input
                             id="title"
-                            placeholder="e.g. GST Certificate"
+                            placeholder="e.g. GST Certificate, PAN Card, Bank Statement"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            className="h-11"
                         />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="description">Instructions (Optional)</Label>
+                    {/* Instructions */}
+                    <div className="space-y-2">
+                        <Label htmlFor="description" className="text-sm font-medium flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            Instructions <span className="text-muted-foreground font-normal">(Optional)</span>
+                        </Label>
                         <Textarea
                             id="description"
-                            placeholder="Tell the client exactly what is needed..."
+                            placeholder="Provide specific instructions for your client, e.g. 'Please upload the latest GST certificate dated after April 2024'"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            className="min-h-[100px] resize-none"
                         />
                     </div>
+
+                    {/* Preview Card */}
+                    {selectedClient && title && (
+                        <div className="rounded-xl bg-muted/50 border border-border p-4 space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview</p>
+                            <p className="text-sm">
+                                Requesting <span className="font-semibold text-primary">"{title}"</span> from{' '}
+                                <span className="font-semibold">{selectedClient.full_name || selectedClient.email}</span>
+                            </p>
+                        </div>
+                    )}
                 </div>
 
-                <DialogFooter>
-                    <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={!selectedClientId || !title || isSubmitting}
+                        className="bg-emerald-600 hover:bg-emerald-700"
                     >
-                        {isSubmitting ? 'Sending Request...' : 'Send Request'}
+                        {isSubmitting ? (
+                            <>
+                                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                                Sending...
+                            </>
+                        ) : (
+                            <>
+                                <Send className="h-4 w-4 mr-2" />
+                                Send Request
+                            </>
+                        )}
                     </Button>
                 </DialogFooter>
             </DialogContent>

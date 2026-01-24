@@ -53,5 +53,35 @@ export const documentService = {
     getAssignedClients: async () => {
         const response = await api.get('/consultant/clients/');
         return response.data.clients;
-    }
+    },
+
+    // ========== Shared Reports ==========
+
+    // List shared reports (role-based: consultant sees theirs, client sees received)
+    listSharedReports: async () => {
+        const response = await api.get('/vault/shared-reports/');
+        return response.data;
+    },
+
+    // Share a report with a client (Consultant only)
+    shareReport: async (formData, onProgress) => {
+        const response = await api.post('/vault/shared-reports/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: (progressEvent) => {
+                if (onProgress) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(percentCompleted);
+                }
+            },
+        });
+        return response.data;
+    },
+
+    // Delete a shared report (Consultant only)
+    deleteSharedReport: async (reportId) => {
+        const response = await api.delete(`/vault/shared-reports/${reportId}/`);
+        return response.data;
+    },
 };

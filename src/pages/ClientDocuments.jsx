@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Eye, Upload, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Download, Eye, Upload, AlertCircle, CheckCircle, Clock, X, Maximize2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { documentService } from '@/api/documentService';
@@ -13,6 +19,7 @@ export default function ClientDocuments() {
   const queryClient = useQueryClient();
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [viewingDoc, setViewingDoc] = useState(null);
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['vault-documents'],
@@ -25,6 +32,28 @@ export default function ClientDocuments() {
   const handleUploadClick = (request = null) => {
     setSelectedRequest(request);
     setIsUploadModalOpen(true);
+  };
+
+  const getFileUrl = (file) => {
+    if (!file) return null;
+    if (file.startsWith('http')) return file;
+    return `http://localhost:8000${file.startsWith('/') ? file : `/${file}`}`;
+  };
+
+  const handleView = (doc) => {
+    setViewingDoc(doc);
+  };
+
+  const handleDownload = (doc) => {
+    const url = getFileUrl(doc.file);
+    if (url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.title || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   if (isLoading) {
@@ -125,7 +154,7 @@ export default function ClientDocuments() {
                     <div>
                       <p className="font-medium text-foreground">{doc.title}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                        <span>Uploaded {new Date(doc.uploaded_at || doc.created_at).toLocaleDateString()}</span>
                         <span>•</span>
                         <Badge variant="outline" className={cn(
                           "text-[10px] uppercase px-1.5 h-4",
@@ -139,15 +168,25 @@ export default function ClientDocuments() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-                      <Eye className="h-4 w-4" />
-                    </Button>
                     {doc.file && (
-                      <a href={`http://localhost:8000${doc.file}`} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="icon" className="hover:bg-primary/10">
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="hover:bg-primary/10"
+                          onClick={() => handleView(doc)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="hover:bg-primary/10"
+                          onClick={() => handleDownload(doc)}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
-                      </a>
+                      </>
                     )}
                   </div>
                 </motion.div>
@@ -157,12 +196,74 @@ export default function ClientDocuments() {
         </CardContent>
       </Card>
 
+      {/* Upload Modal */}
       <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         documentRequest={selectedRequest}
         onSuccess={() => queryClient.invalidateQueries(['vault-documents'])}
       />
+
+      {/* View Document Modal */}
+      <Dialog open={!!viewingDoc} onOpenChange={() => setViewingDoc(null)}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg">{viewingDoc?.title}</DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Uploaded {viewingDoc?.uploaded_at ? new Date(viewingDoc.uploaded_at).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownload(viewingDoc)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(getFileUrl(viewingDoc?.file), '_blank')}
+                >
+                  <Maximize2 className="h-4 w-4 mr-2" />
+                  Fullscreen
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-hidden bg-muted/30 p-4">
+            {viewingDoc?.file && (
+              <div className="w-full h-full rounded-lg border border-border bg-white overflow-hidden">
+                {viewingDoc.file.toLowerCase().endsWith('.pdf') ? (
+                  <iframe
+                    src={getFileUrl(viewingDoc.file)}
+                    className="w-full h-full border-none"
+                    title="Document Preview"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+                    <img
+                      src={getFileUrl(viewingDoc.file)}
+                      alt={viewingDoc.title}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
