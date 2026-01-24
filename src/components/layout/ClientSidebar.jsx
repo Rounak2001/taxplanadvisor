@@ -12,6 +12,7 @@ import {
   Brain,
   Store,
   Shield,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -20,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const navItems = [
   { to: '/client', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/client/gst', icon: FileSpreadsheet, label: 'GST Reports' },
   { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
   { to: '/client/documents', icon: FolderOpen, label: 'My Documents' },
   { to: '/client/meetings', icon: Video, label: 'My Meetings' },
@@ -59,7 +61,7 @@ export function ClientSidebar() {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {sidebarCollapsed && (
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
             <span className="text-primary-foreground font-bold text-sm">TP</span>
@@ -73,7 +75,7 @@ export function ClientSidebar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.to;
-            
+
             const linkContent = (
               <NavLink
                 to={item.to}
@@ -84,13 +86,13 @@ export function ClientSidebar() {
                   !isActive && 'text-sidebar-foreground'
                 )}
               >
-                <Icon 
+                <Icon
                   className={cn(
                     'shrink-0',
                     isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
-                  )} 
-                  size={20} 
-                  strokeWidth={1.5} 
+                  )}
+                  size={20}
+                  strokeWidth={1.5}
                 />
                 <AnimatePresence mode="wait">
                   {!sidebarCollapsed && (
