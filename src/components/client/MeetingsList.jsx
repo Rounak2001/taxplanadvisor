@@ -40,12 +40,10 @@ export function MeetingsList({ onJoinMeeting }) {
   };
 
   // Separate upcoming and past bookings
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const upcomingMeetings = bookings.filter(booking => {
-    const bookingDate = new Date(booking.booking_date);
-    return bookingDate >= today && booking.status !== 'cancelled';
+    if (booking.status === 'cancelled') return false;
+    const meetingEndTime = new Date(`${booking.booking_date}T${booking.end_time}`);
+    return meetingEndTime >= currentTime;
   }).sort((a, b) => {
     const dateA = new Date(`${a.booking_date}T${a.start_time}`);
     const dateB = new Date(`${b.booking_date}T${b.start_time}`);
@@ -53,8 +51,9 @@ export function MeetingsList({ onJoinMeeting }) {
   });
 
   const pastMeetings = bookings.filter(booking => {
-    const bookingDate = new Date(booking.booking_date);
-    return bookingDate < today || booking.status === 'cancelled';
+    if (booking.status === 'cancelled') return true;
+    const meetingEndTime = new Date(`${booking.booking_date}T${booking.end_time}`);
+    return meetingEndTime < currentTime;
   }).sort((a, b) => {
     const dateA = new Date(`${a.booking_date}T${a.start_time}`);
     const dateB = new Date(`${b.booking_date}T${b.start_time}`);
@@ -69,17 +68,27 @@ export function MeetingsList({ onJoinMeeting }) {
     return endInMin - startInMin;
   };
 
-  const isJoinable = (meetingDateStr, startTimeStr) => {
-    const meetingDateTime = new Date(`${meetingDateStr}T${startTimeStr}`);
-    const tenMinutesBefore = new Date(meetingDateTime.getTime() - 10 * 60000);
-    const endDateTime = new Date(meetingDateTime.getTime() + 30 * 60000); // 30 mins duration
+  const isJoinable = (meeting) => {
+    if (!meeting.start_time || !meeting.end_time) return false;
 
-    return currentTime >= tenMinutesBefore && currentTime <= endDateTime;
+    const startTime = new Date(`${meeting.booking_date}T${meeting.start_time}`);
+    const endTime = new Date(`${meeting.booking_date}T${meeting.end_time}`);
+
+    // Enable 10 minutes before start
+    const tenMinutesBefore = new Date(startTime.getTime() - 10 * 60000);
+
+    // Stay enabled until the meeting ends
+    return currentTime >= tenMinutesBefore && currentTime <= endTime;
   };
 
   const handleJoinClick = (meeting) => {
-    if (isJoinable(meeting.booking_date, meeting.start_time)) {
-      navigate(`/meeting/${meeting.id}`);
+    if (meeting.meeting_link) {
+      window.open(meeting.meeting_link, '_blank');
+    } else if (isJoinable(meeting)) {
+      toast({
+        title: "Meeting Link Pending",
+        description: "Google Meet link is being generated. Please refresh in a moment.",
+      });
     } else {
       toast({
         title: "Meeting not started",
@@ -162,10 +171,10 @@ export function MeetingsList({ onJoinMeeting }) {
                 </div>
                 <Button
                   onClick={() => handleJoinClick(meeting)}
-                  disabled={!isJoinable(meeting.booking_date, meeting.start_time)}
+                  disabled={!isJoinable(meeting)}
                   className={cn(
                     "transition-all duration-300",
-                    isJoinable(meeting.booking_date, meeting.start_time)
+                    isJoinable(meeting)
                       ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
                       : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
                   )}

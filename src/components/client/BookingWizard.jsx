@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/use-toast';
 import api from '@/api/axios';
 import { cn } from '@/lib/utils';
@@ -162,15 +164,11 @@ export default function BookingWizard() {
     };
 
     // Get next 30 days for date selection
-    const getAvailableDates = () => {
-        const dates = [];
+    // Disabled dates logic (disable past dates)
+    const isDateDisabled = (date) => {
         const today = new Date();
-        for (let i = 0; i < 30; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
-            dates.push(date.toISOString().split('T')[0]);
-        }
-        return dates;
+        today.setHours(0, 0, 0, 0);
+        return date < today;
     };
 
     return (
@@ -230,23 +228,45 @@ export default function BookingWizard() {
                             <div className="space-y-5">
                                 <div>
                                     <label className="text-sm font-medium mb-2 block">Date</label>
-                                    <select
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:outline-none"
-                                    >
-                                        <option value="">Select a date</option>
-                                        {getAvailableDates().map((date) => (
-                                            <option key={date} value={date}>
-                                                {new Date(date).toLocaleDateString('en-US', {
-                                                    weekday: 'long',
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal h-12 rounded-xl bg-white/5 border-white/10 hover:bg-white/10 hover:text-white",
+                                                    !selectedDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {selectedDate ? (
+                                                    new Date(selectedDate).toLocaleDateString('en-US', {
+                                                        weekday: 'long',
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })
+                                                ) : (
+                                                    <span>Pick a date</span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={selectedDate ? new Date(selectedDate) : undefined}
+                                                onSelect={(date) => {
+                                                    if (date) {
+                                                        const dateStr = date.toLocaleDateString('en-CA');
+                                                        setSelectedDate(dateStr);
+                                                    } else {
+                                                        setSelectedDate('');
+                                                    }
+                                                }}
+                                                disabled={isDateDisabled}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
 
                                 <div>

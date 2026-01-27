@@ -9,7 +9,8 @@ import {
     ChevronDown,
     X,
     AlertCircle,
-    CalendarDays
+    CalendarDays,
+    Edit2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,8 @@ import { useToast } from '@/components/ui/use-toast';
 import TimeSelect from '@/components/ui/TimeSelect';
 import api from '@/api/axios';
 import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const DAYS = [
     { id: 0, name: 'Sunday', short: 'S' },
@@ -37,6 +40,7 @@ export default function Availability() {
     const [selectedDates, setSelectedDates] = useState([]);
     const [timeRanges, setTimeRanges] = useState([{ start: '09:00', end: '17:00' }]);
     const [isUnavailable, setIsUnavailable] = useState(false);
+    const [editingOverrideId, setEditingOverrideId] = useState(null);
     const { toast } = useToast();
 
     const fetchAvailability = async () => {
@@ -125,42 +129,80 @@ export default function Availability() {
         }
     };
 
+    const handleEditOverride = (override) => {
+        setEditingOverrideId(override.id);
+        setSelectedDates([override.date]);
+        setIsUnavailable(override.is_unavailable);
+        if (override.start_time && override.end_time) {
+            setTimeRanges([{ start: override.start_time, end: override.end_time }]);
+        } else {
+            setTimeRanges([{ start: '09:00', end: '17:00' }]);
+        }
+        setShowOverrideModal(true);
+    };
+
     const handleSaveOverrides = async () => {
         try {
-            const promises = selectedDates.map(date => {
-                if (isUnavailable) {
-                    return api.post('/consultations/date-overrides/', {
-                        date,
-                        is_unavailable: true
-                    });
-                } else {
-                    return api.post('/consultations/date-overrides/', {
-                        date,
-                        is_unavailable: false,
-                        start_time: timeRanges[0].start,
-                        end_time: timeRanges[0].end
-                    });
-                }
-            });
+            if (editingOverrideId) {
+                // Update existing override
+                const data = {
+                    date: selectedDates[0],
+                    is_unavailable: isUnavailable,
+                };
 
-            await Promise.all(promises);
+                if (!isUnavailable) {
+                    data.start_time = timeRanges[0].start;
+                    data.end_time = timeRanges[0].end;
+                }
+
+                await api.patch(`/consultations/date-overrides/${editingOverrideId}/`, data);
+
+                toast({
+                    title: 'Success',
+                    description: 'Date override updated.',
+                });
+            } else {
+                // Create new overrides
+                const promises = selectedDates.map(date => {
+                    if (isUnavailable) {
+                        return api.post('/consultations/date-overrides/', {
+                            date,
+                            is_unavailable: true
+                        });
+                    } else {
+                        return api.post('/consultations/date-overrides/', {
+                            date,
+                            is_unavailable: false,
+                            start_time: timeRanges[0].start,
+                            end_time: timeRanges[0].end
+                        });
+                    }
+                });
+
+                await Promise.all(promises);
+                toast({
+                    title: 'Success',
+                    description: 'Date overrides saved successfully.',
+                });
+            }
+
             await fetchAvailability();
             setShowOverrideModal(false);
-            setSelectedDates([]);
-            setTimeRanges([{ start: '09:00', end: '17:00' }]);
-            setIsUnavailable(false);
-
-            toast({
-                title: 'Success',
-                description: 'Date overrides saved successfully.',
-            });
+            resetModalState();
         } catch (error) {
             toast({
                 title: 'Error',
-                description: 'Failed to save date overrides.',
+                description: `Failed to ${editingOverrideId ? 'update' : 'save'} date overrides.`,
                 variant: 'destructive',
             });
         }
+    };
+
+    const resetModalState = () => {
+        setSelectedDates([]);
+        setTimeRanges([{ start: '09:00', end: '17:00' }]);
+        setIsUnavailable(false);
+        setEditingOverrideId(null);
     };
 
     const dayHasHours = (dayId) => weeklyHours.some(h => h.day_of_week === dayId);
@@ -284,7 +326,7 @@ export default function Availability() {
                                     <CalendarIcon size={18} className="text-primary" />
                                     <h3 className="font-medium">Date-specific hours</h3>
                                 </div>
-                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => setShowOverrideModal(true)}>
+                                <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => { resetModalState(); setShowOverrideModal(true); }}>
                                     <Plus size={14} className="mr-1.5" />
                                     Hours
                                 </Button>
@@ -336,6 +378,14 @@ export default function Availability() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    onClick={() => handleEditOverride(override)}
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                                >
+                                                    <Edit2 size={14} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => handleRemoveOverride(override.id)}
                                                     className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                                 >
@@ -352,8 +402,8 @@ export default function Availability() {
                     <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-3">
                         <AlertCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold text-amber-200 uppercase tracking-wider">Note</p>
-                            <p className="text-[11px] text-amber-100/70 leading-relaxed">
+                            <p className="text-xs font-semibold text-black-200 uppercase tracking-wider">Note</p>
+                            <p className="text-[11px] text-black leading-relaxed">
                                 Date-specific hours take priority over your normal weekly schedule. Use them for holidays or one-off schedule changes.
                             </p>
                         </div>
@@ -379,35 +429,75 @@ export default function Availability() {
                             className="glass rounded-2xl border border-white/10 max-w-md w-full max-h-[90vh] overflow-y-auto"
                         >
                             <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur">
-                                <h3 className="font-semibold">Select date(s) for specific hours</h3>
+                                <h3 className="font-semibold">{editingOverrideId ? 'Edit specific hours' : 'Select date(s) for specific hours'}</h3>
                                 <Button variant="ghost" size="icon" onClick={() => setShowOverrideModal(false)}>
                                     <X size={16} />
                                 </Button>
                             </div>
 
                             <div className="p-6 space-y-6">
-                                {/* Simple Date Picker */}
-                                <div>
-                                    <label className="text-sm font-medium mb-2 block">Select Date</label>
-                                    <Input
-                                        type="date"
-                                        min={new Date().toISOString().split('T')[0]}
-                                        onChange={(e) => {
-                                            if (e.target.value && !selectedDates.includes(e.target.value)) {
-                                                setSelectedDates([...selectedDates, e.target.value]);
-                                            }
-                                        }}
-                                        className="bg-white/5 border-white/10"
-                                    />
+                                {/* Calendar Date Picker in Popover */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Select Date(s)</label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal h-12 rounded-xl bg-white/5 border-white/10 hover:bg-white/10",
+                                                    !selectedDates.length && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {selectedDates.length > 0 ? (
+                                                    editingOverrideId ? (
+                                                        formatDateForDisplay(selectedDates[0])
+                                                    ) : (
+                                                        `${selectedDates.length} date${selectedDates.length > 1 ? 's' : ''} selected`
+                                                    )
+                                                ) : (
+                                                    <span>Pick a date</span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode={editingOverrideId ? "single" : "multiple"}
+                                                selected={editingOverrideId
+                                                    ? (selectedDates[0] ? new Date(selectedDates[0]) : undefined)
+                                                    : selectedDates.map(d => new Date(d))
+                                                }
+                                                onSelect={(val) => {
+                                                    if (editingOverrideId) {
+                                                        if (val) {
+                                                            const dateStr = val.toLocaleDateString('en-CA');
+                                                            setSelectedDates([dateStr]);
+                                                        } else {
+                                                            setSelectedDates([]);
+                                                        }
+                                                    } else {
+                                                        if (val) {
+                                                            const dateStrings = val.map(d => d.toLocaleDateString('en-CA'));
+                                                            setSelectedDates(dateStrings);
+                                                        } else {
+                                                            setSelectedDates([]);
+                                                        }
+                                                    }
+                                                }}
+                                                disabled={(date) => date < new Date().setHours(0, 0, 0, 0)}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
 
-                                    {selectedDates.length > 0 && (
+                                    {!editingOverrideId && selectedDates.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-3">
                                             {selectedDates.map((date, index) => (
-                                                <Badge key={index} variant="secondary" className="gap-2">
+                                                <Badge key={index} variant="secondary" className="gap-2 bg-white/10">
                                                     {formatDateForDisplay(date)}
                                                     <button
                                                         onClick={() => setSelectedDates(selectedDates.filter((_, i) => i !== index))}
-                                                        className="hover:text-destructive"
+                                                        className="hover:text-destructive transition-colors"
                                                     >
                                                         <X size={12} />
                                                     </button>
@@ -489,7 +579,7 @@ export default function Availability() {
                                     onClick={handleSaveOverrides}
                                     disabled={selectedDates.length === 0}
                                 >
-                                    Apply
+                                    {editingOverrideId ? 'Update' : 'Apply'}
                                 </Button>
                             </div>
                         </motion.div>
