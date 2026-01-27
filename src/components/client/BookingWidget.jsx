@@ -46,6 +46,14 @@ export function BookingWidget() {
     setIsBooked(false);
   };
 
+  const formatTime = (time24) => {
+    if (!time24) return '';
+    const [hour, minute] = time24.split(':').map(Number);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+  };
+
   if (isBooked) {
     return (
       <motion.div
@@ -65,7 +73,7 @@ export function BookingWidget() {
         <p className="text-muted-foreground mb-4">
           Your {topics.find((t) => t.value === selectedTopic)?.label} session is confirmed for{' '}
           <span className="font-medium text-foreground">
-            {availableSlots.find((d) => d.date === selectedDate)?.day}, {selectedSlot}
+            {availableSlots.find((d) => d.date === selectedDate)?.day}, {formatTime(selectedSlot)}
           </span>
         </p>
         <Button variant="outline" onClick={handleReset}>
@@ -220,7 +228,7 @@ export function BookingWidget() {
                         : 'bg-muted/50 hover:bg-muted'
                     )}
                   >
-                    {slot}
+                    {formatTime(slot)}
                   </motion.button>
                 ))}
             </div>

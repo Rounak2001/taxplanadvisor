@@ -163,6 +163,14 @@ export default function BookingWizard() {
         return false;
     };
 
+    const formatTime = (time24) => {
+        if (!time24) return '';
+        const [hour, minute] = time24.split(':').map(Number);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+    };
+
     // Get next 30 days for date selection
     // Disabled dates logic (disable past dates)
     const isDateDisabled = (date) => {
@@ -397,22 +405,30 @@ export default function BookingWizard() {
                                     {availableSlots.map((slot, index) => (
                                         <motion.button
                                             key={index}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            onClick={() => setSelectedTimeSlot(slot)}
+                                            whileHover={!slot.is_booked ? { scale: 1.05 } : {}}
+                                            whileTap={!slot.is_booked ? { scale: 0.95 } : {}}
+                                            onClick={() => !slot.is_booked && setSelectedTimeSlot(slot)}
+                                            disabled={slot.is_booked}
                                             className={cn(
-                                                "p-4 rounded-xl border-2 transition-all",
+                                                "p-4 rounded-xl border-2 transition-all relative overflow-hidden",
                                                 selectedTimeSlot?.start === slot.start
                                                     ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                                    : "border-white/10 bg-white/5 hover:border-white/20"
+                                                    : slot.is_booked
+                                                        ? "border-white/5 bg-white/5 opacity-40 cursor-not-allowed"
+                                                        : "border-white/10 bg-white/5 hover:border-white/20"
                                             )}
                                         >
                                             <div className="text-sm font-semibold">
-                                                {slot.start}
+                                                {formatTime(slot.start)}
                                             </div>
                                             <div className="text-xs opacity-70 mt-1">
-                                                {slot.end}
+                                                {slot.is_booked ? 'Booked' : formatTime(slot.end)}
                                             </div>
+                                            {slot.is_booked && (
+                                                <div className="absolute top-0 right-0 p-1">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                </div>
+                                            )}
                                         </motion.button>
                                     ))}
                                 </div>
@@ -469,7 +485,7 @@ export default function BookingWizard() {
                                     </span>
 
                                     <span className="text-muted-foreground">Time:</span>
-                                    <span className="font-medium">{selectedTimeSlot?.start} - {selectedTimeSlot?.end}</span>
+                                    <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
                                 </div>
                             </div>
 
