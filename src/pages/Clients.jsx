@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, Plus, Phone, MessageSquare, Filter, Video, Sparkles, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { SmartOnboardingModal } from '@/components/clients/SmartOnboardingModal'
 import { MeetingScheduler } from '@/components/clients/MeetingScheduler';
 import { CAOnboardingWizard } from '@/components/onboarding/CAOnboardingWizard';
 import { useAppStore } from '@/stores/useAppStore';
+import { useClients } from '@/hooks/useClients';
 import { mockActivities } from '@/lib/mockData';
 import { toast } from 'sonner';
 import api from '@/api/axios';
@@ -38,54 +39,26 @@ export default function Clients() {
   const [proOnboardingOpen, setProOnboardingOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
 
-  // Real client data from backend
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch clients from backend on mount
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await api.get('/consultant/clients/');
-        // Transform backend data to match frontend structure
-        const transformedClients = response.data.clients.map(client => ({
-          id: client.id,
-          name: client.full_name,
-          pan: client.pan_number || 'N/A',
-          phone: client.phone_number || 'N/A',
-          email: client.email || 'N/A',
-          status: client.is_onboarded ? 'active' : 'pending',
-          consultantId: consultantId, // All fetched clients belong to current consultant
-        }));
-        setClients(transformedClients);
-      } catch (error) {
-        console.error('Failed to fetch clients:', error);
-        toast.error('Failed to load clients');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClients();
-  }, [consultantId]);
-
-  // Filter clients based on search and status
+  // Filter clients based on consultantId (RLS-ready)
   const filteredClients = useMemo(() => {
-    return clients.filter((client) => {
-      if (statusFilter !== 'all' && client.status !== statusFilter) return false;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          client.name.toLowerCase().includes(query) ||
-          client.pan?.toLowerCase().includes(query) ||
-          client.email?.toLowerCase().includes(query)
-        );
-      }
-      return true;
-    });
-  }, [clients, searchQuery, statusFilter]);
+    return mockClients
+      .filter((client) => client.consultantId === consultantId)
+      .filter((client) => {
+        if (statusFilter !== 'all' && client.status !== statusFilter) return false;
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          return (
+            client.name.toLowerCase().includes(query) ||
+            client.pan.toLowerCase().includes(query) ||
+            client.gstin?.toLowerCase().includes(query)
+          );
+        }
+        return true;
+      });
+  }, [consultantId, searchQuery, statusFilter]);
 
   const activeClient = activeClientId
-    ? clients.find((c) => c.id === activeClientId)
+    ? mockClients.find((c) => c.id === activeClientId)
     : filteredClients[0];
 
   const clientActivities = useMemo(() => {
@@ -164,12 +137,23 @@ export default function Clients() {
             </Select>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <ClientList
-              clients={filteredClients}
-              activeClientId={activeClient?.id}
-              onSelectClient={setActiveClientId}
-              consultantId={consultantId}
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <div className="p-4 text-center text-destructive">
+                <p className="text-sm">Failed to load clients</p>
+                <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+              </div>
+            ) : (
+              <ClientList
+                clients={filteredClients}
+                activeClientId={activeClient?.id}
+                onSelectClient={setActiveClientId}
+                consultantId={consultantId}
+              />
+            )}
           </div>
         </div>
 

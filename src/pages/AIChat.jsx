@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Send, Bot, User, Sparkles, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Bot, User, Sparkles, Copy, ThumbsUp, ThumbsDown, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
+import { sendChatMessage } from '@/lib/api/chat';
+import { toast } from 'sonner';
 
 const suggestedPrompts = [
   'What are the GST filing deadlines for this quarter?',
@@ -38,14 +40,30 @@ export default function AIChat() {
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [useApi, setUseApi] = useState(true); // Toggle between API and mock
+  const scrollRef = useRef(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping]);
 
   const handleSendMessage = async (content) => {
     if (!content.trim()) return;
 
+    // Validate input
+    const trimmedContent = content.trim();
+    if (trimmedContent.length > 2000) {
+      toast.error('Message is too long. Maximum 2000 characters.');
+      return;
+    }
+
     const userMessage = {
       id: Date.now().toString(),
       role: 'user',
-      content: content.trim(),
+      content: trimmedContent,
       timestamp: new Date().toISOString(),
     };
 
@@ -53,8 +71,53 @@ export default function AIChat() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Always try API first
+      const conversationHistory = messages
+        .filter(m => m.id !== '1') // Skip initial greeting for API
+        .map(m => ({
+          role: m.role,
+          content: m.content
+        }));
+      
+      const response = await sendChatMessage(trimmedContent, conversationHistory);
+      
+      // Handle different response formats from Django
+      let responseContent = '';
+      if (typeof response === 'string') {
+        responseContent = response;
+      } else if (response.response) {
+        responseContent = response.response;
+      } else if (response.message) {
+        responseContent = response.message;
+      } else if (response.reply) {
+        responseContent = response.reply;
+      } else if (response.content) {
+        responseContent = response.content;
+      } else if (response.answer) {
+        responseContent = response.answer;
+      } else {
+        responseContent = JSON.stringify(response, null, 2);
+      }
+      
+      const aiResponse = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Chat API error:', error);
+      
+      // Show more descriptive error
+      if (error.message?.includes('fetch')) {
+        toast.error('Cannot connect to server. Check your internet or CORS settings.');
+      } else {
+        toast.error(error.message || 'Failed to get response');
+      }
+      
+      // Fallback to mock on error
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -62,8 +125,9 @@ export default function AIChat() {
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const generateMockResponse = (query) => {
