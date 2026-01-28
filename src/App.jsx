@@ -114,8 +114,8 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </GSTInitializer>
-    </AuthProvider>
-  </QueryClientProvider>
+    </AuthProvider >
+  </QueryClientProvider >
 );
 
 export default App;

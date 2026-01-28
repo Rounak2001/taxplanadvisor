@@ -21,7 +21,6 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useClients } from '@/hooks/useClients';
 import { mockActivities } from '@/lib/mockData';
 import { toast } from 'sonner';
-import api from '@/api/axios';
 
 export default function Clients() {
   const consultantId = useAppStore((state) => state.consultantId);
@@ -32,55 +31,59 @@ export default function Clients() {
   const dialerOpen = useAppStore((state) => state.dialerOpen);
   const setDialerOpen = useAppStore((state) => state.setDialerOpen);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [activityFilter, setActivityFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [proOnboardingOpen, setProOnboardingOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
 
-  // Filter clients based on consultantId (RLS-ready)
+  // Fetch clients from real API
+  const { data: apiClients, isLoading, error } = useClients();
+
+  // Filter clients based on search and status
   const filteredClients = useMemo(() => {
-    return mockClients
-      .filter((client) => client.consultantId === consultantId)
-      .filter((client) => {
-        if (statusFilter !== 'all' && client.status !== statusFilter) return false;
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          return (
-            client.name.toLowerCase().includes(query) ||
-            client.pan.toLowerCase().includes(query) ||
-            client.gstin?.toLowerCase().includes(query)
-          );
-        }
-        return true;
-      });
-  }, [consultantId, searchQuery, statusFilter]);
+    const clients = apiClients || [];
+
+    return clients.filter((client) => {
+      if (statusFilter !== "all" && client.status !== statusFilter) return false;
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          client.name?.toLowerCase().includes(query) ||
+          client.pan?.toLowerCase().includes(query) ||
+          client.gstin?.toLowerCase().includes(query) ||
+          client.email?.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    });
+  }, [apiClients, searchQuery, statusFilter]);
 
   const activeClient = activeClientId
-    ? mockClients.find((c) => c.id === activeClientId)
+    ? (apiClients || []).find((c) => c.id === activeClientId)
     : filteredClients[0];
 
   const clientActivities = useMemo(() => {
     if (!activeClient) return [];
     return mockActivities
       .filter((a) => a.clientId === activeClient.id)
-      .filter((a) => activityFilter === 'all' || a.type === activityFilter);
+      .filter((a) => activityFilter === "all" || a.type === activityFilter);
   }, [activeClient, activityFilter]);
 
   const handleOnboardingComplete = (formData) => {
-    console.log('New client onboarded:', formData);
+    console.log("New client onboarded:", formData);
     toast.success(`${formData.businessName} onboarded successfully!`);
   };
 
   const handleMeetingScheduled = (meetingData) => {
-    console.log('Meeting scheduled:', meetingData);
+    console.log("Meeting scheduled:", meetingData);
     toast.success(`Meeting scheduled with ${meetingData.clientName}`);
   };
 
   const handleCallLogged = (outcomeData) => {
-    console.log('Call logged:', outcomeData);
-    toast.success('Call logged to timeline');
+    console.log("Call logged:", outcomeData);
+    toast.success("Call logged to timeline");
   };
 
   return (
@@ -163,7 +166,7 @@ export default function Clients() {
             <div>
               <h2 className="font-semibold">Activity Timeline</h2>
               <p className="text-sm text-muted-foreground">
-                {activeClient?.name || 'Select a client'}
+                {activeClient?.name || "Select a client"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -182,10 +185,7 @@ export default function Clients() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            <ActivityTimeline
-              activities={clientActivities}
-              clientId={activeClient?.id}
-            />
+            <ActivityTimeline activities={clientActivities} clientId={activeClient?.id} />
           </div>
           {/* Quick Action Bar */}
           {activeClient && (
@@ -221,10 +221,7 @@ export default function Clients() {
         {/* Right Column - Client Details */}
         <div className="col-span-4 flex flex-col bg-card rounded-lg border border-border overflow-hidden">
           {activeClient ? (
-            <ClientDetails
-              client={activeClient}
-              consultantId={consultantId}
-            />
+            <ClientDetails client={activeClient} consultantId={consultantId} />
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               Select a client to view details
