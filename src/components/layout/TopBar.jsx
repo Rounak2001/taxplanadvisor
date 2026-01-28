@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { Search, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,16 +22,31 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 export function TopBar() {
-  const { 
-    taxYear, 
-    setTaxYear, 
-    taxYearOptions, 
+  const navigate = useNavigate();
+  const {
+    taxYear,
+    setTaxYear,
+    taxYearOptions,
     setCommandPaletteOpen,
-    sidebarCollapsed 
+    sidebarCollapsed
   } = useAppStore();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  const userDisplayName = user?.full_name || 'Consultant';
+  const userInitials = userDisplayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'CA';
 
   return (
-    <header 
+    <header
       className="fixed top-0 right-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur-sm flex items-center justify-between px-6 transition-all duration-200"
       style={{ left: sidebarCollapsed ? 72 : 256 }}
     >
@@ -69,7 +86,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell size={20} strokeWidth={1.5} />
-              <Badge 
+              <Badge
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
                 variant="destructive"
               >
@@ -107,12 +124,14 @@ export function TopBar() {
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                  CA
+                  {userInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start text-left">
-                <span className="text-sm font-medium">CA Amit Shah</span>
-                <span className="text-xs text-muted-foreground">Pro Plan</span>
+                <span className="text-sm font-medium">{userDisplayName}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user?.role?.toLowerCase() === 'consultant' ? 'Partner' : 'Member'}
+                </span>
               </div>
               <ChevronDown size={16} strokeWidth={1.5} className="text-muted-foreground" />
             </Button>
@@ -120,16 +139,16 @@ export function TopBar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User size={16} strokeWidth={1.5} className="mr-2" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
               <Settings size={16} strokeWidth={1.5} className="mr-2" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               <LogOut size={16} strokeWidth={1.5} className="mr-2" />
               Log out
             </DropdownMenuItem>
