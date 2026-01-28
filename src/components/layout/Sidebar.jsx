@@ -25,7 +25,7 @@ const navGroups = [
     label: 'Overview',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/insights', icon: LayoutDashboard, label: 'Financial Insights' },
+      // { to: '/insights', icon: LayoutDashboard, label: 'Financial Insights' },
     ],
   },
   {
@@ -41,7 +41,7 @@ const navGroups = [
     label: 'Tax Tools',
     items: [
       { to: '/cma-maker', icon: FileSpreadsheet, label: 'CMA Maker' },
-      { to: '/gst-reco', icon: Receipt, label: 'GST Reco' },
+      { to: '/gst', icon: Receipt, label: 'GST Reco' },
       { to: '/ai-chat', icon: MessageSquare, label: 'AI Chat' },
     ],
   },
@@ -83,7 +83,7 @@ export function Sidebar() {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {sidebarCollapsed && (
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
             <span className="text-primary-foreground font-bold text-sm">TP</span>
@@ -107,12 +107,12 @@ export function Sidebar() {
                 </motion.p>
               )}
             </AnimatePresence>
-            
+
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
-                
+
                 const linkContent = (
                   <NavLink
                     to={item.to}
@@ -123,13 +123,13 @@ export function Sidebar() {
                       !isActive && 'text-sidebar-foreground'
                     )}
                   >
-                    <Icon 
+                    <Icon
                       className={cn(
                         'shrink-0',
                         isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
-                      )} 
-                      size={20} 
-                      strokeWidth={1.5} 
+                      )}
+                      size={20}
+                      strokeWidth={1.5}
                     />
                     <AnimatePresence mode="wait">
                       {!sidebarCollapsed && (

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Users,
   FileCheck,
@@ -20,6 +21,7 @@ import { cn } from '@/lib/utils';
 export default function Dashboard() {
   const { taxYear, consultantId } = useAppStore();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   const stats = [
     {
@@ -228,7 +230,7 @@ export default function Dashboard() {
               <Calendar size={24} strokeWidth={1.5} className="text-primary" />
               <span>New CMA Report</span>
             </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate('/gst')}>
               <TrendingUp size={24} strokeWidth={1.5} className="text-primary" />
               <span>GST Reconciliation</span>
             </Button>
