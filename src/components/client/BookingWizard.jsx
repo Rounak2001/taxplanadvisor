@@ -120,7 +120,8 @@ export default function BookingWizard() {
     const handleBooking = async () => {
         setLoading(true);
         try {
-            await api.post('/consultations/bookings/', {
+            // 1. Create a pending booking (Backend will also create Razorpay Order)
+            const response = await api.post('/consultations/bookings/', {
                 consultant: selectedConsultant.id,
                 topic: selectedTopic.id,
                 booking_date: selectedDate,
@@ -129,28 +130,88 @@ export default function BookingWizard() {
                 notes: notes
             });
 
-            toast({
-                title: 'Booking Confirmed!',
-                description: `Your consultation with ${selectedConsultant.first_name} ${selectedConsultant.last_name} is scheduled.`,
-            });
+            const bookingData = response.data;
+            const razorpayOrderId = bookingData.razorpay_order_id;
 
-            // Reset wizard
-            setStep(1);
-            setSelectedTopic(null);
-            setSelectedDate('');
-            setSelectedConsultant(null);
-            setAvailableConsultants([]);
-            setAvailableSlots([]);
-            setSelectedTimeSlot(null);
-            setNotes('');
+            if (!razorpayOrderId) {
+                throw new Error("Failed to initialize payment. Please try again.");
+            }
+
+            // 2. Open Razorpay Checkout
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Should be in .env
+                amount: bookingData.amount * 100, // Amount in paise
+                currency: "INR",
+                name: "TaxPlan Advisor",
+                description: `Consultation: ${selectedTopic.name}`,
+                order_id: razorpayOrderId,
+                handler: async function (response) {
+                    try {
+                        setLoading(true);
+                        // 3. Verify Payment Signature
+                        await api.post(`/consultations/bookings/${bookingData.id}/verify_payment/`, {
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        });
+
+                        toast({
+                            title: 'Booking Confirmed!',
+                            description: `Payment successful. Your consultation with ${selectedConsultant.first_name} is scheduled.`,
+                        });
+
+                        // Reset wizard
+                        setStep(1);
+                        setSelectedTopic(null);
+                        setSelectedDate('');
+                        setSelectedConsultant(null);
+                        setAvailableConsultants([]);
+                        setAvailableSlots([]);
+                        setSelectedTimeSlot(null);
+                        setNotes('');
+                    } catch (verifyError) {
+                        toast({
+                            title: 'Verification Failed',
+                            description: 'Payment was successful but we could not verify it. Please contact support.',
+                            variant: 'destructive',
+                        });
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                prefill: {
+                    name: "", // Can be prefilled from user state if available
+                    email: "",
+                    contact: ""
+                },
+                theme: {
+                    color: "#3b82f6" // matches primary blue
+                },
+                modal: {
+                    ondismiss: function () {
+                        setLoading(false);
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                toast({
+                    title: 'Payment Failed',
+                    description: response.error.description,
+                    variant: 'destructive',
+                });
+                setLoading(false);
+            });
+            rzp.open();
+
         } catch (error) {
-            console.error('Booking error:', error.response?.data);
+            console.error('Booking error:', error.response?.data || error.message);
             toast({
                 title: 'Booking Failed',
-                description: error.response?.data?.error || error.response?.data?.detail || 'Please try again.',
+                description: error.response?.data?.error || error.response?.data?.detail || error.message || 'Please try again.',
                 variant: 'destructive',
             });
-        } finally {
             setLoading(false);
         }
     };
@@ -353,6 +414,7 @@ export default function BookingWizard() {
                                                         {consultant.first_name} {consultant.last_name}
                                                     </div>
                                                     <div className="text-sm text-muted-foreground">{consultant.email}</div>
+                                                    <div className="text-sm font-medium text-primary mt-1">₹{consultant.consultation_fee}</div>
                                                 </div>
                                             </div>
                                             {selectedConsultant?.id === consultant.id && (
@@ -486,6 +548,9 @@ export default function BookingWizard() {
 
                                     <span className="text-muted-foreground">Time:</span>
                                     <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
+
+                                    <span className="text-muted-foreground">Fee:</span>
+                                    <span className="font-medium text-primary">₹{selectedConsultant?.consultation_fee}</span>
                                 </div>
                             </div>
 
