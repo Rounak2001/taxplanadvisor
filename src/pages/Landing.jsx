@@ -182,7 +182,7 @@ function Navigation() {
         <div className="hidden lg:flex items-center gap-4">
           <LoginModal
             trigger={
-              <Button variant="ghost">Login</Button>
+              <Button variant="ghost"> Login as Consultant</Button>
             }
           />
           <Button className="gap-2 rounded-xl" asChild>
@@ -219,7 +219,7 @@ function Navigation() {
             <div className="pt-4 border-t space-y-2">
               <LoginModal
                 trigger={
-                  <Button variant="outline" className="w-full">Login</Button>
+                  <Button variant="outline" className="w-full">Login </Button>
                 }
               />
               <Button className="w-full gap-2" asChild>
