@@ -239,11 +239,11 @@ export default function Vault() {
                     <div className="flex-1 p-4 bg-muted/30 overflow-hidden">
                       {selectedDoc.file ? (
                         <div className="w-full h-full rounded-lg border border-border bg-white shadow-inner overflow-hidden">
-                          {selectedDoc.file.toLowerCase().endsWith('.pdf') ? (
+                          {selectedDoc.file.split('?')[0].toLowerCase().endsWith('.pdf') ? (
                             <iframe src={getFileUrl(selectedDoc.file)} className="w-full h-full border-none" title="Document Preview" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
-                              <img src={getFileUrl(selectedDoc.file)} alt="Preview" className="max-w-full max-h-full object-contain" />
+                              <img src={getFileUrl(selectedDoc.file)} alt={selectedDoc.title} className="max-w-full max-h-full object-contain" />
                             </div>
                           )}
                         </div>
@@ -266,7 +266,7 @@ export default function Vault() {
                       </div>
                       <div className="flex items-center gap-3">
                         {selectedDoc.file && (
-                          <a href={getFileUrl(selectedDoc.file)} download>
+                          <a href={getFileUrl(selectedDoc.file)} target="_blank" rel="noopener noreferrer">
                             <Button variant="outline" size="sm">
                               <Download size={14} className="mr-1" /> Download
                             </Button>
@@ -346,7 +346,7 @@ export default function Vault() {
                       <Button variant="ghost" size="icon" onClick={() => window.open(getFileUrl(report.file), '_blank')}>
                         <Maximize2 className="h-4 w-4" />
                       </Button>
-                      <a href={getFileUrl(report.file)} download>
+                      <a href={getFileUrl(report.file)} target="_blank" rel="noopener noreferrer">
                         <Button variant="ghost" size="icon">
                           <Download className="h-4 w-4" />
                         </Button>

@@ -47,12 +47,7 @@ export default function ClientDocuments() {
   const handleDownload = (doc) => {
     const url = getFileUrl(doc.file);
     if (url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = doc.title || 'document';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.open(url, '_blank');
     }
   };
 
@@ -244,7 +239,7 @@ export default function ClientDocuments() {
           <div className="flex-1 overflow-hidden bg-muted/30 p-4">
             {viewingDoc?.file && (
               <div className="w-full h-full rounded-lg border border-border bg-white overflow-hidden">
-                {viewingDoc.file.toLowerCase().endsWith('.pdf') ? (
+                {viewingDoc.file.split('?')[0].toLowerCase().endsWith('.pdf') ? (
                   <iframe
                     src={getFileUrl(viewingDoc.file)}
                     className="w-full h-full border-none"

@@ -57,7 +57,7 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
                 <DialogHeader className="space-y-3">
                     <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
                         <FileUp className="h-6 w-6 text-emerald-600" />
@@ -68,7 +68,7 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-4 flex-1 overflow-y-auto px-1">
                     {/* Client Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="client" className="text-sm font-medium flex items-center gap-2">

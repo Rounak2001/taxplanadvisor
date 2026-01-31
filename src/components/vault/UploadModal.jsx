@@ -111,7 +111,7 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
                 <DialogHeader className="space-y-3">
                     <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <CloudUpload className="h-6 w-6 text-primary" />
@@ -126,7 +126,7 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-4 flex-1 overflow-y-auto px-1">
                     {!documentRequest && (
                         <>
                             <div className="space-y-2">
