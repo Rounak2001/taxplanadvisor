@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Shield,
   Video,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -42,6 +43,7 @@ const navGroups = [
     items: [
       { to: '/cma-maker', icon: FileSpreadsheet, label: 'CMA Maker' },
       { to: '/gst', icon: Receipt, label: 'GST Reco' },
+      { to: '/dashboard/calculators', icon: Calculator, label: 'Calculators' },
       { to: '/ai-chat', icon: MessageSquare, label: 'AI Chat' },
     ],
   },

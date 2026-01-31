@@ -13,6 +13,7 @@ import {
   Store,
   Shield,
   FileSpreadsheet,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -23,6 +24,7 @@ const navItems = [
   { to: '/client', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/client/gst', icon: FileSpreadsheet, label: 'GST Reports' },
   { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
+  { to: '/client/calculators', icon: Calculator, label: 'Calculators' },
   { to: '/client/documents', icon: FolderOpen, label: 'My Documents' },
   { to: '/client/meetings', icon: Video, label: 'My Meetings' },
   { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
