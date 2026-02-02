@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Shield, Zap, Users } from "lucide-react";
+import { Shield, Zap, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import DemoBookingModal from "@/components/landing/DemoBookingModal";
 import AICopilot from "@/components/landing/AICopilot";
 import GSTServices from "@/components/landing/GSTServices";
@@ -21,9 +22,14 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
       <Navbar />
 
+      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+        {/* Background Elements */}
+        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-50 pointer-events-none" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -32,12 +38,14 @@ const Landing = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 mb-8"
+              className="flex justify-center mb-8"
             >
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm text-primary font-medium">
-                India's #1 Tax-Tech Platform
-              </span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10">
+                <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                <span className="text-sm text-primary font-medium">
+                  India's #1 Tax-Tech Platform
+                </span>
+              </div>
             </motion.div>
 
             {/* Headline */}
@@ -79,28 +87,6 @@ const Landing = () => {
               >
                 Book a Demo
               </Button>
-            </motion.div>
-
-            {/* Trust Indicators */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.8 }}
-              className="flex flex-wrap items-center justify-center gap-8"
-            >
-              {/* {[
-                { icon: Shield, text: "Bank-Grade Security" },
-                { icon: Users, text: "500+ CAs Registered" },
-                { icon: Zap, text: "AI-Powered Matching" },
-              ].map((item) => (
-                <div
-                  key={item.text}
-                  className="flex items-center gap-2 text-muted-foreground"
-                >
-                  <item.icon className="w-5 h-5 text-primary" />
-                  <span className="text-sm">{item.text}</span>
-                </div>
-              ))} */}
             </motion.div>
           </div>
         </div>
