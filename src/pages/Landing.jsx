@@ -69,8 +69,8 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
             >
-              Connect with ICAI-verified Chartered Accountants, file taxes with AI-powered
-              assistance, and manage all compliance from one intelligent platform.
+              Connect with verified Tax Consultants, file taxes with AI-powered
+              assistance, and manage all compliance from one Intelligent platform.
             </motion.p>
 
             {/* CTA Button */}

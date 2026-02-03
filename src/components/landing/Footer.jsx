@@ -10,9 +10,11 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="space-y-6">
                         <Link to="/" className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-serif font-bold text-xl">
-                                T
-                            </div>
+                            <img
+                                src="/TAX plan Advisor.ico"
+                                alt="TaxPlan Advisor"
+                                className="h-10 w-10"
+                            />
                             <div className="flex flex-col">
                                 <span className="text-lg font-serif font-bold leading-tight">TaxPlan</span>
                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Advisor</span>
@@ -67,15 +69,15 @@ export default function Footer() {
                         <ul className="space-y-4 text-sm text-muted-foreground">
                             <li className="flex items-start gap-3">
                                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                <span>123 Financial District, Tech Hub,<br />Bangalore, Karnataka 560001</span>
+                                <span>Mumbai, India</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                                <span>+91 98765 43210</span>
+                                <span>+91 788 789 1234</span>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                                <span>support@taxplanadvisor.com</span>
+                                <span>developers@taxplanadvisor.in</span>
                             </li>
                         </ul>
                     </div>

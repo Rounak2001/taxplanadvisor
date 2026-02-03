@@ -14,6 +14,8 @@ import {
   Shield,
   FileSpreadsheet,
   Calculator,
+  User,
+  Briefcase,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -22,16 +24,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const navItems = [
   { to: '/client', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/client/profile', icon: User, label: 'Profile' },
+  { to: '/client/services', icon: Briefcase, label: 'Services' },
   { to: '/client/gst', icon: FileSpreadsheet, label: 'GST Reports' },
-  { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
+  // { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
   { to: '/client/calculators', icon: Calculator, label: 'Calculators' },
   { to: '/client/documents', icon: FolderOpen, label: 'My Documents' },
   { to: '/client/meetings', icon: Video, label: 'My Meetings' },
   { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
   { to: '/client/reports', icon: FileText, label: 'My Reports' },
-  { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
-  { to: '/client/billing', icon: CreditCard, label: 'Billing' },
-  { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
+  // { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
+  // { to: '/client/billing', icon: CreditCard, label: 'Billing' },
+  // { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
 ];
 
 export function ClientSidebar() {

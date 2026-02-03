@@ -32,17 +32,19 @@ export default function Navbar() {
             <nav className="container mx-auto flex h-16 lg:h-20 items-center justify-between px-4 lg:px-8">
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-serif font-bold text-xl shadow-lg ring-2 ring-primary/20">
-                        T
-                    </div>
+                    <img
+                        src="/TAX plan Advisor.ico"
+                        alt="TaxPlan Advisor"
+                        className="h-10 w-10"
+                    />
                     <div className="flex flex-col">
                         <span className="text-lg font-serif font-bold leading-tight tracking-tight">TaxPlan</span>
                         <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Advisor</span>
                     </div>
                 </Link>
 
-                {/* Desktop Navigation */}
-                <div className="hidden lg:flex items-center gap-2">
+                {/* Desktop Navigation - Centered */}
+                <div className="hidden lg:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
                     <NavigationMenu>
                         <NavigationMenuList>
                             <NavigationMenuItem>
@@ -65,14 +67,25 @@ export default function Navbar() {
                 </div>
 
                 {/* Desktop Actions */}
-                <div className="hidden lg:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-2">
+                    {/* Sign up as Client Button */}
+                    <GoogleLoginButton text="Sign up as Client" size="sm" className="rounded-full" />
 
+                    {/* Sign up as Consultant Button */}
+                    <LoginModal
+                        trigger={
+                            <Button size="sm" className="rounded-full px-3 h-8 text-s shadow-md hover:shadow-lg transition-all duration-300">
+                                Register as Consultant
+                            </Button>
+                        }
+                    />
 
                     {/* Login Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="rounded-full px-4">
-                                Log In
+                            <Button variant="ghost" className="rounded-full px-">
+                                <LogIn className="w-4 h-4 mr-2" />
+                                Login
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 p-2">
@@ -93,46 +106,9 @@ export default function Navbar() {
                                     <DropdownMenuItem className="p-0 focus:bg-transparent" onSelect={(e) => e.preventDefault()}>
                                         <LoginModal
                                             trigger={
-                                                <Button variant="outline" className="w-full justify-start relative overflow-hidden group border-dashed border-2">
+                                                <Button variant="outline" className="w-full justify-start border-dashed border-2">
                                                     <Briefcase className="w-4 h-4 mr-2" />
                                                     Consultant Login
-                                                </Button>
-                                            }
-                                        />
-                                    </DropdownMenuItem>
-                                </div>
-                            </div>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {/* Get Started (Signup) Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button className="rounded-full px-6 shadow-md hover:shadow-lg transition-all duration-300">
-                                Get Started
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-64 p-2">
-                            <DropdownMenuLabel className="font-normal text-xs text-muted-foreground uppercase tracking-wider ml-2">Sign Up As</DropdownMenuLabel>
-
-                            <div className="p-1 space-y-2">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium ml-2">Client</p>
-                                    <DropdownMenuItem className="p-0 focus:bg-transparent" onSelect={(e) => e.preventDefault()}>
-                                        <GoogleLoginButton text="Sign up with Google" className="w-full" />
-                                    </DropdownMenuItem>
-                                </div>
-
-                                <DropdownMenuSeparator />
-
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium ml-2">Consultant</p>
-                                    <DropdownMenuItem className="p-0 focus:bg-transparent" onSelect={(e) => e.preventDefault()}>
-                                        <LoginModal
-                                            trigger={
-                                                <Button variant="default" className="w-full justify-start">
-                                                    <User className="w-4 h-4 mr-2" />
-                                                    Join as Consultant
                                                 </Button>
                                             }
                                         />

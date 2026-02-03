@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Navigate } from "react-router-dom";
 import { useEffect } from 'react';
 import { useGstStore } from '@/stores/useGstStore';
+import ScrollToTop from '@/components/ScrollToTop';
 import Landing from "./pages/Landing";
 import AboutUs from "./pages/AboutUs";
 import Login from "./pages/Login";
@@ -35,6 +36,8 @@ import ClientBilling from "./pages/ClientBilling";
 import ClientMeetings from "./pages/ClientMeetings";
 import MarketplaceLeads from "./pages/MarketplaceLeads";
 import ClientGSTServices from "./pages/ClientGSTServices";
+import ClientProfile from "./pages/ClientProfile";
+import ClientServices from "./pages/ClientServices";
 
 // GST Service Components
 import GSTServicesHub from "@/components/gstr/GSTServicesHub";
@@ -84,6 +87,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               {/* Public Landing Page */}
               <Route path="/" element={<Landing />} />
@@ -156,6 +160,8 @@ const App = () => (
 
               {/* Client Dashboard */}
               <Route path="/client" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDashboard /></ClientAppShell></ProtectedRoute>} />
+              <Route path="/client/profile" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientProfile /></ClientAppShell></ProtectedRoute>} />
+              <Route path="/client/services" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientServices /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/documents" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDocuments /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/meetings" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMeetings /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/messages" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMessages /></ClientAppShell></ProtectedRoute>} />
