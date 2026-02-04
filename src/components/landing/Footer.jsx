@@ -84,7 +84,7 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-                    <p>© 2026 TaxPlan Advisor. All rights reserved.</p>
+                    <p>© 2025 TaxPlan Advisor. All rights reserved.</p>
                     <div className="flex gap-8">
                         <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
                         <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>

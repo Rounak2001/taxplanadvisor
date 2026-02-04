@@ -18,8 +18,8 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
-                serif: ['Playfair Display', 'Georgia', 'serif'],
+                sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'],
+                serif: ['"Be Vietnam Pro"', 'serif'],
             },
             colors: {
                 border: "hsl(var(--border))",
