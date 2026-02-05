@@ -28,13 +28,12 @@ import Marketplace from "./pages/Marketplace";
 import PrivacyRights from "./pages/PrivacyRights";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
-import ClientDocuments from "./pages/ClientDocuments";
 import ClientMessages from "./pages/ClientMessages";
-import ClientReports from "./pages/ClientReports";
 import ClientBilling from "./pages/ClientBilling";
 import ClientMeetings from "./pages/ClientMeetings";
 import MarketplaceLeads from "./pages/MarketplaceLeads";
 import ClientGSTServices from "./pages/ClientGSTServices";
+import ClientVault from "./pages/ClientVault";
 
 // GST Service Components
 import GSTServicesHub from "@/components/gstr/GSTServicesHub";
@@ -156,10 +155,14 @@ const App = () => (
 
               {/* Client Dashboard */}
               <Route path="/client" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDashboard /></ClientAppShell></ProtectedRoute>} />
-              <Route path="/client/documents" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDocuments /></ClientAppShell></ProtectedRoute>} />
+              <Route path="/client/vault" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientVault /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/meetings" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMeetings /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/messages" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMessages /></ClientAppShell></ProtectedRoute>} />
-              <Route path="/client/reports" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientReports /></ClientAppShell></ProtectedRoute>} />
+
+              {/* Legacy Redirects */}
+              <Route path="/client/documents" element={<ProtectedRoute requiredRole="CLIENT"><Navigate to="/client/vault" replace /></ProtectedRoute>} />
+              <Route path="/client/reports" element={<ProtectedRoute requiredRole="CLIENT"><Navigate to="/client/vault" replace /></ProtectedRoute>} />
+              <Route path="/client/notices" element={<ProtectedRoute requiredRole="CLIENT"><Navigate to="/client/vault" replace /></ProtectedRoute>} />
               <Route path="/client/billing" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientBilling /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/marketplace" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><Marketplace /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/privacy" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><PrivacyRights /></ClientAppShell></ProtectedRoute>} />

@@ -149,9 +149,9 @@ export function ShareReportModal({ isOpen, onClose, clients = [], onSuccess }) {
                                     <SelectItem key={client.id} value={client.id.toString()}>
                                         <div className="flex items-center gap-2">
                                             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                                                {(client.full_name || client.email || 'U').charAt(0).toUpperCase()}
+                                                {(client.name || client.email || 'U').charAt(0).toUpperCase()}
                                             </div>
-                                            <span>{client.full_name || client.email}</span>
+                                            <span>{client.name || client.email}</span>
                                         </div>
                                     </SelectItem>
                                 ))}

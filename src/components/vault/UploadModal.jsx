@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -12,19 +12,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, CheckCircle2, CloudUpload, File, X } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Upload, FileText, CheckCircle2, CloudUpload, File, X, Folder as FolderIcon } from 'lucide-react';
 import { documentService } from '@/api/documentService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
 
 export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess }) {
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState(documentRequest?.title || '');
     const [description, setDescription] = useState(documentRequest?.description || '');
+    const [selectedFolderId, setSelectedFolderId] = useState('none');
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+
+    // Fetch folders for proactive upload
+    const { data: folders = [] } = useQuery({
+        queryKey: ['vault-folders'],
+        queryFn: () => documentService.listFolders(),
+        enabled: !documentRequest && isOpen,
+    });
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -61,6 +77,9 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
         if (!documentRequest) {
             formData.append('title', title);
             formData.append('description', description);
+            if (selectedFolderId !== 'none') {
+                formData.append('folder', selectedFolderId);
+            }
         }
 
         try {
@@ -92,6 +111,7 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
         setFile(null);
         setTitle('');
         setDescription('');
+        setSelectedFolderId('none');
         setUploadProgress(0);
         setIsUploading(false);
         setIsSuccess(false);
@@ -148,6 +168,31 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
                                     onChange={(e) => setDescription(e.target.value)}
                                     className="min-h-[80px] resize-none"
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="folder" className="text-sm font-medium flex items-center gap-2">
+                                    <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                                    Select Folder <span className="text-muted-foreground font-normal">(Optional)</span>
+                                </Label>
+                                <Select
+                                    value={selectedFolderId}
+                                    onValueChange={setSelectedFolderId}
+                                >
+                                    <SelectTrigger id="folder" className="h-11">
+                                        <SelectValue placeholder="Select destination folder..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No Folder (Root)</SelectItem>
+                                        {folders.map(folder => (
+                                            <SelectItem key={folder.id} value={folder.id.toString()}>
+                                                <div className="flex items-center gap-2">
+                                                    <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                                                    <span>{folder.name}</span>
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </>
                     )}

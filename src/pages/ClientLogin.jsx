@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { login } from '@/lib/api/auth';
+import { authService } from '@/api/authService';
 import { toast } from 'sonner';
 
 export default function ClientLogin() {
@@ -19,9 +19,9 @@ export default function ClientLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      await login(email, password);
+      await authService.login(email, password);
       toast.success('Welcome back!');
       navigate('/client');
     } catch (error) {

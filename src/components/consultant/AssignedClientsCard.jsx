@@ -16,7 +16,7 @@ export function AssignedClientsCard() {
     const fetchClients = async () => {
         try {
             const response = await api.get('/consultant/clients/');
-            setClients(response.data.clients);
+            setClients(response.data);
         } catch (err) {
             setError('Failed to load clients');
             console.error('Failed to fetch clients:', err);
@@ -64,7 +64,7 @@ export function AssignedClientsCard() {
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
-                                        <h4 className="font-medium">{client.full_name}</h4>
+                                        <h4 className="font-medium">{client.name}</h4>
                                         <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                                             <span className="flex items-center gap-1">
                                                 <Mail className="h-3.5 w-3.5" />
@@ -72,16 +72,16 @@ export function AssignedClientsCard() {
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Phone className="h-3.5 w-3.5" />
-                                                {client.phone_number || 'No phone'}
+                                                {client.phone || 'No phone'}
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <CreditCard className="h-3.5 w-3.5" />
-                                                {client.pan_number || 'PAN pending'}
+                                                {client.pan || 'PAN pending'}
                                             </span>
                                         </div>
                                     </div>
-                                    <Badge variant={client.is_onboarded ? 'default' : 'outline'}>
-                                        {client.is_onboarded ? (
+                                    <Badge variant={client.status === 'active' ? 'default' : 'outline'}>
+                                        {client.status === 'active' ? (
                                             <><CheckCircle className="h-3 w-3 mr-1" /> Onboarded</>
                                         ) : (
                                             <><Clock className="h-3 w-3 mr-1" /> Pending</>

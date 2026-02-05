@@ -75,6 +75,7 @@ export default function ClientGSTServices() {
         error,
         generateOTP,
         verifyOTP,
+        initializeSession,
         logout,
         clearError
     } = useGstStore();
@@ -92,7 +93,14 @@ export default function ClientGSTServices() {
         const fetchProfile = async () => {
             try {
                 const response = await gstService.getClientProfile();
-                if (response.gstin) setGstNumber(response.gstin);
+                if (response.gstin) {
+                    setGstNumber(response.gstin);
+                    // Proactively check if there's an active session for this GSTIN
+                    const result = await initializeSession(response.gstin);
+                    if (result.success && result.restored) {
+                        toast.success('Active GST session restored');
+                    }
+                }
                 if (response.gst_username) setGstUsername(response.gst_username);
             } catch (err) {
                 // Profile might not have GST details yet - that's okay
@@ -101,7 +109,7 @@ export default function ClientGSTServices() {
         if (!isAuthenticated) {
             fetchProfile();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, initializeSession]);
 
     // Update timer every minute
     useEffect(() => {

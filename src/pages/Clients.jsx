@@ -43,7 +43,7 @@ export default function Clients() {
 
   // Filter clients based on search and status
   const filteredClients = useMemo(() => {
-    const clients = apiClients || [];
+    const clients = Array.isArray(apiClients) ? apiClients : (apiClients?.clients || []);
 
     return clients.filter((client) => {
       if (statusFilter !== "all" && client.status !== statusFilter) return false;
@@ -61,7 +61,7 @@ export default function Clients() {
   }, [apiClients, searchQuery, statusFilter]);
 
   const activeClient = activeClientId
-    ? (apiClients || []).find((c) => c.id === activeClientId)
+    ? (Array.isArray(apiClients) ? apiClients : (apiClients?.clients || [])).find((c) => String(c.id) === String(activeClientId))
     : filteredClients[0];
 
   const clientActivities = useMemo(() => {

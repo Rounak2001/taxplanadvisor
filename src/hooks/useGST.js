@@ -1,12 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { 
-  generateGstOtp, 
-  verifyGstOtp, 
-  reconcileGstr, 
-  downloadGstrExcel,
-  reconcileGstr1VsBook,
-  reconcileGstr3b 
-} from '@/lib/api/gst';
+import { gstService } from '@/api/gstService';
 import { toast } from 'sonner';
 
 // Query key factory
@@ -20,7 +13,7 @@ export const gstKeys = {
  */
 export function useGenerateGstOtp() {
   return useMutation({
-    mutationFn: ({ gstin, username }) => generateGstOtp(gstin, username),
+    mutationFn: ({ gstin, username }) => gstService.generateGstOtp(gstin, username),
     onSuccess: () => {
       toast.success('OTP sent successfully');
     },
@@ -35,7 +28,7 @@ export function useGenerateGstOtp() {
  */
 export function useVerifyGstOtp() {
   return useMutation({
-    mutationFn: ({ gstin, otp }) => verifyGstOtp(gstin, otp),
+    mutationFn: ({ gstin, otp }) => gstService.verifyGstOtp(gstin, otp),
     onSuccess: () => {
       toast.success('GST authentication successful');
     },
@@ -50,7 +43,7 @@ export function useVerifyGstOtp() {
  */
 export function useReconcileGstr() {
   return useMutation({
-    mutationFn: reconcileGstr,
+    mutationFn: gstService.reconcileComprehensive,
     onSuccess: () => {
       toast.success('Reconciliation completed');
     },
@@ -65,7 +58,7 @@ export function useReconcileGstr() {
  */
 export function useReconcileGstr1VsBook() {
   return useMutation({
-    mutationFn: reconcileGstr1VsBook,
+    mutationFn: gstService.reconcile1vsBooks,
     onSuccess: () => {
       toast.success('GSTR1 vs Books reconciliation completed');
     },
@@ -80,7 +73,7 @@ export function useReconcileGstr1VsBook() {
  */
 export function useReconcileGstr3b() {
   return useMutation({
-    mutationFn: reconcileGstr3b,
+    mutationFn: gstService.reconcile3BvsBooks,
     onSuccess: () => {
       toast.success('GSTR3B reconciliation completed');
     },
@@ -95,7 +88,7 @@ export function useReconcileGstr3b() {
  */
 export function useDownloadGstrExcel() {
   return useMutation({
-    mutationFn: downloadGstrExcel,
+    mutationFn: gstService.downloadGstrExcel,
     onSuccess: (blob) => {
       // Create download link
       const url = window.URL.createObjectURL(blob);

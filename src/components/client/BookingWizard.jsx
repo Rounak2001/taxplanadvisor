@@ -117,10 +117,75 @@ export default function BookingWizard() {
         }
     };
 
+    const handleRazorpayPayment = (bookingData) => {
+        const options = {
+            key: bookingData.razorpay_key_id,
+            amount: bookingData.amount * 100, // Amount in paise
+            currency: "INR",
+            name: "TaxPlan Advisor",
+            description: `Consultation: ${selectedTopic.name}`,
+            order_id: bookingData.razorpay_order_id,
+            handler: async (response) => {
+                setLoading(true);
+                try {
+                    await api.post(`/consultations/bookings/${bookingData.id}/verify_payment/`, {
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature
+                    });
+
+                    toast({
+                        title: 'Booking Confirmed!',
+                        description: `Your consultation is scheduled and payment verified. Check your email for details.`,
+                    });
+
+                    // Reset wizard state
+                    resetWizard();
+                } catch (error) {
+                    console.error('Payment verification error:', error);
+                    toast({
+                        title: 'Payment Verification Failed',
+                        description: 'Payment was successful but we couldn\'t verify it. Please contact support.',
+                        variant: 'destructive',
+                    });
+                } finally {
+                    setLoading(false);
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    setLoading(false);
+                    toast({
+                        title: 'Payment Cancelled',
+                        description: 'Payment process was interrupted.',
+                        variant: 'destructive',
+                    });
+                }
+            },
+            theme: {
+                color: "#10B981", // Matching primary color
+            },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    };
+
+    const resetWizard = () => {
+        setStep(1);
+        setSelectedTopic(null);
+        setSelectedDate('');
+        setSelectedConsultant(null);
+        setAvailableConsultants([]);
+        setAvailableSlots([]);
+        setSelectedTimeSlot(null);
+        setNotes('');
+    };
+
     const handleBooking = async () => {
         setLoading(true);
         try {
-            await api.post('/consultations/bookings/', {
+            const response = await api.post('/consultations/bookings/', {
                 consultant: selectedConsultant.id,
                 topic: selectedTopic.id,
                 booking_date: selectedDate,
@@ -129,20 +194,18 @@ export default function BookingWizard() {
                 notes: notes
             });
 
-            toast({
-                title: 'Booking Confirmed!',
-                description: `Your consultation with ${selectedConsultant.first_name} ${selectedConsultant.last_name} is scheduled.`,
-            });
+            const bookingData = response.data;
 
-            // Reset wizard
-            setStep(1);
-            setSelectedTopic(null);
-            setSelectedDate('');
-            setSelectedConsultant(null);
-            setAvailableConsultants([]);
-            setAvailableSlots([]);
-            setSelectedTimeSlot(null);
-            setNotes('');
+            if (bookingData.razorpay_order_id) {
+                handleRazorpayPayment(bookingData);
+            } else {
+                // If it's a free consultation or something went wrong with order creation
+                toast({
+                    title: 'Booking Request Received',
+                    description: 'Your booking has been created but payment is pending.',
+                });
+                resetWizard();
+            }
         } catch (error) {
             console.error('Booking error:', error.response?.data);
             toast({
@@ -150,7 +213,6 @@ export default function BookingWizard() {
                 description: error.response?.data?.error || error.response?.data?.detail || 'Please try again.',
                 variant: 'destructive',
             });
-        } finally {
             setLoading(false);
         }
     };
@@ -352,7 +414,11 @@ export default function BookingWizard() {
                                                     <div className="font-semibold">
                                                         {consultant.first_name} {consultant.last_name}
                                                     </div>
-                                                    <div className="text-sm text-muted-foreground">{consultant.email}</div>
+                                                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                                        <span>{consultant.email}</span>
+                                                        <span className="h-1 w-1 rounded-full bg-white/20" />
+                                                        <span className="text-primary font-medium">₹{consultant.consultation_fee}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             {selectedConsultant?.id === consultant.id && (
@@ -486,6 +552,9 @@ export default function BookingWizard() {
 
                                     <span className="text-muted-foreground">Time:</span>
                                     <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
+
+                                    <span className="text-muted-foreground">Amount:</span>
+                                    <span className="font-semibold text-primary">₹{selectedConsultant?.consultation_fee}</span>
                                 </div>
                             </div>
 

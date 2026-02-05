@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { login as apiLogin, logout as apiLogout, registerConsultant, getCurrentUser, isAuthenticated } from '@/lib/api/auth';
+import { authService } from '@/api/authService';
 import { toast } from 'sonner';
 
 const AuthContext = createContext(null);
@@ -11,8 +11,8 @@ export function AuthProvider({ children }) {
 
   // Check auth status on mount
   useEffect(() => {
-    const storedUser = getCurrentUser();
-    if (storedUser && isAuthenticated()) {
+    const storedUser = authService.getCurrentUser();
+    if (storedUser && authService.isAuthenticated()) {
       setUser(storedUser);
       setIsLoggedIn(true);
     }
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     try {
       setLoading(true);
-      const response = await apiLogin(email, password);
+      const response = await authService.login(email, password);
       setUser(response.user || { email });
       setIsLoggedIn(true);
       toast.success('Logged in successfully');
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
   const register = useCallback(async (data) => {
     try {
       setLoading(true);
-      const response = await registerConsultant(data);
+      const response = await authService.registerConsultant(data);
       setUser(response.user || { email: data.email, role: 'consultant' });
       setIsLoggedIn(true);
       toast.success('Registration successful');
@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
-    apiLogout();
+    authService.logout();
     setUser(null);
     setIsLoggedIn(false);
     toast.success('Logged out successfully');
