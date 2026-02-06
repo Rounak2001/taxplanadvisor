@@ -9,6 +9,7 @@ import GSTServices from "@/components/landing/GSTServices";
 import CAConsultation from "@/components/landing/CAConsultation";
 import ProjectReports from "@/components/landing/ProjectReports";
 import Stats from "@/components/landing/Stats";
+import FeaturedServices from "@/components/landing/FeaturedServices";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ForCAs from "@/components/landing/ForCAs";
@@ -23,7 +24,7 @@ const Landing = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center pt-5 overflow-hidden">
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
@@ -55,7 +56,7 @@ const Landing = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
             >
-              TaxPlan Advisor.{" "}
+              TaxPlan Advisor.{" "}<br />
               <span className="gradient-text">
                 AI That Simplifies.
               </span>{" "}
@@ -90,16 +91,17 @@ const Landing = () => {
             </motion.div>
           </div>
         </div>
-      </section>
 
+      </section>
+      <FeaturedServices />
       <Stats />
-      <AICopilot />
-      <GSTServices />
-      <CAConsultation />
-      <ProjectReports />
-      <Features />
       <HowItWorks />
+      {/* <GSTServices /> */}
+      <AICopilot />
+      <CAConsultation />
+      {/* <ProjectReports /> */}
       <ForCAs />
+      <Features />
       <Footer />
 
       {/* Demo Booking Modal */}

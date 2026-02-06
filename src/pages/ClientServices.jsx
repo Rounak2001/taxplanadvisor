@@ -1,19 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-    Search,
-    ChevronDown,
-    ChevronUp,
-    Clock,
-    IndianRupee,
-    FileText,
-    Filter,
-    BadgeCheck,
-    ChevronRight,
-    ShoppingCart,
-    Check,
-    Trash2
-} from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Clock, IndianRupee, FileText, Filter, BadgeCheck, ChevronRight, ShoppingCart, Check, Trash2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -26,6 +13,165 @@ import { useCartStore } from '@/stores/useCartStore';
 
 // Services data from catalog - restructured to support service variants
 const servicesData = [
+    {
+        category: "Income Tax",
+        services: [
+            {
+                title: "Capital Gains Tax Planning",
+                price: 4999,
+                tat: "5-10 days",
+                variants: [
+                    {
+                        name: "Reinvestment Planning as per IT Act",
+                        tat: "5 days",
+                        documents: "PAN Card of the Assessee\nAadhaar Card\nNature of transaction planning documents\nPurchase and sale of property documents"
+                    },
+                    {
+                        name: "Property Revaluation",
+                        tat: "10 days (subject to valuer)",
+                        documents: "Registered Sale Deed/Title Deed\nProperty Tax Receipt\nBuilding Plan\nProperty Photographs\nUtility Bills\nCompletion/Occupancy Certificate\nRent Agreement\nComparable Properties Details\nPAN & Aadhaar of Owner"
+                    }
+                ]
+            },
+            {
+                title: "Income Tax E-Filing",
+                price: 999,
+                tat: "1-2 days",
+                documents: "PAN Card\nAadhaar Card\nForm 16/16A\nBank Statements\nInvestment Proofs (80C, 80D, etc.)"
+            },
+            {
+                title: "Business Tax Filing",
+                price: 4999,
+                tat: "3-5 days",
+                documents: "PAN Card of Business\nBalance Sheet & P&L Account\nBank Statements\nGST Returns (if applicable)\nPrevious Year ITR"
+            },
+            {
+                title: "Partnership Firm / LLP ITR",
+                price: 7499,
+                tat: "5-7 days",
+                documents: "Partnership Deed/LLP Agreement\nPAN of Firm/LLP\nAudited Financials\nPartner Details\nDigital Signature"
+            },
+            {
+                title: "Company ITR Filing",
+                price: 9999,
+                tat: "7-10 days",
+                documents: "Certificate of Incorporation\nAudited Balance Sheet & P&L\nDirector Details & KYC\nDigital Signature (Class 3)\nForm 26AS"
+            },
+            {
+                title: "Trust / NGO Tax Filing",
+                price: 7499,
+                tat: "7-10 days",
+                documents: "Trust Deed/Registration Certificate\nPAN of Trust/NGO\nAudit Report (Form 10B/10BB)\nDonor List\nUtilization Certificate"
+            },
+            {
+                title: "15CA - 15CB Filing",
+                price: 4999,
+                tat: "1-2 days",
+                documents: "Invoice for foreign payment\nRemittee details\nTRC of remittee\nAgreement/Contract copy\nBank account details"
+            },
+            {
+                title: "TAN Registration",
+                price: 999,
+                tat: "1-2 days",
+                documents: "PAN of Entity\nIdentity Proof of Authorized Signatory\nAddress Proof of Business\nDigital Signature"
+            },
+            {
+                title: "TDS Return Filing",
+                price: 1499,
+                tat: "2-3 days",
+                documents: "TAN Details\nTDS Challans\nList of Deductees with PAN\nAmount Paid & Date of Deduction"
+            },
+            {
+                title: "Revised ITR Return (ITR-U)",
+                price: 2499,
+                tat: "2-4 days",
+                documents: "Original ITR Acknowledgement\nDetails of additional income\nTax payment challans (if any)\nReason for revision"
+            }
+        ]
+    },
+    {
+        category: "GST",
+        services: [
+            {
+                title: "GST Registration",
+                price: 2999,
+                tat: "7-10 days",
+                documents: "PAN Card of Business/Proprietor\nAadhaar Card\nPassport-size Photograph\nAddress Proof (Utility Bill/Tax Receipt)\nBank Account Proof (Cancelled Cheque/Passbook)\nDigital Signature (if applicable)\nRent Agreement & NOC"
+            },
+            {
+                title: "GST Registration for Foreigners",
+                price: 9999,
+                tat: "10-15 days",
+                documents: "Passport (Attested)\nProof of Address in home country\nIndian Nominee Details & ID\nBusiness Activity description"
+            },
+            {
+                title: "GST Return Filing by Accountant",
+                price: 1499,
+                tat: "Monthly/Quarterly",
+                documents: "Sales Invoices\nPurchase Invoices\nBank Statement\nPrevious Month GSTR-3B/1"
+            },
+            {
+                title: "GST Invoicing & Filing Software",
+                price: 4999,
+                tat: "Instant Access",
+                documents: "Business setup details\nGSTIN"
+            },
+            {
+                title: "GST NIL Return Filing",
+                price: 499,
+                tat: "1 day",
+                documents: "Login Credentials\nOTP for verification"
+            },
+            {
+                title: "GST Amendment",
+                price: 1999,
+                tat: "3-5 days",
+                documents: "New Address Proof (if changing address)\nPartner/Director details (if changing constitution)\nSupporting evidence for amendment"
+            },
+            {
+                title: "GST E-Invoicing Software",
+                price: 5999,
+                tat: "Instant Access",
+                documents: "GSTIN\nAPI access credentials"
+            },
+            {
+                title: "GST Revocation",
+                price: 4999,
+                tat: "15-30 days",
+                documents: "GST Cancellation Order\nAll pending Tax Returns\nReason for Revocation\nAffidavit (if required)"
+            },
+            {
+                title: "GST LUT Form",
+                price: 999,
+                tat: "1-2 days",
+                documents: "GSTIN\nDigital Signature\nWitness Details\nPrevious year fulfillment details"
+            },
+            {
+                title: "GSTR-10 (Final Return)",
+                price: 2999,
+                tat: "5-7 days",
+                documents: "Order of Cancellation\nDetails of Closing Stock\nGST payable on closing stock"
+            },
+            {
+                title: "GST Software for Accountants",
+                price: 14999,
+                tat: "Instant Access",
+                documents: "Accountant/CA Firm registration details"
+            },
+            {
+                title: "GST Annual Return Filing (GSTR-9)",
+                price: 4999,
+                tat: "10-15 days",
+                documents: "Annual Financial Statements\nGSTR-1 & 3B data for the financial year\nGST Reconciliation statements"
+            },
+            {
+                title: "Virtual Office + GSTIN",
+                price: 15000,
+                tat: "7-10 days",
+                documents: "Identity and Address proof of owner/directors\nNOC from virtual office provider\nService Agreement"
+            }
+        ]
+    },
     {
         category: "TDS Planning",
         services: [
@@ -64,24 +210,6 @@ const servicesData = [
         category: "Capital Gains & Tax Planning",
         services: [
             {
-                title: "Capital Gains Tax Planning",
-                price: 4999,
-                tat: "5-10 days",
-                variants: [
-                    {
-                        name: "Reinvestment Planning as per IT Act",
-                        tat: "5 days",
-                        documents: "PAN Card of the Assessee\nAadhaar Card\nNature of transaction planning documents\nPurchase and sale of property documents"
-                    },
-                    {
-                        name: "Property Revaluation",
-                        tat: "10 days (subject to valuer)",
-                        documents: "Registered Sale Deed/Title Deed\nProperty Tax Receipt\nBuilding Plan\nProperty Photographs\nUtility Bills\nCompletion/Occupancy Certificate\nRent Agreement\nComparable Properties Details\nPAN & Aadhaar of Owner"
-                    },
-
-                ]
-            },
-            {
                 title: "Filing 26QB",
                 price: 4999,
                 description: "TDS on property purchase > ₹50L",
@@ -97,7 +225,7 @@ const servicesData = [
         ]
     },
     {
-        category: "Registration & Compliance",
+        category: "Registration",
         services: [
             {
                 title: "PAN Registration (Individual/Company)",
@@ -147,10 +275,148 @@ const servicesData = [
                 tat: "10-15 days",
                 documents: "PAN Card of the Promoter/Developer\nAadhaar Card of the Promoter\nProject Land Title Deed and Legal Ownership Documents\nEncumbrance Certificate of the Land\nSanctioned Building Plan and Layout Plan (from competent authority)\nProject Commencement Certificate\nEstimated Project Cost and Timeline\nDetails of Past Projects (if any)\nDevelopment Agreement (if applicable)\nArchitect’s Certificate (project layout)\nEngineer’s Certificate (cost of construction estimate)                           CA Certificate (fund utilization and cost estimation)\nProject Location and Site Photographs\nDetails of Allottees (if any bookings done)\nDetails of Bank Account for Project (70% fund account)\nAffidavit cum Declaration (Form-B)\nParking Area Details (covered and open)\nLegal Title Report (by advocate)\nDetails of Real Estate Agents (if appointed)"
             },
+            {
+                title: "Startup India Registration",
+                price: 4999,
+                tat: "7-10 days",
+                documents: "Certificate of Incorporation/Registration\nProof of funding (if any)\nWrite-up on nature of business/innovation\nEmail & Mobile Number\nPAN Card of Entity"
+            },
+            {
+                title: "Legal Entity Identifier Code",
+                price: 5999,
+                tat: "2-3 days",
+                documents: "Entity Registration Certificate\nPAN Card of Entity\nAuthorized Signatory Details\nBoard Resolution"
+            },
+            {
+                title: "12A and 80G Registration",
+                price: 14999,
+                tat: "3-4 months",
+                documents: "Trust Deed/MOA & AOA\nPAN of Entity\nActivity Report since inception\nBank Balance Sheet (Last 3 years)\nList of Trustees/Governing Body"
+            },
+            {
+                title: "Darpan Registration",
+                price: 2999,
+                tat: "5-7 days",
+                documents: "Entity Registration Certificate\nPAN Card of NGO\nDetails of 3 key office bearers\nAadhar & PAN of key members"
+            },
+            {
+                title: "Trade License",
+                price: 3499,
+                tat: "15-20 days",
+                documents: "Address Proof of Business\nID Proof of Owner\nProperty Tax Receipt\nNOC from neighbors (if applicable)"
+            },
+            {
+                title: "ISO Registration",
+                price: 7999,
+                tat: "10-15 days",
+                documents: "Business Registration Proof\nInvoices of Sales/Purchase\nScope of business\nOrganization Chart"
+            },
+            {
+                title: "12A Registration",
+                price: 8999,
+                tat: "2-3 months",
+                documents: "Trust Deed/Registration Certificate\nPAN of NGO\nFinancial Statements (last 3 years)"
+            },
+            {
+                title: "80G Registration",
+                price: 8999,
+                tat: "2-3 months",
+                documents: "Trust Deed/Registration Certificate\nPAN of NGO\nActivity Reports"
+            },
+            {
+                title: "FSSAI Registration",
+                price: 1999,
+                tat: "5-7 days",
+                documents: "Photo of Applicant\nID Proof (Aadhar/Voter ID)\nAddress Proof of Business\nList of food products"
+            },
+            {
+                title: "FSSAI License",
+                price: 9999,
+                tat: "15-30 days",
+                documents: "Blueprint of Processing Unit\nList of Machinery\nFood Safety Management System Plan\nAnalysis report of water"
+            },
+            {
+                title: "Shop Act Registration",
+                price: 2499,
+                tat: "3-5 days",
+                documents: "Photo of Establishment (with name board)\nID Proof of Owner\nAddress Proof\nRate Card/Menu (if applicable)"
+            },
+            {
+                title: "APEDA Registration",
+                price: 7499,
+                tat: "7-10 days",
+                documents: "IE Code Certificate\nBank Certificate\nCancelled Cheque\nMoA/AoA or Partnership Deed"
+            },
+            {
+                title: "Drug License",
+                price: 14999,
+                tat: "30-45 days",
+                documents: "Premises Plan\nOwnership/Rental Details\nPharmacist Details (Degree & Registration)\nAffidavit of Pharmacist"
+            },
+            {
+                title: "Halal License & Certification",
+                price: 19999,
+                tat: "15-20 days",
+                documents: "Business Registration\nFSSAI License\nList of Ingredients\nManufacturing Process Flow"
+            },
+            {
+                title: "Barcode Registration",
+                price: 8999,
+                tat: "3-5 days",
+                documents: "PAN of Entity\nAudited Financials (for turnover proof)\nProduct list"
+            },
+            {
+                title: "Udyam Registration",
+                price: 1499,
+                tat: "1-2 days",
+                documents: "Aadhar Card of Owner\nPAN Card of Entity\nBank Account Details\nInvestment & Turnover details"
+            },
+            {
+                title: "ICEGATE Registration",
+                price: 3999,
+                tat: "2-3 days",
+                documents: "IE Code\nDigital Signature\nPAN Card\nValid Email & Mobile"
+            },
+            {
+                title: "RCMC Registration",
+                price: 5999,
+                tat: "10-15 days",
+                documents: "IE Code Certificate\nPAN Card\nSME Registration (if any)\nMembership Application Form"
+            },
+            {
+                title: "BIS Registration",
+                price: 24999,
+                tat: "30-60 days",
+                documents: "Test Reports from BIS Lab\nManufacturing Unit Details\nAuthorized Signatory Details\nProduct Specification"
+            },
+            {
+                title: "FCRA Registration",
+                price: 29999,
+                tat: "4-6 months",
+                documents: "NGO Registration Proof\nActivity Logs\nForeign Funding Details\nAffidavit of all members"
+            },
+            {
+                title: "TN RERA Registration for Agents",
+                price: 12999,
+                tat: "7-10 days",
+                documents: "PAN & Aadhar of Agent\nAddress Proof\nRegistration fee payment proof\nPassport size photo"
+            },
+            {
+                title: "Certificate of Incumbency",
+                price: 4999,
+                tat: "3-5 days",
+                documents: "Company Incorporation Certificate\nRegister of Directors/Members\nBoard Resolution"
+            },
+            {
+                title: "Fire License",
+                price: 6999,
+                tat: "15-20 days",
+                documents: "Building Plan\nFire Safety Audit Report\nNOC from local fire department\nBuilding Completion Certificate"
+            }
         ]
     },
     {
-        category: "Startup Advisory",
+        category: "Startup & Advisory",
         services: [
             {
                 title: "Business Structure Selection",
@@ -163,38 +429,99 @@ const servicesData = [
                 price: 29999,
                 tat: "5-10 days",
                 documents: "Incorporation Certificate\nPAN Card of Entity\nDirectors/Partners Details\nBusiness Description\nAddress Proof\nMOA & AOA\nBank Account Details"
+            },
+            {
+                title: "Proprietorship",
+                price: 4999,
+                tat: "3-5 days",
+                documents: "PAN Card of Proprietor\nAadhaar Card\nAddress Proof\nBank Account Details\nBusiness Name & Activity"
+            },
+            {
+                title: "Partnership",
+                price: 9999,
+                tat: "5-7 days",
+                documents: "PAN & Aadhaar of All Partners\nPartnership Deed\nAddress Proof of Firm\nBank Account Details\nPassport-size Photos"
+            },
+            {
+                title: "One Person Company",
+                price: 14999,
+                tat: "10-15 days",
+                documents: "PAN & Aadhaar of Director & Nominee\nAddress Proof\nPassport-size Photos\nDigital Signature\nMOA & AOA"
+            },
+            {
+                title: "Limited Liability Partnership",
+                price: 14999,
+                tat: "10-15 days",
+                documents: "PAN & Aadhaar of Partners\nAddress Proof\nPassport-size Photos\nDigital Signature\nLLP Agreement"
+            },
+            {
+                title: "Private Limited Company",
+                price: 19999,
+                tat: "10-15 days",
+                documents: "PAN & Aadhaar of Directors\nAddress Proof\nPassport-size Photos\nDigital Signature (Class 2/3)\nMOA & AOA\nRent Agreement/NOC"
+            },
+            {
+                title: "Section 8 Company",
+                price: 24999,
+                tat: "15-20 days",
+                documents: "PAN & Aadhaar of Directors\nAddress Proof\nDigital Signature\nMOA & AOA (Non-profit objectives)\nList of Members\nDeclaration of Non-profit intent"
+            },
+            {
+                title: "Trust Registration",
+                price: 14999,
+                tat: "10-15 days",
+                documents: "PAN & Aadhaar of Trustees\nTrust Deed\nAddress Proof\nList of Trustees\nObjectives of Trust"
+            },
+            {
+                title: "Public Limited Company",
+                price: 49999,
+                tat: "20-30 days",
+                documents: "PAN & Aadhaar of Directors (min 7)\nAddress Proof\nDigital Signature\nMOA & AOA\nProspectus\nMinimum Capital Proof"
+            },
+            {
+                title: "Producer Company",
+                price: 34999,
+                tat: "15-20 days",
+                documents: "PAN & Aadhaar of Directors (min 5)\nAddress Proof\nDigital Signature\nMOA & AOA\nList of Producer Members\nActivity Details"
+            },
+            {
+                title: "Indian Subsidiary",
+                price: 39999,
+                tat: "20-25 days",
+                documents: "Parent Company Documents\nBoard Resolution\nPAN & Aadhaar of Indian Directors\nDigital Signature\nMOA & AOA\nFDI Compliance Documents"
             }
         ]
     },
-    {
-        category: "Auditing Services",
-        services: [
-            {
-                title: "Internal Audit",
-                price: "Charges on consultation",
-                tat: "15 days minimum",
-                documents: "Data in Electronic form"
-            },
-            {
-                title: "Statutory Audit",
-                price: "Charges on consultation",
-                tat: "15-30 days",
-                documents: "Data in Electronic form"
-            },
-            {
-                title: "GST Audit (GSTR 9/9C)",
-                price: "Charges on consultation",
-                tat: "7-15 days",
-                documents: "Data in Electronic form"
-            },
-            {
-                title: "Inventory Audit",
-                price: "Charges on consultation",
-                tat: "7-15 days",
-                documents: "Opening Stock Statement\nClosing Stock Statement\nStock Register (Item-wise and Location-wise)\nPhysical Verification Reports\nGoods Inward Register (Purchase Invoices)\nGoods Outward Register (Sales Invoices)\nMaterial Issue Slips / Gate Passes\nStock Movement Records (Intra-location transfers)\nBill of Materials (BOM)\nReorder Levels and Stock Valuation Method\nInventory Valuation Report (FIFO/Weighted Avg./Cost/NRV)\nDamaged/Obsolete Stock Reports\nStock Adjustment Entries (with reasons)\nGRN (Goods Receipt Notes)\nDelivery Challans\nWarehouse-wise stock summary\nStock Ageing Report\nPurchase Return & Sales Return records\nJob Work Inventory Details (Inward/Outward)\nWork-in-Progress (WIP) Register (for manufacturers)"
-            }
-        ]
-    },
+    //Auditing Services
+    // {
+    //     category: "Auditing Services",
+    //     services: [
+    //         {
+    //             title: "Internal Audit",
+    //             price: "Charges on consultation",
+    //             tat: "15 days minimum",
+    //             documents: "Data in Electronic form"
+    //         },
+    //         {
+    //             title: "Statutory Audit",
+    //             price: "Charges on consultation",
+    //             tat: "15-30 days",
+    //             documents: "Data in Electronic form"
+    //         },
+    //         {
+    //             title: "GST Audit (GSTR 9/9C)",
+    //             price: "Charges on consultation",
+    //             tat: "7-15 days",
+    //             documents: "Data in Electronic form"
+    //         },
+    //         {
+    //             title: "Inventory Audit",
+    //             price: "Charges on consultation",
+    //             tat: "7-15 days",
+    //             documents: "Opening Stock Statement\nClosing Stock Statement\nStock Register (Item-wise and Location-wise)\nPhysical Verification Reports\nGoods Inward Register (Purchase Invoices)\nGoods Outward Register (Sales Invoices)\nMaterial Issue Slips / Gate Passes\nStock Movement Records (Intra-location transfers)\nBill of Materials (BOM)\nReorder Levels and Stock Valuation Method\nInventory Valuation Report (FIFO/Weighted Avg./Cost/NRV)\nDamaged/Obsolete Stock Reports\nStock Adjustment Entries (with reasons)\nGRN (Goods Receipt Notes)\nDelivery Challans\nWarehouse-wise stock summary\nStock Ageing Report\nPurchase Return & Sales Return records\nJob Work Inventory Details (Inward/Outward)\nWork-in-Progress (WIP) Register (for manufacturers)"
+    //         }
+    //     ]
+    // },
     {
         category: "Certification Services",
         services: [
@@ -232,6 +559,89 @@ const servicesData = [
                 price: "₹25,000 or 2% of loan amount whichever is higher",
                 tat: "5-10 days",
                 documents: "Business Plan or Proposal\nPromoter/Director Profile and KYC Documents\nPAN and Aadhaar of Promoters\nCompany/Firm Registration Documents\nMOA & AOA / Partnership Deed / LLP Agreement\nLoan Repayment Schedule (if applicable)\nPast Financials (if existing business)\nBank Statements (last 6 months)\nDetails of Existing Loans (if any)\nLicenses/Approvals (if applicable)"
+            }
+        ]
+    },
+    {
+        category: "Compliance",
+        services: [
+            {
+                title: "PF Return Filing",
+                price: 999,
+                tat: "Monthly",
+                documents: "Employee ECR details\nMonthly contribution data"
+            },
+            {
+                title: "ESI Return Filing",
+                price: 999,
+                tat: "Monthly",
+                documents: "Employee-wise ESI contribution data"
+            },
+            {
+                title: "Professional Tax Return Filing",
+                price: 999,
+                tat: "Monthly/Annual",
+                documents: "Employee salary details\nPT Deduction amount"
+            },
+            {
+                title: "FDI Filing with RBI",
+                price: 19999,
+                tat: "15-20 days",
+                documents: "FC-GPR Form details\nValuation Certificate\nFIRC Copy\nKYC of foreign investor"
+            },
+            {
+                title: "FLA Return Filing",
+                price: 4999,
+                tat: "5-7 days",
+                documents: "Audited Financial Statements\nPAN of Entity\nDetails of foreign assets/liabilities"
+            },
+            {
+                title: "FSSAI Renewal",
+                price: 2499,
+                tat: "7-10 days",
+                documents: "Original FSSAI License\nDeclaration Form\nAuthority Letter"
+            },
+            {
+                title: "FSSAI Return Filing",
+                price: 1999,
+                tat: "3-5 days",
+                documents: "Sales & Purchase details\nCategory of food products handled"
+            },
+            {
+                title: "Partnership Compliance",
+                price: 2999,
+                tat: "5-7 days",
+                documents: "Partnership Deed\nFinancial Statements\nPartner details"
+            },
+            {
+                title: "Proprietorship Compliance",
+                price: 2499,
+                tat: "3-5 days",
+                documents: "Proprietor PAN & Aadhar\nBank Statement\nSales/Purchase details"
+            },
+            {
+                title: "Business Plan",
+                price: 14999,
+                tat: "10-15 days",
+                documents: "Project Description\nPromoter details\nMarket analysis data\nFinancial projections"
+            },
+            {
+                title: "PF Registration",
+                price: 3999,
+                tat: "7-10 days",
+                documents: "PAN of Entity\nDigital Signature of Proprietor/Partner/Director\nCancelled Cheque\nAddress Proof"
+            },
+            {
+                title: "ESI Registration",
+                price: 3999,
+                tat: "7-10 days",
+                documents: "Registration Certificate\nPAN of Business\nList of Employees with joining dates\nBank Details"
+            },
+            {
+                title: "Professional Tax Registration",
+                price: 2999,
+                tat: "3-5 days",
+                documents: "PAN of Entity\nAddress Proof\nBank Account Details\nDetails of Employees"
             }
         ]
     }
