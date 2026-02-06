@@ -23,6 +23,7 @@ export const useCartStore = create()(
                     // Add new item
                     const newItem = {
                         id: itemId,
+                        service_id: item.service_id || null, // NEW: Include service_id
                         category: item.category,
                         title: item.title,
                         variantName: item.variantName || null,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   useAuthStore
@@ -16,7 +16,8 @@ import {
   FileText,
   Calendar,
   IndianRupee,
-  ArrowUpRight
+  ArrowUpRight,
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,57 +26,97 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-
-// Mock Data for Active Services
-const mockActiveServices = [
-  {
-    id: 'SRV-001',
-    title: 'GSTR-1 & 3B Monthly Filing',
-    category: 'GST Compliance',
-    status: 'In Progress',
-    purchasedAt: '2026-01-25',
-    progress: 65,
-    assignedTC: {
-      name: 'CA Rajesh Sharma',
-      role: 'Senior Tax Consultant',
-      phone: '+91 98765 43210',
-      email: 'rajesh.sharma@taxplanadv.com',
-      avatar: '/avatars/tc-1.png'
-    },
-    timeline: [
-      { step: 'Service Assigned', status: 'completed', date: 'Jan 25, 2026', description: 'Assigned to CA Rajesh Sharma' },
-      { step: 'Documents Uploaded', status: 'completed', date: 'Jan 26, 2026', description: 'Monthly purchase & sales registers uploaded' },
-      { step: 'Data Verification', status: 'completed', date: 'Jan 28, 2026', description: 'AI processing and manual review completed' },
-      { step: 'Draft Preparation', status: 'current', date: 'In Progress', description: 'Return draft is being prepared for approval' },
-      { step: 'Final Filing', status: 'pending', date: 'Upcoming', description: 'Submission to GST Portal' },
-    ]
-  },
-  {
-    id: 'SRV-002',
-    title: 'TDS Planning for NRIs',
-    category: 'TDS Planning',
-    status: 'Pending Assignment',
-    purchasedAt: '2026-02-04',
-    progress: 10,
-    assignedTC: null,
-    timeline: [
-      { step: 'Payment Received', status: 'completed', date: 'Feb 04, 2026', description: 'Payment of ₹4,999 verified' },
-      { step: 'TC Assignment', status: 'current', date: 'Pending', description: 'System is finding best suited consultant' },
-      { step: 'Initial Call', status: 'pending', date: 'Upcoming', description: 'Strategic consultation call' },
-    ]
-  }
-];
+import api from '@/api/axios';
 
 export default function ClientDashboard() {
   const { user } = useAuthStore();
-  const [selectedService, setSelectedService] = useState(mockActiveServices[0]);
+  const [serviceRequests, setServiceRequests] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchServiceRequests();
+  }, []);
+
+  const fetchServiceRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/consultants/requests/');
+      setServiceRequests(response.data);
+      if (response.data.length > 0) {
+        setSelectedService(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching service requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadgeVariant = (status) => {
+    switch (status) {
+      case 'assigned':
+      case 'in_progress':
+        return 'default';
+      case 'completed':
+        return 'success';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Pending Assignment';
+      case 'assigned':
+        return 'Assigned';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      default:
+        return status;
+    }
+  };
 
   const stats = [
-    { title: 'Active Services', value: '2', icon: FileText, trend: '+1 this month' },
-    { title: 'Processing Time', value: '4.2 Days', icon: Clock, trend: '-15% vs avg' },
-    { title: 'Documents Status', value: '12 / 15', icon: CheckCircle2, trend: '3 pending' },
-    { title: 'Refunds Pending', value: '₹54,200', icon: IndianRupee, trend: 'AY 2025-26' },
+    { title: 'Active Services', value: serviceRequests.length.toString(), icon: FileText, trend: 'Total requests' },
+    { title: 'Assigned', value: serviceRequests.filter(r => r.assigned_consultant).length.toString(), icon: CheckCircle2, trend: 'With consultant' },
+    { title: 'Pending', value: serviceRequests.filter(r => !r.assigned_consultant).length.toString(), icon: Clock, trend: 'Awaiting assignment' },
+    { title: 'Completed', value: serviceRequests.filter(r => r.status === 'completed').length.toString(), icon: TrendingUp, trend: 'Finished' },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (serviceRequests.length === 0) {
+    return (
+      <div className="space-y-8 p-1">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Welcome back, {user?.first_name || user?.username || 'Client'} 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track your ongoing services and manage your tax compliance.
+          </p>
+        </div>
+        <Card className="p-12 text-center">
+          <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold mb-2">No Active Services</h3>
+          <p className="text-muted-foreground mb-6">
+            You haven't purchased any services yet. Browse our services to get started.
+          </p>
+          <Button>Browse Services</Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-1">
@@ -129,34 +170,39 @@ export default function ClientDashboard() {
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-lg font-semibold">Active Services</h2>
-            <Badge variant="secondary">{mockActiveServices.length}</Badge>
+            <Badge variant="secondary">{serviceRequests.length}</Badge>
           </div>
           <div className="space-y-3">
-            {mockActiveServices.map((service) => (
+            {serviceRequests.map((request) => (
               <Card
-                key={service.id}
+                key={request.id}
                 className={cn(
                   "cursor-pointer transition-all hover:border-primary/50",
-                  selectedService.id === service.id ? "border-primary bg-primary/5 shadow-md" : "border-border"
+                  selectedService?.id === request.id ? "border-primary bg-primary/5 shadow-md" : "border-border"
                 )}
-                onClick={() => setSelectedService(service)}
+                onClick={() => setSelectedService(request)}
               >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant={service.status === 'In Progress' ? 'default' : 'outline'} className="text-[10px]">
-                      {service.status}
+                    <Badge variant={getStatusBadgeVariant(request.status)} className="text-[10px]">
+                      {getStatusLabel(request.status)}
                     </Badge>
-                    <span className="text-[10px] text-muted-foreground">{service.id}</span>
+                    <span className="text-[10px] text-muted-foreground">#{request.id}</span>
                   </div>
-                  <h4 className="font-semibold text-sm line-clamp-1">{service.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{service.category}</p>
-                  <div className="mt-4 space-y-2">
-                    <div className="flex justify-between text-[10px]">
-                      <span className="text-muted-foreground font-medium">Progress</span>
-                      <span className="text-primary font-bold">{service.progress}%</span>
+                  <h4 className="font-semibold text-sm line-clamp-1">{request.service?.title || 'Service'}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{request.service?.category?.name || 'General'}</p>
+                  {request.assigned_consultant && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-[10px]">
+                          {request.assigned_consultant.full_name?.charAt(0) || 'TC'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[10px] text-muted-foreground">
+                        {request.assigned_consultant.full_name}
+                      </span>
                     </div>
-                    <Progress value={service.progress} className="h-1" />
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -165,143 +211,140 @@ export default function ClientDashboard() {
 
         {/* Detailed Service View */}
         <div className="lg:col-span-2 space-y-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedService.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="space-y-6">
-                {/* Status and TC Card */}
-                <Card className="border-none bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent shadow-sm">
-                  <CardHeader>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <CardTitle className="text-2xl">{selectedService.title}</CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
-                          <span className="font-medium text-foreground">{selectedService.category}</span>
-                          •
-                          <span>Purchased on {selectedService.purchasedAt}</span>
-                        </CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">Documentation</Button>
-                        <Button size="sm">Download Draft</Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Separator className="mb-6 opacity-30" />
-
-                    {selectedService.assignedTC ? (
-                      <div className="flex flex-col md:flex-row items-center gap-8 py-2">
-                        <div className="flex items-center gap-4">
-                          <div className="relative">
-                            <Avatar className="h-16 w-16 border-2 border-primary/20">
-                              <AvatarImage src={selectedService.assignedTC.avatar} />
-                              <AvatarFallback><User className="h-8 w-8" /></AvatarFallback>
-                            </Avatar>
-                            <span className="absolute bottom-0 right-0 h-4 w-4 bg-success border-2 border-background rounded-full" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground font-medium">Assigned TC</p>
-                            <h4 className="text-lg font-bold">{selectedService.assignedTC.name}</h4>
-                            <p className="text-xs text-primary/80 font-medium">{selectedService.assignedTC.role}</p>
-                          </div>
+          {selectedService && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedService.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="space-y-6">
+                  {/* Status and TC Card */}
+                  <Card className="border-none bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent shadow-sm">
+                    <CardHeader>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                          <CardTitle className="text-2xl">{selectedService.service?.title || 'Service'}</CardTitle>
+                          <CardDescription className="flex items-center gap-2 mt-1">
+                            <span className="font-medium text-foreground">{selectedService.service?.category?.name || 'General'}</span>
+                            •
+                            <span>Requested on {new Date(selectedService.created_at).toLocaleDateString()}</span>
+                          </CardDescription>
                         </div>
-
-                        <div className="flex flex-wrap items-center gap-3">
-                          <Button variant="secondary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
-                            <MessageSquare className="h-4 w-4" /> Chat
-                          </Button>
-                          <Button variant="secondary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
-                            <Phone className="h-4 w-4" /> Call
-                          </Button>
-                          <Button variant="secondary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
-                            <Mail className="h-4 w-4" /> Email
-                          </Button>
-                        </div>
-
-                        <div className="flex-1 md:block hidden" />
-
-                        <div className="text-right">
-                          <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary mb-1">
-                            Current Task
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getStatusBadgeVariant(selectedService.status)}>
+                            {getStatusLabel(selectedService.status)}
                           </Badge>
-                          <p className="font-semibold text-sm">Preparing Draft Return</p>
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                          <User className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <h4 className="font-semibold">Assigning Your Expert</h4>
-                        <p className="text-sm text-muted-foreground max-w-xs mt-1">
-                          We are matching your request with the best tax consultant for this specific service.
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <Separator className="mb-6 opacity-30" />
 
-                {/* Timeline Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Service Timeline</CardTitle>
-                    <CardDescription>Visual tracker of your service progress</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="relative space-y-8">
-                      {selectedService.timeline.map((item, idx) => (
-                        <div key={idx} className="flex gap-4 group">
-                          <div className="relative flex flex-col items-center">
-                            <div className={cn(
-                              "relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
-                              item.status === 'completed' && "bg-success border-success text-success-foreground",
-                              item.status === 'current' && "bg-primary border-primary text-primary-foreground animate-pulse shadow-[0_0_15px_rgba(var(--primary),0.5)]",
-                              item.status === 'pending' && "bg-background border-border text-muted-foreground"
-                            )}>
-                              {item.status === 'completed' ? (
-                                <CheckCircle2 className="h-5 w-5" />
-                              ) : (
-                                <div className="h-2 w-2 rounded-full bg-current" />
-                              )}
+                      {selectedService.assigned_consultant ? (
+                        <div className="flex flex-col md:flex-row items-center gap-8 py-2">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <Avatar className="h-16 w-16 border-2 border-primary/20">
+                                <AvatarFallback>
+                                  {selectedService.assigned_consultant.full_name?.split(' ').map(n => n[0]).join('') || 'TC'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="absolute bottom-0 right-0 h-4 w-4 bg-success border-2 border-background rounded-full" />
                             </div>
-                            {idx !== selectedService.timeline.length - 1 && (
-                              <div className={cn(
-                                "absolute top-8 left-1/2 w-[2px] h-[calc(100%+32px)] -translate-x-1/2",
-                                item.status === 'completed' ? "bg-success" : "bg-border"
-                              )} />
+                            <div>
+                              <p className="text-sm text-muted-foreground font-medium">Assigned Consultant</p>
+                              <h4 className="text-lg font-bold">{selectedService.assigned_consultant.full_name}</h4>
+                              <p className="text-xs text-primary/80 font-medium">{selectedService.assigned_consultant.qualification || 'Tax Consultant'}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-3">
+                            <Button variant="secondary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
+                              <MessageSquare className="h-4 w-4" /> Chat
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="gap-2 bg-background/50 backdrop-blur-sm"
+                              onClick={() => window.location.href = `tel:${selectedService.assigned_consultant.phone}`}
+                            >
+                              <Phone className="h-4 w-4" /> {selectedService.assigned_consultant.phone}
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="gap-2 bg-background/50 backdrop-blur-sm"
+                              onClick={() => window.location.href = `mailto:${selectedService.assigned_consultant.email}`}
+                            >
+                              <Mail className="h-4 w-4" /> Email
+                            </Button>
+                          </div>
+
+                          <div className="flex-1 md:block hidden" />
+
+                          <div className="text-right">
+                            {selectedService.notes && (
+                              <>
+                                <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary mb-1">
+                                  Notes
+                                </Badge>
+                                <p className="font-semibold text-sm">{selectedService.notes}</p>
+                              </>
                             )}
                           </div>
-
-                          <div className="flex-1 pt-0.5">
-                            <div className="flex items-center justify-between">
-                              <h4 className={cn(
-                                "font-bold text-sm",
-                                item.status === 'pending' && "text-muted-foreground"
-                              )}>{item.step}</h4>
-                              <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                                {item.date}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {item.description}
-                            </p>
-                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
+                          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                            <User className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                          <h4 className="font-semibold">Assigning Your Expert</h4>
+                          <p className="text-sm text-muted-foreground max-w-xs mt-1">
+                            We are matching your request with the best tax consultant for this specific service.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Service Details Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Service Details</CardTitle>
+                      <CardDescription>Information about your service request</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Request ID</p>
+                          <p className="font-semibold">#{selectedService.id}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Priority</p>
+                          <Badge variant="outline">{selectedService.priority || 'Normal'}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Created</p>
+                          <p className="font-semibold">{new Date(selectedService.created_at).toLocaleString()}</p>
+                        </div>
+                        {selectedService.assigned_at && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Assigned</p>
+                            <p className="font-semibold">{new Date(selectedService.assigned_at).toLocaleString()}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

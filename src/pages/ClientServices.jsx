@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useCartStore } from '@/stores/useCartStore';
+import { getServiceId } from '@/utils/serviceIdMap';
 
 // Services data from catalog - restructured to support service variants
 const servicesData = [
@@ -684,6 +685,7 @@ export default function ClientServices() {
         }
 
         const item = {
+            service_id: getServiceId(service.title, variant?.name), // NEW: Get service ID
             category: category,
             title: service.title,
             price: service.price,
