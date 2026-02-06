@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { generateGstOtp, verifyGstOtp } from '@/lib/api/gst';
+import { gstService } from '@/api/gstService';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -35,7 +35,7 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
 
   const handleGenerateOtp = async () => {
     setError('');
-    
+
     // Validate inputs
     try {
       gstinSchema.parse(gstin);
@@ -49,7 +49,7 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
 
     setLoading(true);
     try {
-      const response = await generateGstOtp(gstin.toUpperCase(), username);
+      const response = await gstService.generateGstOtp(gstin.toUpperCase(), username);
       setSessionData(response);
       setStep('otp');
       toast.success('OTP sent to your registered mobile number');
@@ -69,10 +69,10 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
     setError('');
     setLoading(true);
     try {
-      const response = await verifyGstOtp(gstin.toUpperCase(), otp);
+      const response = await gstService.verifyGstOtp(sessionData?.session_id, otp, username);
       setStep('success');
       toast.success('GST Portal authenticated successfully!');
-      
+
       // Call the callback with auth data
       setTimeout(() => {
         onAuthenticated?.({
@@ -104,7 +104,7 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
     setLoading(true);
     setError('');
     try {
-      await generateGstOtp(gstin.toUpperCase(), username);
+      await gstService.generateGstOtp(gstin.toUpperCase(), username);
       toast.success('OTP resent successfully');
     } catch (err) {
       setError(err.message || 'Failed to resend OTP');
@@ -141,7 +141,34 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
                   id="gstin"
                   placeholder="29ABCDE1234F1Z5"
                   value={gstin}
-                  onChange={(e) => setGstin(e.target.value.toUpperCase())}
+                  onChange={async (e) => {
+                    const value = e.target.value.toUpperCase();
+                    setGstin(value);
+                    if (value.length === 15) {
+                      setLoading(true);
+                      try {
+                        const response = await gstService.checkActiveSession(value);
+                        if (response.has_active_session) {
+                          toast.success('Active GST session found!');
+                          setStep('success');
+                          setTimeout(() => {
+                            onAuthenticated?.({
+                              gstin: value,
+                              username: response.username,
+                              token: 'RESTORED', // The backend uses the database session via session_id, but here it expects a token
+                              sessionId: response.session_id,
+                              ...response
+                            });
+                            handleClose();
+                          }, 1500);
+                        }
+                      } catch (err) {
+                        console.error('Session check failed:', err);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+                  }}
                   maxLength={15}
                   className="font-mono uppercase"
                 />
@@ -172,8 +199,8 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
                 <Button variant="outline" onClick={handleClose} className="flex-1">
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleGenerateOtp} 
+                <Button
+                  onClick={handleGenerateOtp}
                   disabled={loading || !gstin || !username}
                   className="flex-1"
                 >
@@ -246,15 +273,15 @@ export function GSTAuthModal({ open, onClose, onAuthenticated }) {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => { setStep('gstin'); setOtp(''); setError(''); }}
                   className="flex-1"
                 >
                   Back
                 </Button>
-                <Button 
-                  onClick={handleVerifyOtp} 
+                <Button
+                  onClick={handleVerifyOtp}
                   disabled={loading || otp.length !== 6}
                   className="flex-1"
                 >

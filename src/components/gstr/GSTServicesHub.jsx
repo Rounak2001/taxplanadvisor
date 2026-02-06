@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGstStore } from '@/stores/useGstStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { gstService } from '@/api/gstService';
+import { clientService } from '@/api/clientService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -130,8 +132,11 @@ export default function GSTServicesHub() {
         generateOTP,
         verifyOTP,
         logout,
-        clearError
+        clearSession,
+        clearError,
+        initializeSession
     } = useGstStore();
+    const { user } = useAuthStore();
 
     const isAuthenticated = isVerified && !!sessionId;
 
@@ -149,26 +154,65 @@ export default function GSTServicesHub() {
     // Fetch clients on mount
     useEffect(() => {
         const fetchClients = async () => {
+            if (user?.role !== 'CONSULTANT') return;
             setLoadingClients(true);
             try {
-                const data = await gstService.getClients();
-                setClients(data.clients || []);
+                const data = await clientService.getClients();
+                setClients(data);
             } catch (err) {
                 console.error('Failed to fetch clients:', err);
             } finally {
                 setLoadingClients(false);
             }
         };
+
+        const fetchProfileAndInit = async () => {
+            if (user?.role !== 'CLIENT') return;
+            try {
+                const profile = await clientService.getClientProfile();
+                if (profile.gstin) {
+                    setGstNumber(profile.gstin);
+                    setGstUsername(profile.gst_username || '');
+
+                    // Only try to initialize if not already authenticated in store
+                    if (!isAuthenticated) {
+                        const result = await initializeSession(profile.gstin);
+                        if (result.success && result.restored) {
+                            toast.success('Active GST session restored');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch client profile:', err);
+            }
+        };
+
         fetchClients();
-    }, []);
+        fetchProfileAndInit();
+    }, [user, isAuthenticated, initializeSession]);
 
     // Auto-fill when client selected
-    const handleClientSelect = (clientId) => {
+    const handleClientSelect = async (clientId) => {
+        if (!clientId || clientId === '_none') return;
+
         setSelectedClientId(clientId);
         const client = clients.find(c => String(c.id) === clientId);
         if (client) {
-            setGstNumber(client.gstin || '');
+            const gstinValue = client.gstin || '';
+            setGstNumber(gstinValue);
             setGstUsername(client.gst_username || '');
+
+            // Proactively check if there's an active session for this GSTIN
+            if (gstinValue) {
+                const { initializeSession } = useGstStore.getState();
+                const result = await initializeSession(gstinValue);
+                if (result.success && result.restored) {
+                    toast.success('Active GST session restored for client');
+                } else if (!result.success) {
+                    // If no session to restore, we stay on credentials step
+                    setStep('credentials');
+                }
+            }
         }
     };
 
@@ -225,12 +269,13 @@ export default function GSTServicesHub() {
     };
 
     const handleLogout = () => {
-        logout();
+        clearSession(gstin); // Clear only current client's session
         setStep('credentials');
         setGstUsername('');
         setGstNumber('');
         setOtp('');
-        toast.success('Logged out successfully');
+        setSelectedClientId('');
+        toast.success('Session cleared for current client');
     };
 
     const handleServiceClick = (service) => {
@@ -324,116 +369,129 @@ export default function GSTServicesHub() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {isAuthenticated ? (
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10 border border-success/20">
-                                    <CheckCircle size={20} className="text-success" />
-                                    <div>
-                                        <p className="font-medium text-success">Authenticated</p>
-                                        <p className="text-sm text-muted-foreground">Session expires in {getRemainingTime()}</p>
-                                    </div>
-                                </div>
+                        <div className="space-y-4">
+                            {/* Client Selection (For Consultants) */}
+                            {user?.role === 'CONSULTANT' && (
                                 <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Username:</span>
-                                        <span className="font-medium">{username}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">GSTIN:</span>
-                                        <span className="font-medium">{gstin}</span>
-                                    </div>
+                                    <Label>Active Client</Label>
+                                    <Select value={selectedClientId} onValueChange={handleClientSelect}>
+                                        <SelectTrigger className="w-full">
+                                            <Users size={14} className="mr-2 text-primary" />
+                                            <SelectValue placeholder={loadingClients ? "Loading clients..." : "Select a client"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {clients.filter(c => c.gstin).map(client => (
+                                                <SelectItem key={client.id} value={String(client.id)}>
+                                                    {client.name || client.email} - {client.gstin}
+                                                </SelectItem>
+                                            ))}
+                                            {clients.filter(c => c.gstin).length === 0 && (
+                                                <SelectItem value="_none" disabled>No clients with GSTIN found</SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {step === 'credentials' ? (
-                                    <>
-                                        {/* Client Selection */}
-                                        <div className="space-y-2">
-                                            <Label>Select Client</Label>
-                                            <Select value={selectedClientId} onValueChange={handleClientSelect}>
-                                                <SelectTrigger className="w-full">
-                                                    <Users size={14} className="mr-2" />
-                                                    <SelectValue placeholder={loadingClients ? "Loading clients..." : "Select a client"} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {clients.filter(c => c.gstin).map(client => (
-                                                        <SelectItem key={client.id} value={String(client.id)}>
-                                                            {client.full_name} - {client.gstin}
-                                                        </SelectItem>
-                                                    ))}
-                                                    {clients.filter(c => c.gstin).length === 0 && (
-                                                        <SelectItem value="_none" disabled>No clients with GSTIN found</SelectItem>
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
+                            )}
+
+                            {isAuthenticated ? (
+                                <div className="space-y-4 border-t pt-4">
+                                    <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10 border border-success/20">
+                                        <CheckCircle size={20} className="text-success" />
+                                        <div className="flex-1">
+                                            <p className="font-medium text-success">Authenticated</p>
+                                            <p className="text-sm text-muted-foreground">Session expires in {getRemainingTime() || '6h'}</p>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="username">GST Username</Label>
-                                            <Input
-                                                id="username"
-                                                placeholder="Enter GST portal username"
-                                                value={gstUsername}
-                                                onChange={(e) => setGstUsername(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="gstin">GSTIN (15 characters)</Label>
-                                            <Input
-                                                id="gstin"
-                                                placeholder="e.g., 27AABCU9603R1ZM"
-                                                value={gstNumber}
-                                                onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
-                                                maxLength={15}
-                                            />
-                                        </div>
-                                        <Button
-                                            onClick={handleSendOTP}
-                                            disabled={loading}
-                                            className="w-full"
-                                        >
-                                            {loading ? 'Sending...' : 'Send OTP'}
-                                            <ArrowRight size={16} className="ml-2" />
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="otp">Enter OTP</Label>
-                                            <Input
-                                                id="otp"
-                                                placeholder="6-digit OTP"
-                                                value={otp}
-                                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                                maxLength={6}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => setStep('credentials')}
-                                                className="flex-1"
-                                            >
-                                                Back
-                                            </Button>
-                                            <Button
-                                                onClick={handleVerifyOTP}
-                                                disabled={loading}
-                                                className="flex-1"
-                                            >
-                                                {loading ? 'Verifying...' : 'Verify OTP'}
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-                                {error && (
-                                    <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                                        <AlertCircle size={16} />
-                                        {error}
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                    <div className="space-y-2 p-3 rounded-lg bg-muted/50">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">Portal User:</span>
+                                            <span className="font-medium">{username}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">GSTIN:</span>
+                                            <span className="font-medium">{gstin}</span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleLogout}
+                                        className="w-full border-rose-200 text-rose-700 hover:bg-rose-50"
+                                    >
+                                        <LogOut size={16} className="mr-2" />
+                                        Logout & Switch Client
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4 pt-2">
+                                    {step === 'credentials' ? (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="username">GST Username</Label>
+                                                <Input
+                                                    id="username"
+                                                    placeholder="Enter GST portal username"
+                                                    value={gstUsername}
+                                                    onChange={(e) => setGstUsername(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="gstin">GSTIN (15 characters)</Label>
+                                                <Input
+                                                    id="gstin"
+                                                    placeholder="e.g., 27AABCU9603R1ZM"
+                                                    value={gstNumber}
+                                                    onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
+                                                    maxLength={15}
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={handleSendOTP}
+                                                disabled={loading}
+                                                className="w-full"
+                                            >
+                                                {loading ? 'Sending...' : 'Send OTP'}
+                                                <ArrowRight size={16} className="ml-2" />
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="otp">Enter OTP</Label>
+                                                <Input
+                                                    id="otp"
+                                                    placeholder="6-digit OTP"
+                                                    value={otp}
+                                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                    maxLength={6}
+                                                />
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => setStep('credentials')}
+                                                    className="flex-1"
+                                                >
+                                                    Back
+                                                </Button>
+                                                <Button
+                                                    onClick={handleVerifyOTP}
+                                                    disabled={loading}
+                                                    className="flex-1"
+                                                >
+                                                    {loading ? 'Verifying...' : 'Verify OTP'}
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
+                                    {error && (
+                                        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                                            <AlertCircle size={16} />
+                                            {error}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
 

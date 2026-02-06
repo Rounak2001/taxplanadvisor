@@ -22,8 +22,8 @@ const Get2a = () => {
     const backPath = isClientContext ? '/client/gst' : '/gst';
 
     const [freq, setFreq] = useState("Monthly");
-    const [year, setYear] = useState(new Date().getFullYear().toString());
     const [month, setMonth] = useState("01");
+    const [quarter, setQuarter] = useState("1");
     const [fyYear, setFyYear] = useState(() => {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
@@ -34,13 +34,16 @@ const Get2a = () => {
 
     const handleDownload = async () => {
         setLoading(true);
-        toast.info("Fetching real-time data from GSTN & enriching with supplier names...");
+        toast.info(`Fetching live GSTR-2A data for ${freq} period...`);
 
         const [startYearStr] = (fyYear || "").split("-");
         const startYear = parseInt(startYearStr);
         const actualYear = month >= 4 ? startYear : startYear + 1;
 
         const payload = {
+            download_type: freq,
+            fy: fyYear,
+            quarter: quarter,
             year: actualYear,
             month: month
         };
@@ -52,12 +55,17 @@ const Get2a = () => {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             });
 
-            const filename = `GSTR2A_${gstin}_${month}_${actualYear}.xlsx`;
+            let periodLabel = "";
+            if (freq === "Monthly") periodLabel = `${month}_${actualYear}`;
+            else if (freq === "Quarterly") periodLabel = `${fyYear}_Q${quarter}`;
+            else periodLabel = fyYear;
+
+            const filename = `GSTR2A_${gstin}_${periodLabel}.xlsx`;
 
             saveAs(blob, filename);
             toast.success("Download completed successfully!");
         } catch (err) {
-            toast.error(err.response?.data?.error || "Failed to download GSTR-2A. Ensure API session is active.");
+            toast.error(err.response?.data?.error || "Failed to download GSTR-2A. Ensure session is active.");
         } finally {
             setLoading(false);
         }
@@ -99,14 +107,15 @@ const Get2a = () => {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <GSTPeriodPicker
-                            frequency="Monthly"
-                            onFrequencyChange={() => { }} // Keep as monthly
+                            frequency={freq}
+                            onFrequencyChange={setFreq}
                             selectedFY={fyYear}
                             onFYChange={setFyYear}
                             selectedMonth={month}
                             onMonthChange={setMonth}
+                            selectedQuarter={quarter}
+                            onQuarterChange={setQuarter}
                             className="mb-8"
-                            hideFrequency={true}
                         />
 
                         <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">

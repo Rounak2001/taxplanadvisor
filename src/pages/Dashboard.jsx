@@ -16,6 +16,7 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { mockClients, mockDocuments, mockActivities } from '@/lib/mockData';
 import { AssignedClientsCard } from '@/components/consultant/AssignedClientsCard';
+import { CallLogsTable } from '@/components/consultant/CallLogsTable';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -237,6 +238,9 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Call Logs Section */}
+      <CallLogsTable limit={5} />
 
       {/* Assigned Clients Section */}
       <AssignedClientsCard />

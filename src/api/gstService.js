@@ -8,8 +8,22 @@ export const gstService = {
     const response = await api.post(`${GST_BASE}/auth/generate-otp/`, { gstin, username });
     return response.data;
   },
+  // Alias for compatibility
+  generateGstOtp: async (gstin, username) => {
+    const response = await api.post(`${GST_BASE}/auth/generate-otp/`, { gstin, username });
+    return response.data;
+  },
 
   verifyOTP: async (sessionId, otp, username) => {
+    const response = await api.post(`${GST_BASE}/auth/verify-otp/`, {
+      session_id: sessionId,
+      otp,
+      username
+    });
+    return response.data;
+  },
+  // Alias for compatibility
+  verifyGstOtp: async (sessionId, otp, username) => {
     const response = await api.post(`${GST_BASE}/auth/verify-otp/`, {
       session_id: sessionId,
       otp,
@@ -21,6 +35,13 @@ export const gstService = {
   getSessionStatus: async (sessionId) => {
     const response = await api.get(`${GST_BASE}/auth/session-status/`, {
       params: { session_id: sessionId }
+    });
+    return response.data;
+  },
+
+  checkActiveSession: async (gstin) => {
+    const response = await api.get(`${GST_BASE}/auth/check-session/`, {
+      params: { gstin }
     });
     return response.data;
   },
@@ -152,12 +173,6 @@ export const gstService = {
   // ==================== Cache Management ====================
   clearCache: async () => {
     const response = await api.post(`${GST_BASE}/cache/clear/`);
-    return response.data;
-  },
-
-  // ==================== Client Management ====================
-  getClients: async () => {
-    const response = await api.get('/consultant/clients/');
     return response.data;
   },
 

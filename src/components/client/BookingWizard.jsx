@@ -117,10 +117,74 @@ export default function BookingWizard() {
         }
     };
 
+    const handleRazorpayPayment = (bookingData) => {
+        const options = {
+            key: bookingData.razorpay_key_id,
+            amount: bookingData.amount * 100, // Amount in paise
+            currency: "INR",
+            name: "TaxPlan Advisor",
+            description: `Consultation: ${selectedTopic.name}`,
+            order_id: bookingData.razorpay_order_id,
+            handler: async (response) => {
+                setLoading(true);
+                try {
+                    await api.post(`/consultations/bookings/${bookingData.id}/verify_payment/`, {
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature
+                    });
+
+                    toast({
+                        title: 'Booking Confirmed!',
+                        description: `Your consultation is scheduled and payment verified. Check your email for details.`,
+                    });
+
+                    // Reset wizard state
+                    resetWizard();
+                } catch (error) {
+                    console.error('Payment verification error:', error);
+                    toast({
+                        title: 'Payment Verification Failed',
+                        description: 'Payment was successful but we couldn\'t verify it. Please contact support.',
+                        variant: 'destructive',
+                    });
+                } finally {
+                    setLoading(false);
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    setLoading(false);
+                    toast({
+                        title: 'Payment Cancelled',
+                        description: 'Payment process was interrupted.',
+                        variant: 'destructive',
+                    });
+                }
+            },
+            theme: {
+                color: "#10B981", // Matching primary color
+            },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    };
+
+    const resetWizard = () => {
+        setStep(1);
+        setSelectedTopic(null);
+        setSelectedDate('');
+        setSelectedConsultant(null);
+        setAvailableConsultants([]);
+        setAvailableSlots([]);
+        setSelectedTimeSlot(null);
+        setNotes('');
+    };
+
     const handleBooking = async () => {
         setLoading(true);
         try {
-            // 1. Create a pending booking (Backend will also create Razorpay Order)
             const response = await api.post('/consultations/bookings/', {
                 consultant: selectedConsultant.id,
                 topic: selectedTopic.id,
@@ -131,80 +195,17 @@ export default function BookingWizard() {
             });
 
             const bookingData = response.data;
-            const razorpayOrderId = bookingData.razorpay_order_id;
 
-            if (!razorpayOrderId) {
-                throw new Error("Failed to initialize payment. Please try again.");
-            }
-
-            // 2. Open Razorpay Checkout
-            const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Should be in .env
-                amount: bookingData.amount * 100, // Amount in paise
-                currency: "INR",
-                name: "TaxPlan Advisor",
-                description: `Consultation: ${selectedTopic.name}`,
-                order_id: razorpayOrderId,
-                handler: async function (response) {
-                    try {
-                        setLoading(true);
-                        // 3. Verify Payment Signature
-                        await api.post(`/consultations/bookings/${bookingData.id}/verify_payment/`, {
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature
-                        });
-
-                        toast({
-                            title: 'Booking Confirmed!',
-                            description: `Payment successful. Your consultation with ${selectedConsultant.first_name} is scheduled.`,
-                        });
-
-                        // Reset wizard
-                        setStep(1);
-                        setSelectedTopic(null);
-                        setSelectedDate('');
-                        setSelectedConsultant(null);
-                        setAvailableConsultants([]);
-                        setAvailableSlots([]);
-                        setSelectedTimeSlot(null);
-                        setNotes('');
-                    } catch (verifyError) {
-                        toast({
-                            title: 'Verification Failed',
-                            description: 'Payment was successful but we could not verify it. Please contact support.',
-                            variant: 'destructive',
-                        });
-                    } finally {
-                        setLoading(false);
-                    }
-                },
-                prefill: {
-                    name: "", // Can be prefilled from user state if available
-                    email: "",
-                    contact: ""
-                },
-                theme: {
-                    color: "#3b82f6" // matches primary blue
-                },
-                modal: {
-                    ondismiss: function () {
-                        setLoading(false);
-                    }
-                }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response) {
+            if (bookingData.razorpay_order_id) {
+                handleRazorpayPayment(bookingData);
+            } else {
+                // If it's a free consultation or something went wrong with order creation
                 toast({
-                    title: 'Payment Failed',
-                    description: response.error.description,
-                    variant: 'destructive',
+                    title: 'Booking Request Received',
+                    description: 'Your booking has been created but payment is pending.',
                 });
-                setLoading(false);
-            });
-            rzp.open();
-
+                resetWizard();
+            }
         } catch (error) {
             console.error('Booking error:', error.response?.data || error.message);
             toast({
@@ -413,16 +414,20 @@ export default function BookingWizard() {
                                                     <div className="font-semibold">
                                                         {consultant.first_name} {consultant.last_name}
                                                     </div>
-                                                    <div className="text-sm text-muted-foreground">{consultant.email}</div>
-                                                    <div className="text-sm font-medium text-primary mt-1">₹{consultant.consultation_fee}</div>
+                                                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                                        <span>{consultant.email}</span>
+                                                        <span className="h-1 w-1 rounded-full bg-white/20" />
+                                                        <span className="text-primary font-medium">₹{consultant.consultation_fee}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </div >
                                             {selectedConsultant?.id === consultant.id && (
                                                 <Check size={20} className="text-primary" />
-                                            )}
-                                        </motion.button>
+                                            )
+                                            }
+                                        </motion.button >
                                     ))}
-                                </div>
+                                </div >
                             ) : (
                                 <div className="text-center py-12">
                                     <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
@@ -433,146 +438,150 @@ export default function BookingWizard() {
                                     </Button>
                                 </div>
                             )}
-                        </motion.div>
+                        </motion.div >
                     )}
 
                     {/* Step 3: Pick Time Slot (Calendly-style) */}
-                    {step === 3 && (
-                        <motion.div
-                            key="step3"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    <Clock size={24} className="text-primary" />
+                    {
+                        step === 3 && (
+                            <motion.div
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                                        <Clock size={24} className="text-primary" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-semibold">Pick a Time</h2>
+                                        <p className="text-sm text-muted-foreground">
+                                            Available times for {selectedConsultant?.first_name} {selectedConsultant?.last_name}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold">Pick a Time</h2>
-                                    <p className="text-sm text-muted-foreground">
-                                        Available times for {selectedConsultant?.first_name} {selectedConsultant?.last_name}
-                                    </p>
-                                </div>
-                            </div>
 
-                            {loading ? (
-                                <div className="text-center py-12">
-                                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-                                    <p className="mt-4 text-sm text-muted-foreground">Loading available slots...</p>
-                                </div>
-                            ) : availableSlots.length > 0 ? (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {availableSlots.map((slot, index) => (
-                                        <motion.button
-                                            key={index}
-                                            whileHover={!slot.is_booked ? { scale: 1.05 } : {}}
-                                            whileTap={!slot.is_booked ? { scale: 0.95 } : {}}
-                                            onClick={() => !slot.is_booked && setSelectedTimeSlot(slot)}
-                                            disabled={slot.is_booked}
-                                            className={cn(
-                                                "p-4 rounded-xl border-2 transition-all relative overflow-hidden",
-                                                selectedTimeSlot?.start === slot.start
-                                                    ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                                    : slot.is_booked
-                                                        ? "border-white/5 bg-white/5 opacity-40 cursor-not-allowed"
-                                                        : "border-white/10 bg-white/5 hover:border-white/20"
-                                            )}
-                                        >
-                                            <div className="text-sm font-semibold">
-                                                {formatTime(slot.start)}
-                                            </div>
-                                            <div className="text-xs opacity-70 mt-1">
-                                                {slot.is_booked ? 'Booked' : formatTime(slot.end)}
-                                            </div>
-                                            {slot.is_booked && (
-                                                <div className="absolute top-0 right-0 p-1">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                {loading ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                                        <p className="mt-4 text-sm text-muted-foreground">Loading available slots...</p>
+                                    </div>
+                                ) : availableSlots.length > 0 ? (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {availableSlots.map((slot, index) => (
+                                            <motion.button
+                                                key={index}
+                                                whileHover={!slot.is_booked ? { scale: 1.05 } : {}}
+                                                whileTap={!slot.is_booked ? { scale: 0.95 } : {}}
+                                                onClick={() => !slot.is_booked && setSelectedTimeSlot(slot)}
+                                                disabled={slot.is_booked}
+                                                className={cn(
+                                                    "p-4 rounded-xl border-2 transition-all relative overflow-hidden",
+                                                    selectedTimeSlot?.start === slot.start
+                                                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                                        : slot.is_booked
+                                                            ? "border-white/5 bg-white/5 opacity-40 cursor-not-allowed"
+                                                            : "border-white/10 bg-white/5 hover:border-white/20"
+                                                )}
+                                            >
+                                                <div className="text-sm font-semibold">
+                                                    {formatTime(slot.start)}
                                                 </div>
-                                            )}
-                                        </motion.button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12">
-                                    <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
-                                    <p className="text-muted-foreground">No available time slots for this consultant.</p>
-                                    <Button variant="outline" className="mt-4" onClick={() => setStep(2)}>
-                                        <ChevronLeft size={16} className="mr-2" />
-                                        Choose different consultant
-                                    </Button>
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
+                                                <div className="text-xs opacity-70 mt-1">
+                                                    {slot.is_booked ? 'Booked' : formatTime(slot.end)}
+                                                </div>
+                                                {slot.is_booked && (
+                                                    <div className="absolute top-0 right-0 p-1">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                    </div>
+                                                )}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
+                                        <p className="text-muted-foreground">No available time slots for this consultant.</p>
+                                        <Button variant="outline" className="mt-4" onClick={() => setStep(2)}>
+                                            <ChevronLeft size={16} className="mr-2" />
+                                            Choose different consultant
+                                        </Button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )
+                    }
 
                     {/* Step 4: Enter Details */}
-                    {step === 4 && (
-                        <motion.div
-                            key="step4"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6 max-w-2xl"
-                        >
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    <FileText size={24} className="text-primary" />
+                    {
+                        step === 4 && (
+                            <motion.div
+                                key="step4"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6 max-w-2xl"
+                            >
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                                        <FileText size={24} className="text-primary" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-semibold">Enter Details</h2>
+                                        <p className="text-sm text-muted-foreground">Share what you'd like to discuss</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold">Enter Details</h2>
-                                    <p className="text-sm text-muted-foreground">Share what you'd like to discuss</p>
-                                </div>
-                            </div>
 
-                            {/* Booking Summary */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                <h3 className="font-semibold text-sm mb-3">Booking Summary</h3>
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <span className="text-muted-foreground">Consultant:</span>
-                                    <span className="font-medium">{selectedConsultant?.first_name} {selectedConsultant?.last_name}</span>
+                                {/* Booking Summary */}
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                    <h3 className="font-semibold text-sm mb-3">Booking Summary</h3>
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <span className="text-muted-foreground">Consultant:</span>
+                                        <span className="font-medium">{selectedConsultant?.first_name} {selectedConsultant?.last_name}</span>
 
-                                    <span className="text-muted-foreground">Topic:</span>
-                                    <span className="font-medium">{selectedTopic?.name}</span>
+                                        <span className="text-muted-foreground">Topic:</span>
+                                        <span className="font-medium">{selectedTopic?.name}</span>
 
-                                    <span className="text-muted-foreground">Date:</span>
-                                    <span className="font-medium">
-                                        {new Date(selectedDate).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        })}
-                                    </span>
+                                        <span className="text-muted-foreground">Date:</span>
+                                        <span className="font-medium">
+                                            {new Date(selectedDate).toLocaleDateString('en-US', {
+                                                weekday: 'long',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </span>
 
-                                    <span className="text-muted-foreground">Time:</span>
-                                    <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
+                                        <span className="text-muted-foreground">Time:</span>
+                                        <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
 
-                                    <span className="text-muted-foreground">Fee:</span>
-                                    <span className="font-medium text-primary">₹{selectedConsultant?.consultation_fee}</span>
-                                </div>
-                            </div>
+                                        <span className="text-muted-foreground">Amount:</span>
+                                        <span className="font-semibold text-primary">₹{selectedConsultant?.consultation_fee}</span>
+                                    </div >
+                                </div >
 
-                            {/* Notes Input */}
-                            <div>
-                                <label className="text-sm font-medium mb-2 block">
-                                    Query / Meeting Notes <span className="text-muted-foreground">(Optional)</span>
-                                </label>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Please share anything that will help prepare for our meeting..."
-                                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:outline-none min-h-[120px] resize-none"
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+                                {/* Notes Input */}
+                                < div >
+                                    <label className="text-sm font-medium mb-2 block">
+                                        Query / Meeting Notes <span className="text-muted-foreground">(Optional)</span>
+                                    </label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) => setNotes(e.target.value)}
+                                        placeholder="Please share anything that will help prepare for our meeting..."
+                                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:outline-none min-h-[120px] resize-none"
+                                    />
+                                </div >
+                            </motion.div >
+                        )
+                    }
+                </AnimatePresence >
+            </div >
 
             {/* Action Buttons */}
-            <div className="p-6 border-t border-white/10 bg-white/5 flex items-center justify-between">
+            < div className="p-6 border-t border-white/10 bg-white/5 flex items-center justify-between" >
                 <Button
                     variant="ghost"
                     onClick={() => setStep(Math.max(1, step - 1))}
@@ -589,7 +598,7 @@ export default function BookingWizard() {
                     {step === 4 ? 'Confirm Booking' : 'Next'}
                     {step < 4 && <ArrowRight size={16} className="ml-2" />}
                 </Button>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

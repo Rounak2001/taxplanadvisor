@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -18,22 +18,32 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { FileUp, Send, User, FileText, MessageSquare } from 'lucide-react';
+import { FileUp, Send, User, FileText, MessageSquare, Folder as FolderIcon } from 'lucide-react';
 import { documentService } from '@/api/documentService';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedClientId: preSelectedClientId, onSuccess }) {
     const [selectedClientId, setSelectedClientId] = useState(preSelectedClientId?.toString() || '');
+    const [selectedFolderId, setSelectedFolderId] = useState('none');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Fetch folders for the selected client
+    const { data: folders = [] } = useQuery({
+        queryKey: ['client-folders', selectedClientId],
+        queryFn: () => documentService.listFolders(selectedClientId),
+        enabled: !!selectedClientId && isOpen,
+    });
 
     const handleSubmit = async () => {
         if (!selectedClientId || !title) return;
 
         setIsSubmitting(true);
         try {
-            await documentService.createRequest(selectedClientId, title, description);
+            const folderId = selectedFolderId === 'none' ? null : selectedFolderId;
+            await documentService.createRequest(selectedClientId, title, description, folderId);
             toast.success("Document request sent to client");
             onSuccess?.();
             handleClose();
@@ -47,6 +57,7 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
 
     const handleClose = () => {
         setSelectedClientId(preSelectedClientId?.toString() || '');
+        setSelectedFolderId('none');
         setTitle('');
         setDescription('');
         setIsSubmitting(false);
@@ -57,7 +68,7 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
                 <DialogHeader className="space-y-3">
                     <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
                         <FileUp className="h-6 w-6 text-emerald-600" />
@@ -68,7 +79,7 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-4 flex-1 overflow-y-auto px-1">
                     {/* Client Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="client" className="text-sm font-medium flex items-center gap-2">
@@ -87,6 +98,34 @@ export function RequestDocumentModal({ isOpen, onClose, clients = [], selectedCl
                                                 {(client.full_name || client.email || 'U').charAt(0).toUpperCase()}
                                             </div>
                                             <span>{client.full_name || client.email}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Folder Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="folder" className="text-sm font-medium flex items-center gap-2">
+                            <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                            Select Folder <span className="text-muted-foreground font-normal">(Optional)</span>
+                        </Label>
+                        <Select
+                            value={selectedFolderId}
+                            onValueChange={setSelectedFolderId}
+                            disabled={!selectedClientId}
+                        >
+                            <SelectTrigger id="folder" className="h-11">
+                                <SelectValue placeholder={selectedClientId ? "Select destination folder..." : "Choose a client first"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">No Folder (Root)</SelectItem>
+                                {folders.map(folder => (
+                                    <SelectItem key={folder.id} value={folder.id.toString()}>
+                                        <div className="flex items-center gap-2">
+                                            <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                                            <span>{folder.name}</span>
                                         </div>
                                     </SelectItem>
                                 ))}

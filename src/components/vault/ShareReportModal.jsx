@@ -122,7 +122,7 @@ export function ShareReportModal({ isOpen, onClose, clients = [], onSuccess }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
                 <DialogHeader className="space-y-3">
                     <div className="mx-auto w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                         <FileUp className="h-6 w-6 text-blue-600" />
@@ -133,7 +133,7 @@ export function ShareReportModal({ isOpen, onClose, clients = [], onSuccess }) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-4 flex-1 overflow-y-auto px-1">
                     {/* Client Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="client" className="text-sm font-medium flex items-center gap-2">
@@ -149,9 +149,9 @@ export function ShareReportModal({ isOpen, onClose, clients = [], onSuccess }) {
                                     <SelectItem key={client.id} value={client.id.toString()}>
                                         <div className="flex items-center gap-2">
                                             <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                                                {(client.full_name || client.email || 'U').charAt(0).toUpperCase()}
+                                                {(client.name || client.email || 'U').charAt(0).toUpperCase()}
                                             </div>
-                                            <span>{client.full_name || client.email}</span>
+                                            <span>{client.name || client.email}</span>
                                         </div>
                                     </SelectItem>
                                 ))}

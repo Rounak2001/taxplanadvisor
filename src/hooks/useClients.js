@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getClients, createClient, onboardClient } from '@/lib/api/clients';
+import { clientService } from '@/api/clientService';
 import { toast } from 'sonner';
 
 // Query key factory
 export const clientsKeys = {
-  all: ['clients'],
-  list: () => [...clientsKeys.all, 'list'],
+  all: ['assigned-clients'],
+  list: () => [...clientsKeys.all],
   detail: (id) => [...clientsKeys.all, 'detail', id],
 };
 
@@ -15,7 +15,7 @@ export const clientsKeys = {
 export function useClients() {
   return useQuery({
     queryKey: clientsKeys.list(),
-    queryFn: getClients,
+    queryFn: clientService.getClients,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
   });
@@ -26,9 +26,9 @@ export function useClients() {
  */
 export function useCreateClient() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: createClient,
+    mutationFn: clientService.createClient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clientsKeys.list() });
       toast.success('Client created successfully');
@@ -44,9 +44,9 @@ export function useCreateClient() {
  */
 export function useOnboardClient() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: onboardClient,
+    mutationFn: clientService.onboardClient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clientsKeys.list() });
       toast.success('Client onboarded successfully');

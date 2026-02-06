@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   FolderOpen,
   MessageSquare,
-  FileText,
   CreditCard,
   ChevronLeft,
   ChevronRight,
@@ -14,8 +13,7 @@ import {
   Shield,
   FileSpreadsheet,
   Calculator,
-  User,
-  Briefcase,
+  Library,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -29,13 +27,12 @@ const navItems = [
   { to: '/client/gst', icon: FileSpreadsheet, label: 'GST Reports' },
   // { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
   { to: '/client/calculators', icon: Calculator, label: 'Calculators' },
-  { to: '/client/documents', icon: FolderOpen, label: 'My Documents' },
+  { to: '/client/vault', icon: Library, label: 'Smart Vault' },
   { to: '/client/meetings', icon: Video, label: 'My Meetings' },
   { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
-  { to: '/client/reports', icon: FileText, label: 'My Reports' },
-  // { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
-  // { to: '/client/billing', icon: CreditCard, label: 'Billing' },
-  // { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
+  { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
+  { to: '/client/billing', icon: CreditCard, label: 'Billing' },
+  { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
 ];
 
 export function ClientSidebar() {

@@ -20,7 +20,7 @@ export function ClientList({ clients, activeClientId, onSelectClient, consultant
           onClick={() => onSelectClient(client.id)}
           className={cn(
             'w-full p-4 text-left hover:bg-muted/50 transition-colors',
-            activeClientId === client.id && 'bg-muted'
+            String(activeClientId) === String(client.id) && 'bg-muted'
           )}
         >
           <div className="flex items-center gap-3">

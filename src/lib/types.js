@@ -17,16 +17,17 @@
 
 /**
  * @typedef {Object} Document
- * @property {string} id
- * @property {string} consultantId
- * @property {string} clientId
- * @property {string} name
- * @property {'bank_statement' | 'pan_card' | 'gst_return' | 'itr' | 'other'} type
- * @property {'draft' | 'submitted' | 'checker_review' | 'approved' | 'rejected'} status
- * @property {string} uploadedAt
- * @property {string} [checkedAt]
- * @property {string} [checkerId]
- * @property {Object} extractedData
+ * @property {number} id
+ * @property {number} client
+ * @property {string} client_name
+ * @property {number} consultant
+ * @property {string} consultant_name
+ * @property {string} title
+ * @property {string} description
+ * @property {string} file
+ * @property {'PENDING' | 'UPLOADED' | 'VERIFIED' | 'REJECTED'} status
+ * @property {string} created_at
+ * @property {string} uploaded_at
  */
 
 /**
@@ -67,17 +68,17 @@
  */
 
 /**
- * @typedef {Object} CMAData
- * @property {string} id
- * @property {string} consultantId
- * @property {string} clientId
- * @property {string} businessName
- * @property {string} financialYear
- * @property {'draft' | 'in_progress' | 'completed'} status
- * @property {Object} basicInfo
- * @property {Object} balanceSheet
- * @property {Object} profitLoss
- * @property {Object} ratios
+ * @typedef {Object} SharedReport
+ * @property {number} id
+ * @property {number} consultant
+ * @property {string} consultant_name
+ * @property {number} client
+ * @property {string} client_name
+ * @property {string} title
+ * @property {string} description
+ * @property {string} file
+ * @property {'CMA' | 'GST' | 'TAX' | 'AUDIT' | 'OTHER'} report_type
+ * @property {string} created_at
  */
 
 /**
@@ -91,4 +92,4 @@
  * @property {string} expiryDate
  */
 
-export {};
+export { };

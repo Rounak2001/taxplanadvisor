@@ -42,6 +42,11 @@ export const useAuthStore = create(
                 }
                 // Clear local state regardless
                 set({ user: null, isAuthenticated: false, isLoading: false });
+
+                // Clear GST session state to prevent data leakage across users
+                import('./useGstStore').then(({ useGstStore }) => {
+                    useGstStore.getState().logout();
+                });
             },
 
             checkAuth: async () => {

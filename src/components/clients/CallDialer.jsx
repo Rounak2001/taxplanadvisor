@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { X, Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CallOutcomeModal } from './CallOutcomeModal';
+import { toast } from 'sonner';
+import api from '@/api/axios';
 
 export function CallDialer({ open, onClose, client, onCallLogged }) {
   const [callActive, setCallActive] = useState(false);
+  const [isInitiating, setIsInitiating] = useState(false);
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
   const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const [lastCallDuration, setLastCallDuration] = useState(0);
+  const [currentCallId, setCurrentCallId] = useState(null);
 
   useEffect(() => {
     let interval;
@@ -21,10 +25,46 @@ export function CallDialer({ open, onClose, client, onCallLogged }) {
     return () => clearInterval(interval);
   }, [callActive]);
 
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setCallActive(false);
+      setDuration(0);
+      setCurrentCallId(null);
+      setMuted(false);
+      setSpeakerOn(true);
+    }
+  }, [open]);
+
   const formatDuration = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleStartCall = async () => {
+    if (!client?.id) {
+      toast.error('Client information is missing');
+      return;
+    }
+
+    setIsInitiating(true);
+    try {
+      const response = await api.post('/calls/initiate/', { client_id: client.id });
+      if (response.data.success) {
+        toast.success(response.data.message || 'Call initiated! Please pick up your phone.');
+        setCallActive(true);
+        setCurrentCallId(response.data.call_id); // Track the call_id
+      } else {
+        toast.error(response.data.error || 'Failed to initiate call');
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Failed to initiate call. Please try again.';
+      toast.error(errorMsg);
+      console.error('Call initiation failed:', err);
+    } finally {
+      setIsInitiating(false);
+    }
   };
 
   const handleEndCall = () => {
@@ -35,14 +75,16 @@ export function CallDialer({ open, onClose, client, onCallLogged }) {
   };
 
   const handleOutcomeSaved = (outcomeData) => {
-    console.log('Call logged:', outcomeData);
+    console.log('Call outcome saved:', outcomeData);
     onCallLogged?.(outcomeData);
     setShowOutcomeModal(false);
+    setCurrentCallId(null);
     onClose();
   };
 
   const handleCloseOutcomeModal = () => {
     setShowOutcomeModal(false);
+    setCurrentCallId(null);
     onClose();
   };
 
@@ -72,12 +114,14 @@ export function CallDialer({ open, onClose, client, onCallLogged }) {
               </Avatar>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">{client?.name || 'Unknown'}</h3>
-                <p className="text-sm text-muted-foreground">{client?.phone}</p>
+                <p className="text-sm text-muted-foreground">
+                  {isInitiating ? 'Connecting...' : callActive ? 'In call...' : 'Ready to call'}
+                </p>
               </div>
               {callActive && (
                 <>
                   <p className="text-2xl font-mono text-success">{formatDuration(duration)}</p>
-                  
+
                   {/* Call Controls */}
                   <div className="flex gap-4">
                     <Button
@@ -103,18 +147,23 @@ export function CallDialer({ open, onClose, client, onCallLogged }) {
 
             <div className="p-6 flex justify-center gap-4">
               {!callActive ? (
-                <Button 
-                  size="lg" 
-                  className="rounded-full h-16 w-16 bg-success hover:bg-success/90" 
-                  onClick={() => setCallActive(true)}
+                <Button
+                  size="lg"
+                  className="rounded-full h-16 w-16 bg-success hover:bg-success/90"
+                  onClick={handleStartCall}
+                  disabled={isInitiating}
                 >
-                  <Phone size={24} strokeWidth={1.5} />
+                  {isInitiating ? (
+                    <Loader2 size={24} className="animate-spin" />
+                  ) : (
+                    <Phone size={24} strokeWidth={1.5} />
+                  )}
                 </Button>
               ) : (
-                <Button 
-                  size="lg" 
-                  variant="destructive" 
-                  className="rounded-full h-16 w-16" 
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  className="rounded-full h-16 w-16"
                   onClick={handleEndCall}
                 >
                   <PhoneOff size={24} strokeWidth={1.5} />
@@ -129,9 +178,12 @@ export function CallDialer({ open, onClose, client, onCallLogged }) {
         open={showOutcomeModal}
         onClose={handleCloseOutcomeModal}
         client={client}
+        callId={currentCallId}
         callDuration={lastCallDuration}
         onSaveOutcome={handleOutcomeSaved}
       />
     </>
   );
 }
+
+

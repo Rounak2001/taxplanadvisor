@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Mail, Phone, CreditCard, CheckCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Users, Mail, PhoneCall, CreditCard, CheckCircle, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/api/axios';
 
 export function AssignedClientsCard() {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [callingClientId, setCallingClientId] = useState(null);
 
     useEffect(() => {
         fetchClients();
@@ -16,7 +19,7 @@ export function AssignedClientsCard() {
     const fetchClients = async () => {
         try {
             const response = await api.get('/consultant/clients/');
-            setClients(response.data.clients);
+            setClients(response.data);
         } catch (err) {
             setError('Failed to load clients');
             console.error('Failed to fetch clients:', err);
@@ -34,6 +37,24 @@ export function AssignedClientsCard() {
             </Card>
         );
     }
+
+    const handleCall = async (clientId, clientName) => {
+        setCallingClientId(clientId);
+        try {
+            const response = await api.post('/calls/initiate/', { client_id: clientId });
+            if (response.data.success) {
+                toast.success(response.data.message || `Calling ${clientName}...`);
+            } else {
+                toast.error(response.data.error || 'Failed to initiate call');
+            }
+        } catch (err) {
+            const errorMsg = err.response?.data?.error || 'Failed to initiate call. Please try again.';
+            toast.error(errorMsg);
+            console.error('Call initiation failed:', err);
+        } finally {
+            setCallingClientId(null);
+        }
+    };
 
     return (
         <Card>
@@ -64,29 +85,41 @@ export function AssignedClientsCard() {
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
-                                        <h4 className="font-medium">{client.full_name}</h4>
+                                        <h4 className="font-medium">{client.name}</h4>
                                         <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                                             <span className="flex items-center gap-1">
                                                 <Mail className="h-3.5 w-3.5" />
                                                 {client.email || 'No email'}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Phone className="h-3.5 w-3.5" />
-                                                {client.phone_number || 'No phone'}
-                                            </span>
-                                            <span className="flex items-center gap-1">
                                                 <CreditCard className="h-3.5 w-3.5" />
-                                                {client.pan_number || 'PAN pending'}
+                                                {client.pan || 'PAN pending'}
                                             </span>
                                         </div>
                                     </div>
-                                    <Badge variant={client.is_onboarded ? 'default' : 'outline'}>
-                                        {client.is_onboarded ? (
-                                            <><CheckCircle className="h-3 w-3 mr-1" /> Onboarded</>
-                                        ) : (
-                                            <><Clock className="h-3 w-3 mr-1" /> Pending</>
-                                        )}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleCall(client.id, client.name)}
+                                            disabled={callingClientId === client.id}
+                                            className="gap-1"
+                                        >
+                                            {callingClientId === client.id ? (
+                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                            ) : (
+                                                <PhoneCall className="h-3.5 w-3.5" />
+                                            )}
+                                            Call
+                                        </Button>
+                                        <Badge variant={client.status === 'active' ? 'default' : 'outline'}>
+                                            {client.status === 'active' ? (
+                                                <><CheckCircle className="h-3 w-3 mr-1" /> Onboarded</>
+                                            ) : (
+                                                <><Clock className="h-3 w-3 mr-1" /> Pending</>
+                                            )}
+                                        </Badge>
+                                    </div>
                                 </div>
                             </div>
                         ))}
