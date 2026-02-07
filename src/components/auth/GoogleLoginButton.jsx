@@ -16,7 +16,7 @@ const GoogleIcon = () => (
     </svg>
 );
 
-export function GoogleLoginButton({ className = '', text = 'Sign in with Google' }) {
+export function GoogleLoginButton({ className = '', text = 'Sign in with Google', size = 'default' }) {
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [showVerification, setShowVerification] = useState(false);
@@ -123,6 +123,7 @@ export function GoogleLoginButton({ className = '', text = 'Sign in with Google'
         <div className={className}>
             <Button
                 variant="outline"
+                size={size}
                 className="w-full bg-white text-black hover:bg-gray-100 hover:text-black border-gray-300 shadow-sm"
                 onClick={() => login()}
             >

@@ -120,13 +120,13 @@ const AICopilot = () => {
                                     <Bot className="w-5 h-5 text-primary-foreground" />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-semibold text-foreground">
+                                    <h4 className="text-sm font-semibold bg-secondary/80 text-white">
                                         TaxPlan AI
                                     </h4>
                                     <div className="flex items-center gap-2">
                                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                        <span className="text-xs text-muted-foreground">
-                                            Online • Trained on latest tax laws
+                                        <span className="text-xs text-muted-foreground bg-secondary/80 text-white">
+                                            Online 
                                         </span>
                                     </div>
                                 </div>
@@ -147,7 +147,7 @@ const AICopilot = () => {
                                         <div
                                             className={`max-w-[85%] p-3 rounded-2xl ${msg.type === "user"
                                                 ? "bg-primary text-primary-foreground rounded-br-md"
-                                                : "bg-secondary/80 text-foreground rounded-bl-md border border-border/50"
+                                                : "bg-secondary/80 text-white rounded-bl-md border border-border/50"
                                                 }`}
                                         >
                                             <p className="text-sm leading-relaxed">{msg.text}</p>

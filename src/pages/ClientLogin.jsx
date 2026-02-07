@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authService } from '@/api/authService';
 import { toast } from 'sonner';
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 
 export default function ClientLogin() {
   const navigate = useNavigate();
@@ -112,10 +113,21 @@ export default function ClientLogin() {
               </Button>
             </form>
 
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <GoogleLoginButton text="Continue with Google" className="w-full" />
+
             {/* CA login link */}
             <div className="mt-6 pt-6 border-t border-border text-center">
               <p className="text-sm text-muted-foreground">
-                Are you a CA/Consultant?{' '}
+                Are you a Consultant?{' '}
                 <Link to="/login" className="text-primary hover:underline font-medium">
                   Login to Consultant Portal
                 </Link>

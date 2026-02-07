@@ -8,7 +8,7 @@ const features = [
     {
         icon: Video,
         title: "1-on-1 Video Call",
-        description: "Connect with verified CAs for personalized advice.",
+        description: "Connect with verified Expert for personalized advice.",
     },
     {
         icon: ShieldCheck,
@@ -87,11 +87,11 @@ const CAConsultation = () => {
                                 </span>
                             </div>
                             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
-                                CA-Verified{" "}
+                                Video{" "}
                                 <span className="gradient-text">Consultation</span>
                             </h2>
                             <p className="text-muted-foreground max-w-xl mx-auto">
-                                Get expert advice from ICAI-verified Chartered Accountants for
+                                Get advice from verified Tax Consultants for
                                 complex tax matters, compliance issues, or financial planning.
                             </p>
                         </div>
@@ -127,7 +127,7 @@ const CAConsultation = () => {
                                 onClick={() => setIsOpen(true)}
                                 className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-8 py-6 rounded-xl font-medium group"
                             >
-                                Book a CA Consultation
+                                Book Consultation
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </Button>
                         </div>

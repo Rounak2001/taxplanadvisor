@@ -114,7 +114,7 @@ export function ClientProfileCard() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email (from Google)</Label>
+                        <Label htmlFor="email">Email (Google)</Label>
                         <Input
                             id="email"
                             value={profile.email}

@@ -207,10 +207,10 @@ export default function BookingWizard() {
                 resetWizard();
             }
         } catch (error) {
-            console.error('Booking error:', error.response?.data);
+            console.error('Booking error:', error.response?.data || error.message);
             toast({
                 title: 'Booking Failed',
-                description: error.response?.data?.error || error.response?.data?.detail || 'Please try again.',
+                description: error.response?.data?.error || error.response?.data?.detail || error.message || 'Please try again.',
                 variant: 'destructive',
             });
             setLoading(false);
@@ -420,13 +420,14 @@ export default function BookingWizard() {
                                                         <span className="text-primary font-medium">₹{consultant.consultation_fee}</span>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div >
                                             {selectedConsultant?.id === consultant.id && (
                                                 <Check size={20} className="text-primary" />
-                                            )}
-                                        </motion.button>
+                                            )
+                                            }
+                                        </motion.button >
                                     ))}
-                                </div>
+                                </div >
                             ) : (
                                 <div className="text-center py-12">
                                     <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
@@ -437,146 +438,150 @@ export default function BookingWizard() {
                                     </Button>
                                 </div>
                             )}
-                        </motion.div>
+                        </motion.div >
                     )}
 
                     {/* Step 3: Pick Time Slot (Calendly-style) */}
-                    {step === 3 && (
-                        <motion.div
-                            key="step3"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    <Clock size={24} className="text-primary" />
+                    {
+                        step === 3 && (
+                            <motion.div
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                                        <Clock size={24} className="text-primary" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-semibold">Pick a Time</h2>
+                                        <p className="text-sm text-muted-foreground">
+                                            Available times for {selectedConsultant?.first_name} {selectedConsultant?.last_name}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold">Pick a Time</h2>
-                                    <p className="text-sm text-muted-foreground">
-                                        Available times for {selectedConsultant?.first_name} {selectedConsultant?.last_name}
-                                    </p>
-                                </div>
-                            </div>
 
-                            {loading ? (
-                                <div className="text-center py-12">
-                                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-                                    <p className="mt-4 text-sm text-muted-foreground">Loading available slots...</p>
-                                </div>
-                            ) : availableSlots.length > 0 ? (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {availableSlots.map((slot, index) => (
-                                        <motion.button
-                                            key={index}
-                                            whileHover={!slot.is_booked ? { scale: 1.05 } : {}}
-                                            whileTap={!slot.is_booked ? { scale: 0.95 } : {}}
-                                            onClick={() => !slot.is_booked && setSelectedTimeSlot(slot)}
-                                            disabled={slot.is_booked}
-                                            className={cn(
-                                                "p-4 rounded-xl border-2 transition-all relative overflow-hidden",
-                                                selectedTimeSlot?.start === slot.start
-                                                    ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                                    : slot.is_booked
-                                                        ? "border-white/5 bg-white/5 opacity-40 cursor-not-allowed"
-                                                        : "border-white/10 bg-white/5 hover:border-white/20"
-                                            )}
-                                        >
-                                            <div className="text-sm font-semibold">
-                                                {formatTime(slot.start)}
-                                            </div>
-                                            <div className="text-xs opacity-70 mt-1">
-                                                {slot.is_booked ? 'Booked' : formatTime(slot.end)}
-                                            </div>
-                                            {slot.is_booked && (
-                                                <div className="absolute top-0 right-0 p-1">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                {loading ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                                        <p className="mt-4 text-sm text-muted-foreground">Loading available slots...</p>
+                                    </div>
+                                ) : availableSlots.length > 0 ? (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {availableSlots.map((slot, index) => (
+                                            <motion.button
+                                                key={index}
+                                                whileHover={!slot.is_booked ? { scale: 1.05 } : {}}
+                                                whileTap={!slot.is_booked ? { scale: 0.95 } : {}}
+                                                onClick={() => !slot.is_booked && setSelectedTimeSlot(slot)}
+                                                disabled={slot.is_booked}
+                                                className={cn(
+                                                    "p-4 rounded-xl border-2 transition-all relative overflow-hidden",
+                                                    selectedTimeSlot?.start === slot.start
+                                                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                                        : slot.is_booked
+                                                            ? "border-white/5 bg-white/5 opacity-40 cursor-not-allowed"
+                                                            : "border-white/10 bg-white/5 hover:border-white/20"
+                                                )}
+                                            >
+                                                <div className="text-sm font-semibold">
+                                                    {formatTime(slot.start)}
                                                 </div>
-                                            )}
-                                        </motion.button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12">
-                                    <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
-                                    <p className="text-muted-foreground">No available time slots for this consultant.</p>
-                                    <Button variant="outline" className="mt-4" onClick={() => setStep(2)}>
-                                        <ChevronLeft size={16} className="mr-2" />
-                                        Choose different consultant
-                                    </Button>
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
+                                                <div className="text-xs opacity-70 mt-1">
+                                                    {slot.is_booked ? 'Booked' : formatTime(slot.end)}
+                                                </div>
+                                                {slot.is_booked && (
+                                                    <div className="absolute top-0 right-0 p-1">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                    </div>
+                                                )}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <AlertCircle size={48} className="mx-auto text-muted-foreground mb-4" />
+                                        <p className="text-muted-foreground">No available time slots for this consultant.</p>
+                                        <Button variant="outline" className="mt-4" onClick={() => setStep(2)}>
+                                            <ChevronLeft size={16} className="mr-2" />
+                                            Choose different consultant
+                                        </Button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )
+                    }
 
                     {/* Step 4: Enter Details */}
-                    {step === 4 && (
-                        <motion.div
-                            key="step4"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6 max-w-2xl"
-                        >
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    <FileText size={24} className="text-primary" />
+                    {
+                        step === 4 && (
+                            <motion.div
+                                key="step4"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6 max-w-2xl"
+                            >
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                                        <FileText size={24} className="text-primary" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-semibold">Enter Details</h2>
+                                        <p className="text-sm text-muted-foreground">Share what you'd like to discuss</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold">Enter Details</h2>
-                                    <p className="text-sm text-muted-foreground">Share what you'd like to discuss</p>
-                                </div>
-                            </div>
 
-                            {/* Booking Summary */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                <h3 className="font-semibold text-sm mb-3">Booking Summary</h3>
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <span className="text-muted-foreground">Consultant:</span>
-                                    <span className="font-medium">{selectedConsultant?.first_name} {selectedConsultant?.last_name}</span>
+                                {/* Booking Summary */}
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                    <h3 className="font-semibold text-sm mb-3">Booking Summary</h3>
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <span className="text-muted-foreground">Consultant:</span>
+                                        <span className="font-medium">{selectedConsultant?.first_name} {selectedConsultant?.last_name}</span>
 
-                                    <span className="text-muted-foreground">Topic:</span>
-                                    <span className="font-medium">{selectedTopic?.name}</span>
+                                        <span className="text-muted-foreground">Topic:</span>
+                                        <span className="font-medium">{selectedTopic?.name}</span>
 
-                                    <span className="text-muted-foreground">Date:</span>
-                                    <span className="font-medium">
-                                        {new Date(selectedDate).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        })}
-                                    </span>
+                                        <span className="text-muted-foreground">Date:</span>
+                                        <span className="font-medium">
+                                            {new Date(selectedDate).toLocaleDateString('en-US', {
+                                                weekday: 'long',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </span>
 
-                                    <span className="text-muted-foreground">Time:</span>
-                                    <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
+                                        <span className="text-muted-foreground">Time:</span>
+                                        <span className="font-medium">{formatTime(selectedTimeSlot?.start)} - {formatTime(selectedTimeSlot?.end)}</span>
 
-                                    <span className="text-muted-foreground">Amount:</span>
-                                    <span className="font-semibold text-primary">₹{selectedConsultant?.consultation_fee}</span>
-                                </div>
-                            </div>
+                                        <span className="text-muted-foreground">Amount:</span>
+                                        <span className="font-semibold text-primary">₹{selectedConsultant?.consultation_fee}</span>
+                                    </div >
+                                </div >
 
-                            {/* Notes Input */}
-                            <div>
-                                <label className="text-sm font-medium mb-2 block">
-                                    Query / Meeting Notes <span className="text-muted-foreground">(Optional)</span>
-                                </label>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Please share anything that will help prepare for our meeting..."
-                                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:outline-none min-h-[120px] resize-none"
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+                                {/* Notes Input */}
+                                < div >
+                                    <label className="text-sm font-medium mb-2 block">
+                                        Query / Meeting Notes <span className="text-muted-foreground">(Optional)</span>
+                                    </label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) => setNotes(e.target.value)}
+                                        placeholder="Please share anything that will help prepare for our meeting..."
+                                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary focus:outline-none min-h-[120px] resize-none"
+                                    />
+                                </div >
+                            </motion.div >
+                        )
+                    }
+                </AnimatePresence >
+            </div >
 
             {/* Action Buttons */}
-            <div className="p-6 border-t border-white/10 bg-white/5 flex items-center justify-between">
+            < div className="p-6 border-t border-white/10 bg-white/5 flex items-center justify-between" >
                 <Button
                     variant="ghost"
                     onClick={() => setStep(Math.max(1, step - 1))}
@@ -593,7 +598,7 @@ export default function BookingWizard() {
                     {step === 4 ? 'Confirm Booking' : 'Next'}
                     {step < 4 && <ArrowRight size={16} className="ml-2" />}
                 </Button>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

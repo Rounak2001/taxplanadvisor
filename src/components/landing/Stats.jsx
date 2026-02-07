@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const stats = [
-    { value: 500, suffix: "+", label: "Verified CAs", color: "primary" },
-    { value: 5000, suffix: "+", label: "Filings Completed", color: "accent" },
+    { value: 100, suffix: "+", label: "Verified Consultants", color: "primary" },
+    { value: 1000, suffix: "+", label: "Filings Completed", color: "accent" },
     { value: 99.5, suffix: "%", label: "Accuracy Rate", color: "primary" },
     { value: 4.8, suffix: "/5", label: "User Rating", color: "accent" },
 ];

@@ -15,7 +15,7 @@ export function MeetingsList({ onJoinMeeting }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth(); // Already imported useAuth in my thought, wait let me check imports
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchBookings();
@@ -97,6 +97,7 @@ export function MeetingsList({ onJoinMeeting }) {
     }
   };
 
+
   const formatTime = (time24) => {
     const [hour, minute] = time24.split(':').map(Number);
     const period = hour >= 12 ? 'PM' : 'AM';
@@ -158,6 +159,7 @@ export function MeetingsList({ onJoinMeeting }) {
                       <Badge variant="secondary" className="text-xs">
                         {calculateDuration(meeting.start_time, meeting.end_time)} min
                       </Badge>
+
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       {user?.role === 'CONSULTANT' ? `Client: ${meeting.client_name}` : `Consultant: ${meeting.consultant_name}`}
@@ -169,19 +171,23 @@ export function MeetingsList({ onJoinMeeting }) {
                     )}
                   </div>
                 </div>
-                <Button
-                  onClick={() => handleJoinClick(meeting)}
-                  disabled={!isJoinable(meeting)}
-                  className={cn(
-                    "transition-all duration-300",
-                    isJoinable(meeting)
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
-                      : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <Video size={16} strokeWidth={1.5} className="mr-2" />
-                  Join Meeting
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2">
+
+                  <Button
+                    onClick={() => handleJoinClick(meeting)}
+                    disabled={!isJoinable(meeting)}
+                    size="sm"
+                    className={cn(
+                      "transition-all duration-300",
+                      isJoinable(meeting)
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
+                        : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <Video size={16} strokeWidth={1.5} className="mr-2" />
+                    Join Meeting
+                  </Button>
+                </div>
               </motion.div>
             ))
           ) : (
