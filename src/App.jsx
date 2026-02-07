@@ -32,6 +32,7 @@ import ClientMessages from "./pages/ClientMessages";
 import ClientBilling from "./pages/ClientBilling";
 import ClientMeetings from "./pages/ClientMeetings";
 import MarketplaceLeads from "./pages/MarketplaceLeads";
+import ConsultantMessages from "./pages/ConsultantMessages";
 import ClientGSTServices from "./pages/ClientGSTServices";
 import ClientVault from "./pages/ClientVault";
 
@@ -133,6 +134,7 @@ const App = () => (
               <Route path="/consultations" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><Consultations /></AppShell></ProtectedRoute>} />
               <Route path="/insights" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><FinancialInsights /></AppShell></ProtectedRoute>} />
               <Route path="/marketplace-leads" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><MarketplaceLeads /></AppShell></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><ConsultantMessages /></AppShell></ProtectedRoute>} />
 
               {/* Consultant Calculators - Protected with AppShell */}
               <Route path="/dashboard/calculators" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><DashboardCalculators basePath="/dashboard/calculators" /></AppShell></ProtectedRoute>} />
