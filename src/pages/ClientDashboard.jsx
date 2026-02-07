@@ -17,7 +17,10 @@ import {
   Calendar,
   IndianRupee,
   ArrowUpRight,
-  Loader2
+  Loader2,
+  ClipboardList,
+  Search,
+  FileCheck
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +30,97 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import api from '@/api/axios';
+
+// Status workflow stages
+const WORKFLOW_STAGES = [
+  { key: 'pending', label: 'Pending', icon: Clock },
+  { key: 'assigned', label: 'Assigned', icon: User },
+  { key: 'in_progress', label: 'In Progress', icon: ClipboardList },
+  { key: 'review', label: 'Review', icon: Search },
+  { key: 'completed', label: 'Completed', icon: CheckCircle2 },
+];
+
+// Status Progress Bar Component
+function StatusProgressBar({ currentStatus }) {
+  const getStageIndex = (status) => {
+    const statusMap = {
+      'pending': 0,
+      'assigned': 1,
+      'in_progress': 2,
+      'completed': 4, // Skip review for now, can be added later
+    };
+    return statusMap[status] ?? 0;
+  };
+
+  const currentStageIndex = getStageIndex(currentStatus);
+
+  return (
+    <div className="w-full py-6">
+      <div className="relative">
+        {/* Progress Line */}
+        <div className="absolute top-5 left-0 right-0 h-1 bg-muted/30 rounded-full" />
+        <div
+          className="absolute top-5 left-0 h-1 bg-primary rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${(currentStageIndex / (WORKFLOW_STAGES.length - 1)) * 100}%` }}
+        />
+
+        {/* Stages */}
+        <div className="relative flex justify-between">
+          {WORKFLOW_STAGES.map((stage, index) => {
+            const isCompleted = index < currentStageIndex;
+            const isCurrent = index === currentStageIndex;
+            const Icon = stage.icon;
+
+            return (
+              <div key={stage.key} className="flex flex-col items-center gap-2 relative">
+                {/* Stage Circle */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    scale: isCurrent ? 1.1 : 1,
+                  }}
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-10",
+                    isCompleted && "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20",
+                    isCurrent && "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/20",
+                    !isCompleted && !isCurrent && "bg-background border-muted-foreground/30 text-muted-foreground"
+                  )}
+                >
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <Icon className="h-5 w-5" />
+                  )}
+                </motion.div>
+
+                {/* Stage Label */}
+                <div className="text-center">
+                  <p className={cn(
+                    "text-xs font-medium whitespace-nowrap transition-colors",
+                    (isCompleted || isCurrent) ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {stage.label}
+                  </p>
+                  {isCurrent && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1"
+                    >
+                      <Badge variant="default" className="text-[10px] h-4 px-1.5">
+                        Current
+                      </Badge>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ClientDashboard() {
   const { user } = useAuthStore();
@@ -100,7 +194,7 @@ export default function ClientDashboard() {
       <div className="space-y-8 p-1">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome back, {user?.first_name || user?.username || 'Client'} 👋
+            Welcome back, {user?.full_name || user?.username || 'Client'} 👋
           </h1>
           <p className="text-muted-foreground mt-1">
             Track your ongoing services and manage your tax compliance.
@@ -124,13 +218,13 @@ export default function ClientDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome back, {user?.first_name || user?.username || 'Client'} 👋
+            Welcome back, {user?.full_name || user?.username || 'Client'} 👋
           </h1>
           <p className="text-muted-foreground mt-1">
             Track your ongoing services and manage your tax compliance.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
             <Calendar className="h-4 w-4" />
             Tax Calendar
@@ -139,7 +233,7 @@ export default function ClientDashboard() {
             <TrendingUp className="h-4 w-4" />
             Tax Savings Report
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Grid */}
@@ -165,7 +259,7 @@ export default function ClientDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-6">
         {/* Active Services List */}
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between px-2">
@@ -187,7 +281,7 @@ export default function ClientDashboard() {
                     <Badge variant={getStatusBadgeVariant(request.status)} className="text-[10px]">
                       {getStatusLabel(request.status)}
                     </Badge>
-                    <span className="text-[10px] text-muted-foreground">#{request.id}</span>
+                    {/* <span className="text-[10px] text-muted-foreground">#{request.id}</span> */}
                   </div>
                   <h4 className="font-semibold text-sm line-clamp-1">{request.service?.title || 'Service'}</h4>
                   <p className="text-xs text-muted-foreground mt-1">{request.service?.category?.name || 'General'}</p>
@@ -241,11 +335,10 @@ export default function ClientDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <Separator className="mb-6 opacity-30" />
-
+                      {/* Consultant Information - Moved to Top */}
                       {selectedService.assigned_consultant ? (
-                        <div className="flex flex-col md:flex-row items-center gap-8 py-2">
-                          <div className="flex items-center gap-4">
+                        <div className="flex flex-col md:flex-row items-center gap-8 py-2 mb-6">
+                          <div className="flex items-center gap-6">
                             <div className="relative">
                               <Avatar className="h-16 w-16 border-2 border-primary/20">
                                 <AvatarFallback>
@@ -262,30 +355,30 @@ export default function ClientDashboard() {
                           </div>
 
                           <div className="flex flex-wrap items-center gap-3">
-                            <Button variant="secondary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
+                            <Button variant="primary" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm">
                               <MessageSquare className="h-4 w-4" /> Chat
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant="primary"
                               size="sm"
                               className="gap-2 bg-background/50 backdrop-blur-sm"
                               onClick={() => window.location.href = `tel:${selectedService.assigned_consultant.phone}`}
                             >
                               <Phone className="h-4 w-4" /> {selectedService.assigned_consultant.phone}
                             </Button>
-                            <Button
-                              variant="secondary"
+                            {/* <Button
+                              variant="primary"
                               size="sm"
                               className="gap-2 bg-background/50 backdrop-blur-sm"
                               onClick={() => window.location.href = `mailto:${selectedService.assigned_consultant.email}`}
                             >
                               <Mail className="h-4 w-4" /> Email
-                            </Button>
+                            </Button> */}
                           </div>
 
                           <div className="flex-1 md:block hidden" />
 
-                          <div className="text-right">
+                          {/* <div className="text-right">
                             {selectedService.notes && (
                               <>
                                 <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary mb-1">
@@ -294,10 +387,10 @@ export default function ClientDashboard() {
                                 <p className="font-semibold text-sm">{selectedService.notes}</p>
                               </>
                             )}
-                          </div>
+                          </div> */}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
+                        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20 mb-6">
                           <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                             <User className="h-6 w-6 text-muted-foreground" />
                           </div>
@@ -316,16 +409,25 @@ export default function ClientDashboard() {
                       <CardTitle className="text-lg">Service Details</CardTitle>
                       <CardDescription>Information about your service request</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
+                      {/* Workflow Status Bar */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-4 text-foreground">Workflow Progress</h4>
+                        <StatusProgressBar currentStatus={selectedService.status} />
+                      </div>
+
+                      <Separator className="opacity-30" />
+
+                      {/* Service Information */}
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
+                        {/* <div>
                           <p className="text-sm text-muted-foreground">Request ID</p>
                           <p className="font-semibold">#{selectedService.id}</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Priority</p>
                           <Badge variant="outline">{selectedService.priority || 'Normal'}</Badge>
-                        </div>
+                        </div> */}
                         <div>
                           <p className="text-sm text-muted-foreground">Created</p>
                           <p className="font-semibold">{new Date(selectedService.created_at).toLocaleString()}</p>

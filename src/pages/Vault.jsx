@@ -196,7 +196,7 @@ export default function Vault() {
   const selectedDoc = selectedDocId ? documents.find((d) => d.id === selectedDocId) : null;
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, status }) => documentService.review(id, status),
+    mutationFn: ({ id, status, rejection_reason }) => documentService.review(id, status, rejection_reason),
     onSuccess: () => {
       queryClient.invalidateQueries(['vault-documents']);
       toast.success("Status updated");
@@ -256,10 +256,31 @@ export default function Vault() {
     onError: (err) => toast.error("Failed to delete folder")
   });
 
-  const handleStatusChange = (newStatus) => {
-    if (selectedDoc) {
-      reviewMutation.mutate({ id: selectedDoc.id, status: newStatus });
+  const handleStatusChange = async (newStatus) => {
+    if (!selectedDoc) return;
+
+    let rejectionReason = '';
+
+    // Prompt for rejection reason if rejecting
+    if (newStatus === 'REJECTED') {
+      rejectionReason = window.prompt(
+        'Please provide a reason for rejecting this document:',
+        ''
+      );
+
+      // Cancel if no reason provided
+      if (rejectionReason === null || rejectionReason.trim() === '') {
+        toast.error('Rejection reason is required');
+        return;
+      }
     }
+
+    // Call mutation with rejection reason if provided
+    reviewMutation.mutate({
+      id: selectedDoc.id,
+      status: newStatus,
+      ...(rejectionReason && { rejection_reason: rejectionReason.trim() })
+    });
   };
 
   const getFileUrl = (file) => {

@@ -95,6 +95,10 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
 
             setIsSuccess(true);
             toast.success("Document uploaded successfully");
+
+            // Dispatch custom event to notify sidebar to refresh pending count
+            window.dispatchEvent(new CustomEvent('documentUploaded'));
+
             setTimeout(() => {
                 onSuccess?.();
                 handleClose();

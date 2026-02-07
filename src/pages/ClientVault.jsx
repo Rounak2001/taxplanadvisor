@@ -16,7 +16,8 @@ import {
     Search,
     Calendar as CalendarIcon,
     Folder as FolderIcon,
-    Plus
+    Plus,
+    XCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -108,7 +109,8 @@ export default function ClientVault() {
     }, [documents, selectedFolderId]);
 
     const requestedDocs = filteredDocs.filter(d => d.status === 'PENDING');
-    const uploadedDocs = filteredDocs.filter(d => d.status !== 'PENDING');
+    const rejectedDocs = filteredDocs.filter(d => d.status === 'REJECTED');
+    const uploadedDocs = filteredDocs.filter(d => d.status !== 'PENDING' && d.status !== 'REJECTED');
 
     // Filters for notices
     const urgentNotices = notices.filter(n => !n.is_resolved && n.priority === 'URGENT');
@@ -241,6 +243,32 @@ export default function ClientVault() {
                         </Card>
                     )}
 
+                    {/* Rejected Documents Section */}
+                    {rejectedDocs.length > 0 && (
+                        <Card className="border-border/30 bg-grey/5 overflow-hidden">
+                            <CardHeader className="pb-3 text-black">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <XCircle className="h-5 w-5" />
+                                    Rejected Documents ({rejectedDocs.length})
+                                </CardTitle>
+                                <p className="text-xs text-black/80 mt-1">
+                                    These documents need to be re-uploaded with corrections
+                                </p>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {rejectedDocs.map((doc) => (
+                                    <DocumentRow
+                                        key={doc.id}
+                                        doc={doc}
+                                        onOpen={setViewingDoc}
+                                        onDownload={() => handleDownload(doc.file, doc.title)}
+                                        onReupload={handleUploadClick}
+                                    />
+                                ))}
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <Card className="glass shadow-sm border-border/50">
                         <CardHeader className="pb-3 border-b border-border/50">
                             <CardTitle className="text-lg flex items-center gap-2">
@@ -254,7 +282,13 @@ export default function ClientVault() {
                                     <EmptyState icon={FolderOpen} title="No records yet" description="Start by uploading documents or responding to requests." />
                                 ) : (
                                     uploadedDocs.map((doc) => (
-                                        <DocumentRow key={doc.id} doc={doc} onOpen={setViewingDoc} onDownload={() => handleDownload(doc.file, doc.title)} />
+                                        <DocumentRow
+                                            key={doc.id}
+                                            doc={doc}
+                                            onOpen={setViewingDoc}
+                                            onDownload={() => handleDownload(doc.file, doc.title)}
+                                            onReupload={handleUploadClick}
+                                        />
                                     ))
                                 )}
                             </div>
@@ -402,11 +436,23 @@ export default function ClientVault() {
 }
 
 // Sub-components for cleaner code
-function DocumentRow({ doc, onOpen, onDownload }) {
+function DocumentRow({ doc, onOpen, onDownload, onReupload }) {
+    const isRejected = doc.status === 'REJECTED';
+
     return (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors border border-border/10">
+        <div className={cn(
+            "flex items-center justify-between p-3 rounded-lg transition-colors border",
+            isRejected
+                ? "bg-destructive/5 hover:bg-destructive/10 border-destructive/20"
+                : "bg-muted/20 hover:bg-muted/40 border-border/10"
+        )}>
             <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success shrink-0">
+                <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
+                    isRejected
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-success/10 text-success"
+                )}>
                     <FileText className="h-4 w-4" />
                 </div>
                 <div>
@@ -424,15 +470,44 @@ function DocumentRow({ doc, onOpen, onDownload }) {
                         {new Date(doc.uploaded_at || doc.created_at).toLocaleDateString()}
                         {doc.folder_name && ` • ${doc.folder_name}`}
                     </p>
+                    {isRejected && doc.description && (
+                        <p className="text-[10px] text-destructive mt-1 font-medium">
+                            Reason: {doc.description}
+                        </p>
+                    )}
                 </div>
             </div>
             <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpen(doc)}>
-                    <Eye className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
-                    <Download className="h-3.5 w-3.5" />
-                </Button>
+                {isRejected && (
+                    <>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpen(doc)}>
+                            <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
+                            <Download className="h-3.5 w-3.5" />
+                        </Button>
+                    </>
+                )}
+                {isRejected && onReupload && (
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={() => onReupload(doc)}
+                    >
+                        <Upload className="h-3.5 w-3.5" /> Re-upload
+                    </Button>
+                )}
+                {!isRejected && (
+                    <>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpen(doc)}>
+                            <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
+                            <Download className="h-3.5 w-3.5" />
+                        </Button>
+                    </>
+                )}
             </div>
         </div>
     );

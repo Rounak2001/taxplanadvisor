@@ -35,6 +35,8 @@ import ClientMeetings from "./pages/ClientMeetings";
 import MarketplaceLeads from "./pages/MarketplaceLeads";
 import ClientGSTServices from "./pages/ClientGSTServices";
 import ClientVault from "./pages/ClientVault";
+import ClientProfile from "./pages/ClientProfile";
+import ClientServices from "./pages/ClientServices";
 
 // GST Service Components
 import GSTServicesHub from "@/components/gstr/GSTServicesHub";
@@ -157,9 +159,9 @@ const App = () => (
 
               {/* Client Dashboard */}
               <Route path="/client" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDashboard /></ClientAppShell></ProtectedRoute>} />
-              <Route path="/client/profile" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientProfile /></ClientAppShell></ProtectedRoute>} />
+              {<Route path="/client/profile" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientProfile /></ClientAppShell></ProtectedRoute>} />}
               <Route path="/client/services" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientServices /></ClientAppShell></ProtectedRoute>} />
-              <Route path="/client/documents" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDocuments /></ClientAppShell></ProtectedRoute>} />
+              {/* {<Route path="/client/documents" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDocuments /></ClientAppShell></ProtectedRoute>} />} */}
               <Route path="/client/vault" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientVault /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/meetings" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMeetings /></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/messages" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientMessages /></ClientAppShell></ProtectedRoute>} />

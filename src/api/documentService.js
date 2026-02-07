@@ -68,8 +68,18 @@ export const documentService = {
     },
 
     // Consultant reviews a document
-    review: async (documentId, status) => {
-        const response = await api.post(`/vault/documents/${documentId}/review/`, { status });
+    review: async (documentId, status, rejection_reason = null) => {
+        const payload = { status };
+        if (rejection_reason) {
+            payload.rejection_reason = rejection_reason;
+        }
+        const response = await api.post(`/vault/documents/${documentId}/review/`, payload);
+        return response.data;
+    },
+
+    // Get pending document count for client
+    getPendingCount: async () => {
+        const response = await api.get('/vault/documents/pending-count/');
         return response.data;
     },
 

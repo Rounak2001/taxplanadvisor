@@ -1,78 +1,79 @@
-// Service ID mapping utility
-// Maps service titles to their database IDs from the consultants app
+// Auto-generated Service ID Map
+// Run: python generate_service_map.py > ../frontend/src/utils/serviceIdMap.js
 
 export const SERVICE_ID_MAP = {
-    // Income Tax
-    "Capital Gains Tax Planning": null, // Parent service with variants
-    "Reinvestment Planning as per IT Act": 1,
-    "Property Revaluation": null, // Needs ID
-    "Income Tax E-Filing": 2,
-    "Business Tax Filing": 3,
-    "Partnership Firm / LLP ITR": 4,
-    "Company ITR Filing": 5,
-    "Trust / NGO Tax Filing": 6,
-    "15CA - 15CB Filing": 7,
-    "TAN Registration": 8,
-    "TDS Return Filing": 9,
-    "Revised ITR Return (ITR-U)": 10,
+    // Capital Gains & Tax Planning
+    "Filing 26QB": 52,
+    "Tax Planning Consultation": 53,
 
-    // GST
-    "GST Registration": 11,
-    "GST Return Filing": 12,
-    "GST Annual Return": 13,
-    "GST Refund Claim": 14,
-    "GST Cancellation": 15,
-    "GST Amendment": 16,
-    "E-Way Bill Generation": 17,
-    "GST Audit": 18,
-    "GST LUT Filing": 19,
-
-    // Registration
-    "PAN Registration": 20,
-    "Aadhaar-PAN Linking": 21,
-    "Udyam Registration (MSME)": 22,
-    "Import Export Code (IEC)": 23,
-    "FSSAI License": 24,
-    "Shop Act License": 25,
-    "Professional Tax Registration": 26,
-    "ESI Registration": 27,
-    "PF Registration": 28,
+    // Certification Services
+    "15CA/15CB (FEMA Remittance)": 56,
+    "Capital Contribution Certificate": 57,
+    "Net Worth Certificate": 54,
+    "Turnover Certificate": 55,
 
     // Compliance
-    "ROC Annual Filing": 29,
-    "DIR-3 KYC Filing": 30,
-    "MCA Compliance": 31,
-    "Statutory Audit": 32,
-    "Internal Audit": 33,
-    "Tax Audit": 34,
-    "GST Audit": 35,
-    "Secretarial Audit": 36,
-    "Stock Audit": 37,
+    "Business Plan": 48,
+    "ESI Registration": 50,
+    "ESI Return Filing": 40,
+    "FDI Filing with RBI": 42,
+    "FLA Return Filing": 43,
+    "FSSAI Renewal": 44,
+    "FSSAI Return Filing": 45,
+    "PF Registration": 49,
+    "PF Return Filing": 39,
+    "Partnership Compliance": 46,
+    "Professional Tax Registration": 51,
+    "Professional Tax Return Filing": 41,
+    "Proprietorship Compliance": 47,
+
+    // GST
+    "GST Amendment": 15,
+    "GST Annual Return Filing (GSTR-9)": 19,
+    "GST LUT Form": 17,
+    "GST NIL Return Filing": 14,
+    "GST Registration": 11,
+    "GST Registration for Foreigners": 12,
+    "GST Return Filing by Accountant": 13,
+    "GST Revocation": 16,
+    "GSTR-10 (Final Return)": 18,
+
+    // Income Tax
+    "15CA - 15CB Filing": 7,
+    "Business Tax Filing": 3,
+    "Capital Gains Tax Planning": 1,
+    "Company ITR Filing": 5,
+    "Income Tax E-Filing": 2,
+    "Partnership Firm / LLP ITR": 4,
+    "Revised ITR Return (ITR-U)": 10,
+    "TAN Registration": 8,
+    "TDS Return Filing": 9,
+    "Trust / NGO Tax Filing": 6,
+
+    // Registration
+    "DSC Signature": 22,
+    "FSSAI Registration": 24,
+    "IEC Certificate": 21,
+    "PAN Registration (Individual/Company)": 20,
+    "Startup India Registration": 23,
+    "Trade License": 25,
+    "Udyam Registration": 26,
 
     // Startup & Advisory
-    "Sole Proprietorship Registration": 38,
-    "Partnership Firm Registration": 39,
-    "LLP Registration": 40,
-    "Private Limited Company": 41,
-    "One Person Company (OPC)": 42,
-    "Section 8 Company (NGO)": 43,
-    "Nidhi Company": 44,
-    "Producer Company": 45,
-    "Business Plan Preparation": 46,
-    "Financial Projections": 47,
-    "Pitch Deck Creation": 48,
-    "Startup India Registration": 49,
-    "Trademark Registration": 50,
-    "Copyright Registration": 51,
-    "Patent Filing": 52,
-
-    // Accounting
-    "Monthly Bookkeeping": 53,
-    "Payroll Processing": 54,
-    "Financial Statement Preparation": 55,
-    "MIS Reporting": 56,
-    "Budgeting & Forecasting": 57,
+    "Business Structure Selection": 27,
+    "Indian Subsidiary": 38,
+    "Limited Liability Partnership": 32,
+    "One Person Company": 31,
+    "Partnership": 30,
+    "Private Limited Company": 33,
+    "Producer Company": 37,
+    "Proprietorship": 29,
+    "Public Limited Company": 36,
+    "Section 8 Company": 34,
+    "Startup Certificate": 28,
+    "Trust Registration": 35,
 };
+
 
 /**
  * Get service ID by title
@@ -90,3 +91,4 @@ export function getServiceId(title, variantName = null) {
     // Otherwise match by title
     return SERVICE_ID_MAP[title] || null;
 }
+
