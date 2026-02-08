@@ -557,7 +557,7 @@ const servicesData = [
         services: [
             {
                 title: "Project Reports",
-                price: "₹25,000 or 2% of loan amount whichever is higher",
+                price: "25,000 or 2% of loan amount whichever is higher",
                 tat: "5-10 days",
                 documents: "Business Plan or Proposal\nPromoter/Director Profile and KYC Documents\nPAN and Aadhaar of Promoters\nCompany/Firm Registration Documents\nMOA & AOA / Partnership Deed / LLP Agreement\nLoan Repayment Schedule (if applicable)\nPast Financials (if existing business)\nBank Statements (last 6 months)\nDetails of Existing Loans (if any)\nLicenses/Approvals (if applicable)"
             }
