@@ -149,7 +149,12 @@ export default function ClientVault() {
             documents.map(d => d.title.toLowerCase().trim())
         );
 
-        serviceRequests.forEach(request => {
+        // CRITICAL FIX: Only show requirements for ACTIVE services
+        const activeServices = serviceRequests.filter(request =>
+            request.status === 'assigned' || request.status === 'in_progress'
+        );
+
+        activeServices.forEach(request => {
             if (request.service?.documents_required) {
                 // Split by newline, comma, semicolon, or bullet points
                 const rawDocs = request.service.documents_required;
