@@ -8,7 +8,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Upload, FileText, CheckCircle, XCircle } from "lucide-react";
 
-axios.defaults.baseURL = "http://localhost:8000/";
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 export default function GstUpload() {
   const [gstr1, setGstr1] = useState(null);

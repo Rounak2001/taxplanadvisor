@@ -89,7 +89,7 @@ export default function ClientVault() {
     const getFileUrl = (file) => {
         if (!file) return null;
         if (typeof file === 'string' && file.startsWith('http')) return file;
-        const baseUrl = 'http://localhost:8000';
+        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
         const filePath = typeof file === 'string' ? file : file.url;
         if (!filePath) return null;
         return `${baseUrl}${filePath.startsWith('/') ? filePath : `/${filePath}`}`;

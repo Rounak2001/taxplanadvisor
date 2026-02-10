@@ -21,6 +21,7 @@ const navGroups = [
     items: [
       { to: '/clients', icon: Users, label: 'Clients' },
       { to: '/vault', icon: FolderOpen, label: 'Smart Vault' },
+      { to: '/messages', icon: MessageSquare, label: 'Messages' },
       { to: '/consultations', icon: Video, label: 'Consultations' },
       // { to: '/marketplace-leads', icon: TrendingUp, label: 'Marketplace Leads' },
     ],

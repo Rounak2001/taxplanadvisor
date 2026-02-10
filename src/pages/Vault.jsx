@@ -293,7 +293,7 @@ export default function Vault() {
     }
 
     // Fallback to local development server
-    const baseUrl = 'http://localhost:8000';
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
     const filePath = typeof file === 'string' ? file : file.url;
     if (!filePath) return null;
 
