@@ -158,6 +158,10 @@
     @apply bg-card/90 backdrop-blur-2xl border border-border/30;
   }
 
+  .glass-card {
+    @apply bg-card/95 backdrop-blur-md border-2 border-border shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -185,6 +189,11 @@
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-emerald-dark bg-clip-text text-transparent;
   }
+
+  .gradient-text-accent {
+    @apply bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent;
+  }
+
 
   /* Premium Shadow */
   .shadow-premium {

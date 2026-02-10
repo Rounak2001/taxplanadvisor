@@ -141,32 +141,33 @@ export default function Vault() {
   // Filter documents by selected client, status, and folder/category
   const filteredDocs = useMemo(() => {
     return documents.filter((doc) => {
-      // 1. Client filter
-      if (selectedClientId !== 'all' && doc.client !== Number(selectedClientId)) return false;
+      // 1. Client filter - be robust to both ID and object formats
+      const docClientId = typeof doc.client === 'object' ? doc.client.id : doc.client;
+      if (selectedClientId !== 'all' && Number(docClientId) !== Number(selectedClientId)) return false;
 
       // 2. Status filter
       if (statusFilter !== 'all' && doc.status !== statusFilter) return false;
 
       // 3. Folder / Smart Category filter
       if (selectedFolderId !== 'all') {
-        if (selectedClientId === 'all') {
-          // Handling Smart Categories
-          if (selectedFolderId === 'pending') return doc.status === 'PENDING';
-          if (selectedFolderId === 'review') return doc.status === 'UPLOADED';
-          if (selectedFolderId === 'recent') {
-            const fortyEightHoursAgo = new Date(Date.now() - (48 * 60 * 60 * 1000));
-            return doc.uploaded_at && new Date(doc.uploaded_at) > fortyEightHoursAgo;
-          }
-          if (selectedFolderId.toString().startsWith('sys-')) {
-            const folderName = selectedFolderId.replace('sys-', '');
-            return doc.folder_name === folderName;
-          }
-          // Default fallthrough for aggregated names if any
-          if (typeof selectedFolderId === 'string' && doc.folder_name !== selectedFolderId) return false;
-        } else {
-          // ID-based for specific client
-          if (typeof selectedFolderId === 'number' && doc.folder !== selectedFolderId) return false;
+        // Handling Smart Categories regardless of client selection
+        if (selectedFolderId === 'pending') return doc.status === 'PENDING';
+        if (selectedFolderId === 'review') return doc.status === 'UPLOADED';
+        if (selectedFolderId === 'recent') {
+          const fortyEightHoursAgo = new Date(Date.now() - (48 * 60 * 60 * 1000));
+          return doc.uploaded_at && new Date(doc.uploaded_at) > fortyEightHoursAgo;
         }
+
+        if (selectedFolderId.toString().startsWith('sys-')) {
+          const folderName = selectedFolderId.replace('sys-', '');
+          return doc.folder_name === folderName;
+        }
+
+        // ID-based for folders
+        if (typeof selectedFolderId === 'number' && doc.folder !== selectedFolderId) return false;
+
+        // Fallback for string matching folder names
+        if (typeof selectedFolderId === 'string' && doc.folder_name !== selectedFolderId) return false;
       }
       return true;
     });

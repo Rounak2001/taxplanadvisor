@@ -81,7 +81,7 @@ export function AssignedClientsCard() {
                         {clients.map((client) => (
                             <div
                                 key={client.id}
-                                className="p-4 rounded-lg border bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                                className="p-4 rounded-lg border /30 hover:bg-gray-200 transition-colors"
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
@@ -112,13 +112,6 @@ export function AssignedClientsCard() {
                                             )}
                                             Call
                                         </Button>
-                                        <Badge variant={client.status === 'active' ? 'default' : 'outline'}>
-                                            {client.status === 'active' ? (
-                                                <><CheckCircle className="h-3 w-3 mr-1" /> Onboarded</>
-                                            ) : (
-                                                <><Clock className="h-3 w-3 mr-1" /> Pending</>
-                                            )}
-                                        </Badge>
                                     </div>
                                 </div>
                             </div>

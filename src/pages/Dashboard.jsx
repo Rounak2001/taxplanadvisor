@@ -1,22 +1,16 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Users,
-  FileCheck,
-  TrendingUp,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  Calendar,
-  Clock,
+import { useQuery } from '@tanstack/react-query';
+import {Users,FileCheck,TrendingUp,AlertTriangle,ArrowUpRight,ArrowDownRight,Calendar, Clock,AlertCircle,CheckCircle2,Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { mockClients, mockDocuments, mockActivities } from '@/lib/mockData';
 import { AssignedClientsCard } from '@/components/consultant/AssignedClientsCard';
 import { CallLogsTable } from '@/components/consultant/CallLogsTable';
+import { ActivityTimeline } from '@/components/consultant/ActivityTimeline';
+import { consultantService } from '@/api/consultantService';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -24,66 +18,71 @@ export default function Dashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
+  // Fetch dashboard stats with React Query
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['consultant-dashboard-stats'],
+    queryFn: consultantService.getDashboardStats,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  // Fetch full dashboard data
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+    queryKey: ['consultant-dashboard'],
+    queryFn: consultantService.getDashboard,
+    refetchInterval: 5000,
+  });
+
   const stats = [
     {
       title: 'My Workload',
-      value: `${user?.stats?.current_load || 0} / ${user?.stats?.max_capacity || 10}`,
-      change: `${user?.stats?.current_load || 0} clients`,
-      changeType: 'positive',
+      value: dashboardStats?.clients
+        ? `${dashboardStats.clients.current_clients} / ${dashboardStats.clients.max_capacity}`
+        : '0 / 10',
+      change: dashboardStats?.clients
+        ? `${dashboardStats.clients.utilization_percentage}% utilized`
+        : '0% utilized',
+      changeType: (dashboardStats?.clients?.utilization_percentage || 0) > 80 ? 'negative' : 'positive',
       icon: Users,
     },
     {
       title: 'Services Offered',
-      value: user?.stats?.services?.length || 0,
-      change: user?.stats?.services?.join(', ') || 'N/A',
+      value: dashboardStats?.services_offered || 0,
+      change: `Active services`,
       changeType: 'positive',
       icon: FileCheck,
     },
     {
-      title: 'GST Filings Due',
-      value: '8',
-      change: '+2',
-      changeType: 'negative',
-      icon: Calendar,
+      title: 'Active Requests',
+      value: dashboardStats?.service_requests?.in_progress || 0,
+      change: `${dashboardStats?.service_requests?.pending || 0} pending`,
+      changeType: (dashboardStats?.service_requests?.pending || 0) > 0 ? 'negative' : 'positive',
+      icon: Clock,
     },
     {
-      title: 'Revenue This Month',
-      value: '₹2.4L',
-      change: '+18%',
+      title: 'Completed This Month',
+      value: dashboardStats?.monthly_completed || 0,
+      change: `${dashboardStats?.service_requests?.completed || 0} total`,
       changeType: 'positive',
-      icon: TrendingUp,
+      icon: CheckCircle2,
     },
   ];
-
-  const upcomingDeadlines = [
-    { client: 'Rajesh Kumar Industries', task: 'GST Filing', date: 'Jan 20', priority: 'high' },
-    { client: 'Sharma Textiles Pvt Ltd', task: 'TDS Return', date: 'Jan 25', priority: 'medium' },
-    { client: 'Singh Pharmaceuticals', task: 'Advance Tax', date: 'Jan 31', priority: 'high' },
-    { client: 'Patel Electronics', task: 'ITR Filing', date: 'Feb 15', priority: 'low' },
-  ];
-
-  const activeClients = mockClients.filter(
-    (c) => c.consultantId === consultantId && c.status === 'active'
-  );
-
-  const pendingDocs = mockDocuments.filter(
-    (d) => d.consultantId === consultantId && d.status !== 'approved'
-  );
-
-  const recentActivities = mockActivities.slice(0, 5);
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user?.full_name || 'Consultant'}! Here's your practice status.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Welcome back, {user?.full_name || 'Consultant'} 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Here's your practice overview and client status.
+          </p>
         </div>
-        <Badge variant="outline" className="text-sm">
-          {taxYear}
-        </Badge>
       </div>
+
+      {/* Assigned Clients Section */}
+      <AssignedClientsCard />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -123,127 +122,110 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Deadlines */}
+
+
+      {/* Document Review Alert */}
+      {dashboardStats?.documents?.total_pending > 0 && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
+                  <AlertCircle size={24} strokeWidth={1.5} className="text-destructive" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    Documents Pending Review
+                    <Badge variant="destructive" className="animate-pulse">
+                      {dashboardStats.documents.total_pending}
+                    </Badge>
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {dashboardStats.documents.needs_review} newly uploaded • {dashboardStats.documents.rejected} need re-review
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                className="gap-2"
+                onClick={() => navigate('/vault')}
+              >
+                <FileCheck size={16} />
+                Review Documents
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Service Requests Overview */}
+      {dashboardData?.assigned_requests && dashboardData.assigned_requests.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock size={20} strokeWidth={1.5} />
-              Upcoming Deadlines
-            </CardTitle>
-            <CardDescription>Tasks due in the next 30 days</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock size={20} strokeWidth={1.5} />
+                  Active Service Requests
+                </CardTitle>
+                <CardDescription>
+                  {dashboardData.assigned_requests.length} requests currently assigned to you
+                </CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate('/services')}>
+                View All
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingDeadlines.map((deadline, index) => (
+            <div className="space-y-3">
+              {dashboardData.assigned_requests.slice(0, 5).map((request) => (
                 <div
-                  key={index}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  key={request.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                  onClick={() => navigate(`/services/${request.id}`)}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
                         'h-2 w-2 rounded-full',
-                        deadline.priority === 'high' && 'bg-destructive',
-                        deadline.priority === 'medium' && 'bg-warning',
-                        deadline.priority === 'low' && 'bg-success'
+                        request.status === 'pending' && 'bg-warning',
+                        request.status === 'assigned' && 'bg-info',
+                        request.status === 'in_progress' && 'bg-primary',
+                        request.status === 'completed' && 'bg-success'
                       )}
                     />
                     <div>
-                      <p className="font-medium text-sm">{deadline.client}</p>
-                      <p className="text-xs text-muted-foreground">{deadline.task}</p>
+                      <p className="font-medium text-sm">
+                        {request.client_name || 'Client'} - {request.service?.title || 'Service'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Assigned {new Date(request.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short'
+                        })}
+                      </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">{deadline.date}</Badge>
+                  <Badge variant={
+                    request.status === 'pending' ? 'secondary' :
+                      request.status === 'in_progress' ? 'default' :
+                        request.status === 'completed' ? 'success' : 'secondary'
+                  }>
+                    {request.status.replace('_', ' ')}
+                  </Badge>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+      )}
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp size={20} strokeWidth={1.5} />
-              Recent Activity
-            </CardTitle>
-            <CardDescription>Latest updates across your clients</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => {
-                const client = mockClients.find((c) => c.id === activity.clientId);
-                return (
-                  <div
-                    key={activity.id}
-                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
-                  >
-                    <div
-                      className={cn(
-                        'mt-1 h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium',
-                        activity.type === 'whatsapp' && 'bg-success/20 text-success',
-                        activity.type === 'call' && 'bg-info/20 text-info',
-                        activity.type === 'document' && 'bg-warning/20 text-warning',
-                        activity.type === 'system' && 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {activity.type.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{activity.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {client?.name} • {activity.description}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(activity.timestamp).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
-              <Users size={24} strokeWidth={1.5} className="text-primary" />
-              <span>Add Client</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
-              <FileCheck size={24} strokeWidth={1.5} className="text-primary" />
-              <span>Upload Document</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
-              <Calendar size={24} strokeWidth={1.5} className="text-primary" />
-              <span>New CMA Report</span>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => navigate('/gst')}>
-              <TrendingUp size={24} strokeWidth={1.5} className="text-primary" />
-              <span>GST Reconciliation</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Activity Timeline */}
+      <ActivityTimeline />
 
       {/* Call Logs Section */}
       <CallLogsTable limit={5} />
-
-      {/* Assigned Clients Section */}
-      <AssignedClientsCard />
     </div>
   );
 }

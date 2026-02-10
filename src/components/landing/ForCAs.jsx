@@ -104,13 +104,13 @@ const ForCAs = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <div
-                            className="glass-card p-8 rounded-3xl"
+                            className="glass-card p-8 rounded-3xl border-2 shadow-xl"
                         >
                             {/* CA Profile Card Preview */}
-                            <div className="space-y-6">
+                            <div className=" space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div
-                                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60"
+                                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/60 shadow-md"
                                     />
                                     <div>
                                         <div
@@ -119,14 +119,14 @@ const ForCAs = () => {
                                         <div className="h-4 bg-muted/30 rounded w-24" />
                                     </div>
                                     <div
-                                        className="ml-auto flex items-center gap-1"
+                                        className="ml-auto flex items-center gap-1 bg-accent/10 px-3 py-1.5 rounded-lg border border-accent/20"
                                     >
                                         <Star className="w-4 h-4 text-accent fill-accent" />
                                         <span className="text-foreground font-semibold">4.9</span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className=" grid grid-cols-3 gap-4 ">
                                     {[
                                         { value: "250+", label: "Returns Filed", gradient: "gradient-text" },
                                         { value: "98%", label: "Success Rate", gradient: "gradient-text-accent" },
@@ -134,7 +134,7 @@ const ForCAs = () => {
                                     ].map((stat, index) => (
                                         <motion.div
                                             key={stat.label}
-                                            className="glass-card p-4 text-center"
+                                            className="glass-card p-4 text-center border-2 shadow-md hover:shadow-lg rounded-2xl"
                                             whileHover={{ scale: 1.05, y: -5 }}
                                             initial={{ opacity: 0, y: 20 }}
                                             whileInView={{ opacity: 1, y: 0 }}
@@ -151,7 +151,7 @@ const ForCAs = () => {
                                     {[100, 80, 60].map((width, i) => (
                                         <motion.div
                                             key={i}
-                                            className="h-4 bg-muted/30 rounded"
+                                            className="h-4 bg-muted/30 rounded border border-border/30"
                                             style={{ width: `${width}%` }}
                                             initial={{ width: 0 }}
                                             whileInView={{ width: `${width}%` }}
@@ -169,14 +169,14 @@ const ForCAs = () => {
                                     transition={{ delay: 0.8 }}
                                 >
                                     {[
-                                        { label: "ITR", bg: "bg-primary/20", text: "text-primary" },
-                                        { label: "GST", bg: "bg-primary/20", text: "text-primary" },
-                                        { label: "Audit", bg: "bg-accent/20", text: "text-accent" },
-                                        { label: "+3", bg: "bg-muted/50", text: "text-muted-foreground" },
+                                        { label: "ITR", bg: "bg-primary/20", text: "text-primary", border: "border-primary/30" },
+                                        { label: "GST", bg: "bg-primary/20", text: "text-primary", border: "border-primary/30" },
+                                        { label: "Audit", bg: "bg-accent/20", text: "text-accent", border: "border-accent/30" },
+                                        { label: "+3", bg: "bg-muted/50", text: "text-muted-foreground", border: "border-border" },
                                     ].map((tag, i) => (
                                         <motion.span
                                             key={tag.label}
-                                            className={`px-3 py-1 ${tag.bg} ${tag.text} text-xs rounded-full`}
+                                            className={`px-3 py-1 ${tag.bg} ${tag.text} border ${tag.border} text-xs rounded-full font-medium`}
                                             whileHover={{ scale: 1.1 }}
                                             initial={{ opacity: 0, scale: 0 }}
                                             whileInView={{ opacity: 1, scale: 1 }}
