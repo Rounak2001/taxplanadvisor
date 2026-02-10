@@ -122,8 +122,8 @@ export function CallLogsTable({ clientId = null, limit = 10, showTitle = true })
                                         {/* Left: Client and Status */}
                                         <div className="flex items-center gap-3 min-w-0 flex-1">
                                             <div className={`p-2 rounded-full ${log.status === 'completed' ? 'bg-success/20 text-success' :
-                                                    log.status === 'failed' ? 'bg-destructive/20 text-destructive' :
-                                                        'bg-muted text-muted-foreground'
+                                                log.status === 'failed' ? 'bg-destructive/20 text-destructive' :
+                                                    'bg-muted text-muted-foreground'
                                                 }`}>
                                                 <StatusIcon className="h-4 w-4" />
                                             </div>
@@ -136,6 +136,12 @@ export function CallLogsTable({ clientId = null, limit = 10, showTitle = true })
                                                         <>
                                                             <span>•</span>
                                                             <span>{log.duration_display}</span>
+                                                        </>
+                                                    )}
+                                                    {log.price && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span className="text-primary">₹{parseFloat(log.price).toFixed(2)}</span>
                                                         </>
                                                     )}
                                                 </div>
