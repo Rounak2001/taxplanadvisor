@@ -12,14 +12,14 @@ import { useAuth } from '@/hooks/useAuth.jsx';
 export default function Login() {
   const navigate = useNavigate();
   const { login, register, loading } = useAuth();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  
+
   // Register form state
   const [registerData, setRegisterData] = useState({
     name: '',
@@ -84,7 +84,7 @@ export default function Login() {
               {activeTab === 'login' ? 'Sign In' : 'Create Account'}
             </CardTitle>
             <CardDescription className="text-center">
-              {activeTab === 'login' 
+              {activeTab === 'login'
                 ? 'Enter your credentials to access your dashboard'
                 : 'Register as a Chartered Accountant'
               }
@@ -110,6 +110,7 @@ export default function Login() {
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         className="pl-10"
+                        autoComplete="email"
                         required
                       />
                     </div>
@@ -131,6 +132,7 @@ export default function Login() {
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         className="pl-10 pr-10"
+                        autoComplete="current-password"
                         required
                       />
                       <button
@@ -162,6 +164,7 @@ export default function Login() {
                         value={registerData.name}
                         onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
                         className="pl-10"
+                        autoComplete="name"
                         required
                       />
                     </div>
@@ -178,6 +181,7 @@ export default function Login() {
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                         className="pl-10"
+                        autoComplete="email"
                         required
                       />
                     </div>
@@ -195,6 +199,7 @@ export default function Login() {
                           value={registerData.phone}
                           onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
                           className="pl-10"
+                          autoComplete="tel"
                           required
                         />
                       </div>
@@ -209,6 +214,7 @@ export default function Login() {
                           value={registerData.firm_name}
                           onChange={(e) => setRegisterData({ ...registerData, firm_name: e.target.value })}
                           className="pl-10"
+                          autoComplete="organization"
                         />
                       </div>
                     </div>
@@ -225,6 +231,7 @@ export default function Login() {
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         className="pl-10 pr-10"
+                        autoComplete="new-password"
                         required
                         minLength={8}
                       />
@@ -249,6 +256,7 @@ export default function Login() {
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                         className="pl-10"
+                        autoComplete="new-password"
                         required
                       />
                     </div>

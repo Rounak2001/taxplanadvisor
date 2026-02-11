@@ -176,6 +176,16 @@ const allCalculators = [
         path: 'portfolio',
         color: 'text-primary',
         bgColor: 'bg-primary/10'
+    },
+    {
+        id: 'partnership',
+        title: 'Partnership Calculator',
+        description: 'Calculate interest on capital & partner remuneration (40b)',
+        icon: Landmark,
+        path: 'partnership',
+        color: 'text-indigo-500',
+        bgColor: 'bg-indigo-50/50',
+        badge: 'New'
     }
 ];
 

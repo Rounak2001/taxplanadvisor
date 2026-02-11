@@ -2,7 +2,20 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Input = React.forwardRef(({ className, type, ...props }, ref) => {
+const Input = React.forwardRef(({ className, type, onFocus, ...props }, ref) => {
+  const handleFocus = (e) => {
+    // Prevent auto-selection when clicking on input
+    const selectionAllowed = ["text", "search", "url", "tel", "password"].includes(type || "text");
+    if (e.target.value && selectionAllowed) {
+      const length = e.target.value.length;
+      e.target.setSelectionRange(length, length);
+    }
+    // Call custom onFocus if provided
+    if (onFocus) {
+      onFocus(e);
+    }
+  };
+
   return (
     <input
       type={type}
@@ -11,6 +24,7 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => {
         className,
       )}
       ref={ref}
+      onFocus={handleFocus}
       {...props}
     />
   );
