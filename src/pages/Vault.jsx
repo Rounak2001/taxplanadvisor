@@ -21,6 +21,7 @@ import { ShareReportModal } from '@/components/vault/ShareReportModal';
 import { ShareNoticeModal } from '@/components/vault/ShareNoticeModal';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import api from '@/api/axios';
 
 const REPORT_TYPE_COLORS = {
   CMA: 'bg-purple-100 text-purple-700',
@@ -75,6 +76,18 @@ export default function Vault() {
     queryKey: ['vault-folders', selectedClientId],
     queryFn: () => documentService.listFolders(selectedClientId === 'all' ? null : selectedClientId),
   });
+
+  // Fetch all service requests to identify revisions
+  const { data: serviceRequests = [] } = useQuery({
+    queryKey: ['consultant-service-requests-vault'],
+    queryFn: async () => {
+      const response = await api.get('/consultants/requests/');
+      return response.data;
+    },
+    refetchInterval: 5000,
+  });
+
+  const hasPendingRevision = serviceRequests.some(r => r.status === 'revision_pending');
 
   // Group folders by name for 'All Clients' view to avoid redundancy
   const displayFolders = useMemo(() => {
@@ -347,7 +360,12 @@ export default function Vault() {
         <div className="flex items-center gap-4 mb-4">
           <TabsList>
             <TabsTrigger value="documents">Client Documents</TabsTrigger>
-            <TabsTrigger value="shared">Shared Reports</TabsTrigger>
+            <TabsTrigger value="shared" className="relative">
+              Shared Reports
+              {hasPendingRevision && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-rose-500 rounded-full border-2 border-background animate-pulse" />
+              )}
+            </TabsTrigger>
             <TabsTrigger value="notices">Legal & Notices</TabsTrigger>
           </TabsList>
 
@@ -585,49 +603,87 @@ export default function Vault() {
               </div>
             ) : (
               <div className="space-y-3 max-h-full overflow-y-auto">
-                {filteredReports.map((report) => (
-                  <div
-                    key={report.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors border border-border/20"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileSpreadsheet className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0">
+                {filteredReports.map((report) => {
+                  const associatedReq = serviceRequests.find(r =>
+                    r.status === 'revision_pending' && Number(r.client) === Number(report.client)
+                  );
+
+                  return (
+                    <div
+                      key={report.id}
+                      className={cn(
+                        "flex flex-col p-3 rounded-lg transition-colors border",
+                        associatedReq ? "bg-rose-50/50 border-rose-200" : "bg-muted/40 hover:bg-muted/60 border-border/20"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn(
+                            "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                            associatedReq ? "bg-rose-100 text-rose-600" : "bg-primary/10 text-primary"
+                          )}>
+                            <FileSpreadsheet className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-sm truncate">{report.title}</p>
+                              <Badge className={cn("text-[9px] h-4 px-1 leading-none", REPORT_TYPE_COLORS[report.report_type] || REPORT_TYPE_COLORS.OTHER)}>
+                                {report.report_type}
+                              </Badge>
+                              {associatedReq && (
+                                <Badge variant="destructive" className="text-[9px] h-4 px-1 leading-none animate-pulse">
+                                  Revision Requested
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                              <span className="truncate">For: <span className="font-medium">{report.client_name || 'Client'}</span></span>
+                              <span>•</span>
+                              <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm truncate">{report.title}</p>
-                          <Badge className={cn("text-[9px] h-4 px-1 leading-none", REPORT_TYPE_COLORS[report.report_type] || REPORT_TYPE_COLORS.OTHER)}>
-                            {report.report_type}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
-                          <span className="truncate">For: <span className="font-medium">{report.client_name || 'Client'}</span></span>
-                          <span>•</span>
-                          <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                          <Button variant="ghost" size="icon" onClick={() => window.open(getFileUrl(report.file), '_blank')}>
+                            <Maximize2 className="h-4 w-4" />
+                          </Button>
+                          <a href={getFileUrl(report.file)} target="_blank" rel="noopener noreferrer">
+                            <Button variant="ghost" size="icon">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </a>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:bg-destructive/10"
+                            onClick={() => deleteReportMutation.mutate(report.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
+                      {associatedReq?.revision_notes && (
+                        <div className="mt-2 pl-12">
+                          <div className="text-[11px] bg-rose-100/50 text-rose-800 p-2 rounded border border-rose-200/50 flex flex-col gap-1">
+                            <span className="font-bold uppercase tracking-widest text-[9px] opacity-70">Client Feedback:</span>
+                            <p className="italic leading-relaxed">{associatedReq.revision_notes}</p>
+                          </div>
+                        </div>
+                      )}
+                      {associatedReq && (
+                        <div className="mt-2 pl-12">
+                          <Button
+                            size="sm"
+                            className="h-7 gap-2 bg-amber-600 hover:bg-amber-700 text-white text-[11px]"
+                            onClick={() => setIsShareReportModalOpen(true)}
+                          >
+                            <Upload className="h-3 w-3" /> Re-upload Revised Report
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => window.open(getFileUrl(report.file), '_blank')}>
-                        <Maximize2 className="h-4 w-4" />
-                      </Button>
-                      <a href={getFileUrl(report.file)} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="icon">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </a>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteReportMutation.mutate(report.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
