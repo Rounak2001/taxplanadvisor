@@ -50,6 +50,16 @@ const allCalculators = [
         bgColor: 'bg-indigo-500/10'
     },
     {
+        id: 'partnership',
+        title: 'Partnership Calculator',
+        description: 'Calculate interest on capital & partner remuneration (40b)',
+        icon: Landmark,
+        path: 'partnership',
+        color: 'text-indigo-500',
+        bgColor: 'bg-indigo-50/50',
+        badge: 'New'
+    },
+    {
         id: 'emi',
         title: 'EMI Calculator',
         description: 'Calculate your monthly loan EMI with interest breakdown',
@@ -177,16 +187,7 @@ const allCalculators = [
         color: 'text-primary',
         bgColor: 'bg-primary/10'
     },
-    {
-        id: 'partnership',
-        title: 'Partnership Calculator',
-        description: 'Calculate interest on capital & partner remuneration (40b)',
-        icon: Landmark,
-        path: 'partnership',
-        color: 'text-indigo-500',
-        bgColor: 'bg-indigo-50/50',
-        badge: 'New'
-    }
+
 ];
 
 // Dashboard-specific calculators page - flat grid, no categories
