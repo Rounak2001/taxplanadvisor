@@ -19,7 +19,7 @@ const servicesData = [
         services: [
             {
                 title: "Capital Gains Tax Planning",
-                price: 4999,
+                price: 1,
                 tat: "5-10 days",
                 variants: [
                     {
@@ -36,55 +36,55 @@ const servicesData = [
             },
             {
                 title: "Income Tax E-Filing",
-                price: 999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "PAN Card\nAadhaar Card\nForm 16/16A\nBank Statements\nInvestment Proofs (80C, 80D, etc.)"
             },
             {
                 title: "Business Tax Filing",
-                price: 4999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "PAN Card of Business\nBalance Sheet & P&L Account\nBank Statements\nGST Returns (if applicable)\nPrevious Year ITR"
             },
             {
                 title: "Partnership Firm / LLP ITR",
-                price: 7499,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Partnership Deed/LLP Agreement\nPAN of Firm/LLP\nAudited Financials\nPartner Details\nDigital Signature"
             },
             {
                 title: "Company ITR Filing",
-                price: 9999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Certificate of Incorporation\nAudited Balance Sheet & P&L\nDirector Details & KYC\nDigital Signature (Class 3)\nForm 26AS"
             },
             {
                 title: "Trust / NGO Tax Filing",
-                price: 7499,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Trust Deed/Registration Certificate\nPAN of Trust/NGO\nAudit Report (Form 10B/10BB)\nDonor List\nUtilization Certificate"
             },
             {
                 title: "15CA - 15CB Filing",
-                price: 4999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "Invoice for foreign payment\nRemittee details\nTRC of remittee\nAgreement/Contract copy\nBank account details"
             },
             {
                 title: "TAN Registration",
-                price: 999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "PAN of Entity\nIdentity Proof of Authorized Signatory\nAddress Proof of Business\nDigital Signature"
             },
             {
                 title: "TDS Return Filing",
-                price: 1499,
+                price: 1,
                 tat: "2-3 days",
                 documents: "TAN Details\nTDS Challans\nList of Deductees with PAN\nAmount Paid & Date of Deduction"
             },
             {
                 title: "Revised ITR Return (ITR-U)",
-                price: 2499,
+                price: 1,
                 tat: "2-4 days",
                 documents: "Original ITR Acknowledgement\nDetails of additional income\nTax payment challans (if any)\nReason for revision"
             }
@@ -95,79 +95,79 @@ const servicesData = [
         services: [
             {
                 title: "GST Registration",
-                price: 2999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "PAN Card of Business/Proprietor\nAadhaar Card\nPassport-size Photograph\nAddress Proof (Utility Bill/Tax Receipt)\nBank Account Proof (Cancelled Cheque/Passbook)\nDigital Signature (if applicable)\nRent Agreement & NOC"
             },
             {
                 title: "GST Registration for Foreigners",
-                price: 9999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "Passport (Attested)\nProof of Address in home country\nIndian Nominee Details & ID\nBusiness Activity description"
             },
             {
                 title: "GST Return Filing by Accountant",
-                price: 1499,
+                price: 1,
                 tat: "Monthly/Quarterly",
                 documents: "Sales Invoices\nPurchase Invoices\nBank Statement\nPrevious Month GSTR-3B/1"
             },
             {
                 title: "GST Invoicing & Filing Software",
-                price: 4999,
+                price: 1,
                 tat: "Instant Access",
                 documents: "Business setup details\nGSTIN"
             },
             {
                 title: "GST NIL Return Filing",
-                price: 499,
+                price: 1,
                 tat: "1 day",
                 documents: "Login Credentials\nOTP for verification"
             },
             {
                 title: "GST Amendment",
-                price: 1999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "New Address Proof (if changing address)\nPartner/Director details (if changing constitution)\nSupporting evidence for amendment"
             },
             {
                 title: "GST E-Invoicing Software",
-                price: 5999,
+                price: 1,
                 tat: "Instant Access",
                 documents: "GSTIN\nAPI access credentials"
             },
             {
                 title: "GST Revocation",
-                price: 4999,
+                price: 1,
                 tat: "15-30 days",
                 documents: "GST Cancellation Order\nAll pending Tax Returns\nReason for Revocation\nAffidavit (if required)"
             },
             {
                 title: "GST LUT Form",
-                price: 999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "GSTIN\nDigital Signature\nWitness Details\nPrevious year fulfillment details"
             },
             {
                 title: "GSTR-10 (Final Return)",
-                price: 2999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Order of Cancellation\nDetails of Closing Stock\nGST payable on closing stock"
             },
             {
                 title: "GST Software for Accountants",
-                price: 14999,
+                price: 1,
                 tat: "Instant Access",
                 documents: "Accountant/CA Firm registration details"
             },
             {
                 title: "GST Annual Return Filing (GSTR-9)",
-                price: 4999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "Annual Financial Statements\nGSTR-1 & 3B data for the financial year\nGST Reconciliation statements"
             },
             {
                 title: "Virtual Office + GSTIN",
-                price: 15000,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Identity and Address proof of owner/directors\nNOC from virtual office provider\nService Agreement"
             }
@@ -178,7 +178,7 @@ const servicesData = [
         services: [
             {
                 title: "Lower TDS Certificate (LDC) u/s 197 for NRIs",
-                price: 49999,
+                price: 1,
                 name: "Lower TDS Certificate (LDC) u/s 197 for NRIs",
                 tat: "25-30 days (after docs submission)",
                 documents: "PAN Card\nTax Residency Certificate (TRC)\nPassport and Visa Copies\nBank Statement (India and Foreign)\nIncome Tax Returns (last 2-3 years)\nDetails of Income\nSale/Purchase Agreements (if applicable)\nProof of Investment" + "\n" + "Further requirements will be shared after receiving above documents*"
@@ -190,7 +190,7 @@ const servicesData = [
         services: [
             {
                 title: "Trust",
-                price: 49999,
+                price: 1,
                 tat: "15-20 days",
                 variants: [
                     {
@@ -212,14 +212,14 @@ const servicesData = [
         services: [
             {
                 title: "Filing 26QB",
-                price: 4999,
+                price: 1,
                 description: "TDS on property purchase > ₹50L",
                 tat: "1-2 days",
                 documents: "PAN of Buyer\nPAN of Seller\nAadhaar of Buyer and Seller\nAddress of Buyer and Seller\nSale Agreement/Deed Copy\nDate of Agreement/Transaction\nMode of Payment\nContact details\nLogin Credentials for Income tax Site"
             },
             {
                 title: "Tax Planning Consultation",
-                price: 4999,
+                price: 1,
                 tat: "1-3 days",
                 documents: "PAN Card\nAadhaar Card\nIncome Tax Returns (last 2–3 years)\nForm 16 / Salary Slips (for salaried individuals)\nBank Statements (last 6 months)\nInvestment Proofs (LIC, PPF, ELSS, etc.)\nDetails of Capital Gains (property, shares, mutual funds)\nRental Income Details (if any)\nHome Loan Documents (sanction letter, EMI schedule)\nBusiness Income/Profit & Loss Account (if self-employed)\nBalance Sheet (for businesses or professionals)\nDetails of Foreign Income/Assets (if applicable)\nAdvance Tax / Self-Assessment Tax Paid\nTDS Certificates (Form 16A, etc.)\nDetails of Donations (for 80G deductions)\nEducation Loan Details (interest certificate)\nMedical Insurance Premium Receipts (80D)\nHouse Rent Receipts (if claiming HRA)\nDepreciation Schedule (for businesses)\nAny Pending Tax Notices/Communications from IT Dept\nFurther requirements, if any, will be shared after receiving above documents*"
             }
@@ -230,187 +230,187 @@ const servicesData = [
         services: [
             {
                 title: "PAN Registration (Individual/Company)",
-                price: 499,
+                price: 1,
                 tat: "1-2 days",
                 documents: "INDIVIDUAL\nProof of Identity (Aadhaar Card / Passport / Voter ID / Driving License)\nProof of Address (Aadhaar / Utility Bill / Bank Statement / Passport)\nPassport-size Photograph\nDate of Birth Proof (Birth Certificate / Passport / Matriculation Certificate)\nProof of NRI Status (if applicable – Passport + Visa/PIO/OCI copy)\n\nCOMPANY\nCertificate of Incorporation (COI)\nProof of Company Address (Utility Bill / Rent Agreement)\nAuthorization Letter from Director\nIdentity and Address Proof of Signatory (Director/Partner)"
             },
             {
                 title: "PAN Registration (NRI)",
-                price: 4999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "Recent passport-sized photograph (two copies)\nPassport copy\nPIO or OCI card copy (if applicable)\nOverseas address proof (e.g., overseas bank statement or residential permit from Indian authorities)\nNRE bank account statement (if available) showing at least two transactions in the last six months, duly attested by Indian Embassy/Consulate/High Commission/Apostille or bank manager\nNote: Requirements for NRI documents are different, charges may vary accordingly.\nPlease specify if Resident Individual - different documentation applies."
             },
             {
                 title: "IEC Certificate",
-                price: 2999,
+                price: 1,
                 tat: "2-3 days",
                 documents: "PAN Card\nAadhaar Card\nPassport-size Photograph\nCancelled Cheque\nAddress Proof of Business\nDigital Signature Certificate"
             },
             {
                 title: "DSC Signature",
-                price: 2999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "Passport-size Photograph\nPAN Card\nAadhaar Card\nEmail ID and Mobile Number\nIdentity Verification"
             },
             {
                 title: "GST Registration",
-                price: 4999,
+                price: 1,
                 tat: "10 days",
                 documents: "PAN Card of Business\nAadhaar Card\nPassport-size Photograph\nBusiness Address Proof\nUtility Bill\nBank Account Proof\nDigital Signature Certificate\nRent agreement with NOC"
             },
             {
                 title: "Partnership firm registration, dissolution, addition, deletion",
-                price: 9999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "1. Partnership Firm Registration\nPartnership Deed (Notarized)- FORMAT AND Draft will provide\nPAN & Aadhaar of All Partners\nAddress Proof of Firm (Utility Bill / Rent Agreement / NOC)\nPassport-size Photos of Partners\nAffidavit (for name and business nature confirmation)\nProof of Principal Place of Business\n2. Addition of Partner\nAmended Partnership Deed (reflecting new partner)-will provide draft\nConsent Letter from New Partner\nPAN & Aadhaar of New Partner\nPassport-size Photo of New Partner\nAddress Proof of New Partner\nForm for Change in Constitution (State-specific)\n3. Deletion/Retirement of Partner\nReconstituted Partnership Deed-will provide draft\nConsent Letter/Retirement Deed\nForm for Change in Constitution (State-specific)\nPAN & Aadhaar of Retiring Partner\nBoard/Partner Resolution (if applicable)\n4. Dissolution of Partnership Firm\nDissolution Deed (signed by all partners)\nPAN of Firm & All Partners\nConsent Letter from Partners\nApplication for Dissolution (State-specific Form)\nFinal Account Statement\nAffidavit / Declaration for Closure"
             },
             {
                 title: "RERA Agent Registration (Maharashtra)",
-                price: 14999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "PAN Card of the Agent (Individual or Company/Firm)\nAadhaar Card (for individuals or authorized person)\nPassport-size Photograph\nAddress Proof (Electricity Bill/Rent Agreement)\nIncome Tax Return (ITR) for last 3 years (if applicable)\nCopy of Partnership Deed or MOA/AOA and COI (for firms/companies)\nBoard Resolution/Authorization Letter (if company/LLP)\nDetails of All Past Real Estate Projects/Deals (if any)\nMobile Number and Email ID\nProof of Business Address (Rent Agreement/Ownership Proof)\nCopy of Business Registration Certificate (GST/Shop Act etc.)\nLetterhead and Stamp (optional, but often requested)"
             },
             {
                 title: "RERA Project Registration (Maharashtra)",
-                price: 49999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "PAN Card of the Promoter/Developer\nAadhaar Card of the Promoter\nProject Land Title Deed and Legal Ownership Documents\nEncumbrance Certificate of the Land\nSanctioned Building Plan and Layout Plan (from competent authority)\nProject Commencement Certificate\nEstimated Project Cost and Timeline\nDetails of Past Projects (if any)\nDevelopment Agreement (if applicable)\nArchitect’s Certificate (project layout)\nEngineer’s Certificate (cost of construction estimate)                           CA Certificate (fund utilization and cost estimation)\nProject Location and Site Photographs\nDetails of Allottees (if any bookings done)\nDetails of Bank Account for Project (70% fund account)\nAffidavit cum Declaration (Form-B)\nParking Area Details (covered and open)\nLegal Title Report (by advocate)\nDetails of Real Estate Agents (if appointed)"
             },
             {
                 title: "Startup India Registration",
-                price: 4999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Certificate of Incorporation/Registration\nProof of funding (if any)\nWrite-up on nature of business/innovation\nEmail & Mobile Number\nPAN Card of Entity"
             },
             {
                 title: "Legal Entity Identifier Code",
-                price: 5999,
+                price: 1,
                 tat: "2-3 days",
                 documents: "Entity Registration Certificate\nPAN Card of Entity\nAuthorized Signatory Details\nBoard Resolution"
             },
             {
                 title: "12A and 80G Registration",
-                price: 14999,
+                price: 1,
                 tat: "3-4 months",
                 documents: "Trust Deed/MOA & AOA\nPAN of Entity\nActivity Report since inception\nBank Balance Sheet (Last 3 years)\nList of Trustees/Governing Body"
             },
             {
                 title: "Darpan Registration",
-                price: 2999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Entity Registration Certificate\nPAN Card of NGO\nDetails of 3 key office bearers\nAadhar & PAN of key members"
             },
             {
                 title: "Trade License",
-                price: 3499,
+                price: 1,
                 tat: "15-20 days",
                 documents: "Address Proof of Business\nID Proof of Owner\nProperty Tax Receipt\nNOC from neighbors (if applicable)"
             },
             {
                 title: "ISO Registration",
-                price: 7999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "Business Registration Proof\nInvoices of Sales/Purchase\nScope of business\nOrganization Chart"
             },
             {
                 title: "12A Registration",
-                price: 8999,
+                price: 1,
                 tat: "2-3 months",
                 documents: "Trust Deed/Registration Certificate\nPAN of NGO\nFinancial Statements (last 3 years)"
             },
             {
                 title: "80G Registration",
-                price: 8999,
+                price: 1,
                 tat: "2-3 months",
                 documents: "Trust Deed/Registration Certificate\nPAN of NGO\nActivity Reports"
             },
             {
                 title: "FSSAI Registration",
-                price: 1999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Photo of Applicant\nID Proof (Aadhar/Voter ID)\nAddress Proof of Business\nList of food products"
             },
             {
                 title: "FSSAI License",
-                price: 9999,
+                price: 1,
                 tat: "15-30 days",
                 documents: "Blueprint of Processing Unit\nList of Machinery\nFood Safety Management System Plan\nAnalysis report of water"
             },
             {
                 title: "Shop Act Registration",
-                price: 2499,
+                price: 1,
                 tat: "3-5 days",
                 documents: "Photo of Establishment (with name board)\nID Proof of Owner\nAddress Proof\nRate Card/Menu (if applicable)"
             },
             {
                 title: "APEDA Registration",
-                price: 7499,
+                price: 1,
                 tat: "7-10 days",
                 documents: "IE Code Certificate\nBank Certificate\nCancelled Cheque\nMoA/AoA or Partnership Deed"
             },
             {
                 title: "Drug License",
-                price: 14999,
+                price: 1,
                 tat: "30-45 days",
                 documents: "Premises Plan\nOwnership/Rental Details\nPharmacist Details (Degree & Registration)\nAffidavit of Pharmacist"
             },
             {
                 title: "Halal License & Certification",
-                price: 19999,
+                price: 1,
                 tat: "15-20 days",
                 documents: "Business Registration\nFSSAI License\nList of Ingredients\nManufacturing Process Flow"
             },
             {
                 title: "Barcode Registration",
-                price: 8999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "PAN of Entity\nAudited Financials (for turnover proof)\nProduct list"
             },
             {
                 title: "Udyam Registration",
-                price: 1499,
+                price: 1,
                 tat: "1-2 days",
                 documents: "Aadhar Card of Owner\nPAN Card of Entity\nBank Account Details\nInvestment & Turnover details"
             },
             {
                 title: "ICEGATE Registration",
-                price: 3999,
+                price: 1,
                 tat: "2-3 days",
                 documents: "IE Code\nDigital Signature\nPAN Card\nValid Email & Mobile"
             },
             {
                 title: "RCMC Registration",
-                price: 5999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "IE Code Certificate\nPAN Card\nSME Registration (if any)\nMembership Application Form"
             },
             {
                 title: "BIS Registration",
-                price: 24999,
+                price: 1,
                 tat: "30-60 days",
                 documents: "Test Reports from BIS Lab\nManufacturing Unit Details\nAuthorized Signatory Details\nProduct Specification"
             },
             {
                 title: "FCRA Registration",
-                price: 29999,
+                price: 1,
                 tat: "4-6 months",
                 documents: "NGO Registration Proof\nActivity Logs\nForeign Funding Details\nAffidavit of all members"
             },
             {
                 title: "TN RERA Registration for Agents",
-                price: 12999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "PAN & Aadhar of Agent\nAddress Proof\nRegistration fee payment proof\nPassport size photo"
             },
             {
                 title: "Certificate of Incumbency",
-                price: 4999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "Company Incorporation Certificate\nRegister of Directors/Members\nBoard Resolution"
             },
             {
                 title: "Fire License",
-                price: 6999,
+                price: 1,
                 tat: "15-20 days",
                 documents: "Building Plan\nFire Safety Audit Report\nNOC from local fire department\nBuilding Completion Certificate"
             }
@@ -421,73 +421,73 @@ const servicesData = [
         services: [
             {
                 title: "Business Structure Selection",
-                price: 4999,
+                price: 1,
                 tat: "1-2 days",
                 documents: "Founders' PAN & Aadhar\nEducational qualifications\nBusiness model summary\nVision & mission statement"
             },
             {
                 title: "Startup Certificate",
-                price: 29999,
+                price: 1,
                 tat: "5-10 days",
                 documents: "Incorporation Certificate\nPAN Card of Entity\nDirectors/Partners Details\nBusiness Description\nAddress Proof\nMOA & AOA\nBank Account Details"
             },
             {
                 title: "Proprietorship",
-                price: 4999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "PAN Card of Proprietor\nAadhaar Card\nAddress Proof\nBank Account Details\nBusiness Name & Activity"
             },
             {
                 title: "Partnership",
-                price: 9999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "PAN & Aadhaar of All Partners\nPartnership Deed\nAddress Proof of Firm\nBank Account Details\nPassport-size Photos"
             },
             {
                 title: "One Person Company",
-                price: 14999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "PAN & Aadhaar of Director & Nominee\nAddress Proof\nPassport-size Photos\nDigital Signature\nMOA & AOA"
             },
             {
                 title: "Limited Liability Partnership",
-                price: 14999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "PAN & Aadhaar of Partners\nAddress Proof\nPassport-size Photos\nDigital Signature\nLLP Agreement"
             },
             {
                 title: "Private Limited Company",
-                price: 19999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "PAN & Aadhaar of Directors\nAddress Proof\nPassport-size Photos\nDigital Signature (Class 2/3)\nMOA & AOA\nRent Agreement/NOC"
             },
             {
                 title: "Section 8 Company",
-                price: 24999,
+                price: 1,
                 tat: "15-20 days",
                 documents: "PAN & Aadhaar of Directors\nAddress Proof\nDigital Signature\nMOA & AOA (Non-profit objectives)\nList of Members\nDeclaration of Non-profit intent"
             },
             {
                 title: "Trust Registration",
-                price: 14999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "PAN & Aadhaar of Trustees\nTrust Deed\nAddress Proof\nList of Trustees\nObjectives of Trust"
             },
             {
                 title: "Public Limited Company",
-                price: 49999,
+                price: 1,
                 tat: "20-30 days",
                 documents: "PAN & Aadhaar of Directors (min 7)\nAddress Proof\nDigital Signature\nMOA & AOA\nProspectus\nMinimum Capital Proof"
             },
             {
                 title: "Producer Company",
-                price: 34999,
+                price: 1,
                 tat: "15-20 days",
                 documents: "PAN & Aadhaar of Directors (min 5)\nAddress Proof\nDigital Signature\nMOA & AOA\nList of Producer Members\nActivity Details"
             },
             {
                 title: "Indian Subsidiary",
-                price: 39999,
+                price: 1,
                 tat: "20-25 days",
                 documents: "Parent Company Documents\nBoard Resolution\nPAN & Aadhaar of Indian Directors\nDigital Signature\nMOA & AOA\nFDI Compliance Documents"
             }
@@ -528,25 +528,25 @@ const servicesData = [
         services: [
             {
                 title: "Net Worth Certificate",
-                price: 9999,
+                price: 1,
                 tat: "1-3 days",
                 documents: "PAN Card\nAadhaar Card\nLatest ITR\nBank Statements\nFD Statements\nProperty Documents\nLoan Statements\nBusiness Financial Statements"
             },
             {
                 title: "Turnover Certificate",
-                price: 4999,
+                price: 1,
                 tat: "1-3 days",
                 documents: "PAN Card\nGST Registration Certificate\nAudited Financial Statements\nIncome Tax Returns\nBank Statements\nSales Invoices"
             },
             {
                 title: "15CA/15CB (FEMA Remittance)",
-                price: 9999,
+                price: 1,
                 tat: "7 days",
                 documents: "PAN of Remitter\nPAN of Remittee\nInvoice or Agreement\nBank Details\nTax Residency Certificate"
             },
             {
                 title: "Capital Contribution Certificate",
-                price: 4999,
+                price: 1,
                 tat: "1-3 days",
                 documents: "PAN Card of Partners / Shareholders\nPartnership Deed / LLP Agreement / MOA & AOA\nBank Statements showing capital infusion\nAudited Financial Statements (if available)\nIncome Tax Returns (optional, for verification)"
             }
@@ -557,7 +557,7 @@ const servicesData = [
         services: [
             {
                 title: "Project Reports",
-                price: "25,000 or 2% of loan amount whichever is higher",
+                price: 1,
                 tat: "5-10 days",
                 documents: "Business Plan or Proposal\nPromoter/Director Profile and KYC Documents\nPAN and Aadhaar of Promoters\nCompany/Firm Registration Documents\nMOA & AOA / Partnership Deed / LLP Agreement\nLoan Repayment Schedule (if applicable)\nPast Financials (if existing business)\nBank Statements (last 6 months)\nDetails of Existing Loans (if any)\nLicenses/Approvals (if applicable)"
             }
@@ -568,79 +568,79 @@ const servicesData = [
         services: [
             {
                 title: "PF Return Filing",
-                price: 999,
+                price: 1,
                 tat: "Monthly",
                 documents: "Employee ECR details\nMonthly contribution data"
             },
             {
                 title: "ESI Return Filing",
-                price: 999,
+                price: 1,
                 tat: "Monthly",
                 documents: "Employee-wise ESI contribution data"
             },
             {
                 title: "Professional Tax Return Filing",
-                price: 999,
+                price: 1,
                 tat: "Monthly/Annual",
                 documents: "Employee salary details\nPT Deduction amount"
             },
             {
                 title: "FDI Filing with RBI",
-                price: 19999,
+                price: 1,
                 tat: "15-20 days",
                 documents: "FC-GPR Form details\nValuation Certificate\nFIRC Copy\nKYC of foreign investor"
             },
             {
                 title: "FLA Return Filing",
-                price: 4999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Audited Financial Statements\nPAN of Entity\nDetails of foreign assets/liabilities"
             },
             {
                 title: "FSSAI Renewal",
-                price: 2499,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Original FSSAI License\nDeclaration Form\nAuthority Letter"
             },
             {
                 title: "FSSAI Return Filing",
-                price: 1999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "Sales & Purchase details\nCategory of food products handled"
             },
             {
                 title: "Partnership Compliance",
-                price: 2999,
+                price: 1,
                 tat: "5-7 days",
                 documents: "Partnership Deed\nFinancial Statements\nPartner details"
             },
             {
                 title: "Proprietorship Compliance",
-                price: 2499,
+                price: 1,
                 tat: "3-5 days",
                 documents: "Proprietor PAN & Aadhar\nBank Statement\nSales/Purchase details"
             },
             {
                 title: "Business Plan",
-                price: 14999,
+                price: 1,
                 tat: "10-15 days",
                 documents: "Project Description\nPromoter details\nMarket analysis data\nFinancial projections"
             },
             {
                 title: "PF Registration",
-                price: 3999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "PAN of Entity\nDigital Signature of Proprietor/Partner/Director\nCancelled Cheque\nAddress Proof"
             },
             {
                 title: "ESI Registration",
-                price: 3999,
+                price: 1,
                 tat: "7-10 days",
                 documents: "Registration Certificate\nPAN of Business\nList of Employees with joining dates\nBank Details"
             },
             {
                 title: "Professional Tax Registration",
-                price: 2999,
+                price: 1,
                 tat: "3-5 days",
                 documents: "PAN of Entity\nAddress Proof\nBank Account Details\nDetails of Employees"
             }
