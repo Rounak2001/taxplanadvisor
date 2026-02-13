@@ -67,6 +67,7 @@ import { ExistingLoanCalculator } from "@/components/allcalculators/ExistingLoan
 import FinancialHealthCalculator from "@/components/allcalculators/FinancialHealthCalculator";
 import InvestmentCalculator from "@/components/allcalculators/InvestmentCalculator";
 import CapitalGainsCal from "@/components/allcalculators/CapitalGains";
+import { InterestAndRemunerationCalculator } from "@/components/allcalculators/InterestAndRemuneration";
 import BulkTDSCalculator from "@/components/tdscalculator/BulkTDSCalculator";
 import TDSCalculator from "@/components/tdscalculator/TDSCalculator";
 import DashboardCalculatorWrapper from "@/components/calculators/DashboardCalculatorWrapper";
@@ -113,6 +114,7 @@ const App = () => (
               <Route path="/calculators/prepayment" element={<ExistingLoanCalculator />} />
               <Route path="/calculators/financial-health" element={<FinancialHealthCalculator />} />
               <Route path="/calculators/portfolio" element={<InvestmentCalculator />} />
+              <Route path="/calculators/partnership" element={<InterestAndRemunerationCalculator />} />
 
               {/* Consultant Dashboard */}
               <Route path="/dashboard" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><Dashboard /></AppShell></ProtectedRoute>} />
@@ -158,6 +160,7 @@ const App = () => (
               <Route path="/dashboard/calculators/prepayment" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><DashboardCalculatorWrapper backPath="/dashboard/calculators"><ExistingLoanCalculator /></DashboardCalculatorWrapper></AppShell></ProtectedRoute>} />
               <Route path="/dashboard/calculators/financial-health" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><DashboardCalculatorWrapper backPath="/dashboard/calculators"><FinancialHealthCalculator /></DashboardCalculatorWrapper></AppShell></ProtectedRoute>} />
               <Route path="/dashboard/calculators/portfolio" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><DashboardCalculatorWrapper backPath="/dashboard/calculators"><InvestmentCalculator /></DashboardCalculatorWrapper></AppShell></ProtectedRoute>} />
+              <Route path="/dashboard/calculators/partnership" element={<ProtectedRoute requiredRole="CONSULTANT"><AppShell><DashboardCalculatorWrapper backPath="/dashboard/calculators"><InterestAndRemunerationCalculator /></DashboardCalculatorWrapper></AppShell></ProtectedRoute>} />
 
               {/* Client Dashboard */}
               <Route path="/client" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><ClientDashboard /></ClientAppShell></ProtectedRoute>} />
@@ -200,6 +203,7 @@ const App = () => (
               <Route path="/client/calculators/prepayment" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><DashboardCalculatorWrapper backPath="/client/calculators"><ExistingLoanCalculator /></DashboardCalculatorWrapper></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/calculators/financial-health" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><DashboardCalculatorWrapper backPath="/client/calculators"><FinancialHealthCalculator /></DashboardCalculatorWrapper></ClientAppShell></ProtectedRoute>} />
               <Route path="/client/calculators/portfolio" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><DashboardCalculatorWrapper backPath="/client/calculators"><InvestmentCalculator /></DashboardCalculatorWrapper></ClientAppShell></ProtectedRoute>} />
+              <Route path="/client/calculators/partnership" element={<ProtectedRoute requiredRole="CLIENT"><ClientAppShell><DashboardCalculatorWrapper backPath="/client/calculators"><InterestAndRemunerationCalculator /></DashboardCalculatorWrapper></ClientAppShell></ProtectedRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

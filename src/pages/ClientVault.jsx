@@ -34,6 +34,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { documentService } from '@/api/documentService';
 import { UploadModal } from '@/components/vault/UploadModal';
 import { ShareNoticeModal } from '@/components/vault/ShareNoticeModal';
+import api from '@/api/axios';
 
 const REPORT_TYPE_COLORS = {
     CMA: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -73,6 +74,15 @@ export default function ClientVault() {
     const { data: folders = [], isLoading: foldersLoading } = useQuery({
         queryKey: ['vault-folders'],
         queryFn: () => documentService.listFolders(),
+    });
+
+    // Fetch service requests to get document requirements
+    const { data: serviceRequests = [], isLoading: servicesLoading } = useQuery({
+        queryKey: ['client-service-requests'],
+        queryFn: async () => {
+            const response = await api.get('/consultants/requests/');
+            return response.data;
+        },
     });
 
     // Helpers
@@ -129,7 +139,44 @@ export default function ClientVault() {
         }
     };
 
-    const isLoading = docsLoading || reportsLoading || noticesLoading || foldersLoading;
+    const isLoading = docsLoading || reportsLoading || noticesLoading || foldersLoading || servicesLoading;
+
+    // Extract document requirements from active services
+    const serviceDocumentRequirements = useMemo(() => {
+        const requirements = [];
+        // Get set of all existing document titles to prevent duplicates
+        const existingDocTitles = new Set(
+            documents.map(d => d.title.toLowerCase().trim())
+        );
+
+        // CRITICAL FIX: Only show requirements for ACTIVE services
+        const activeServices = serviceRequests.filter(request =>
+            request.status === 'assigned' || request.status === 'in_progress'
+        );
+
+        activeServices.forEach(request => {
+            if (request.service?.documents_required) {
+                // Split by newline, comma, semicolon, or bullet points
+                const rawDocs = request.service.documents_required;
+
+                // Refined split to avoid breaking words with hyphens (like Passport-size)
+                const docs = rawDocs
+                    .split(/[\n,;•]|\r\n/)
+                    .map(doc => doc.replace(/^[ \-\•\*\d\.]+/g, '').trim()) // Clean leading bullets/dashes/numbers
+                    .filter(doc => doc && doc.length > 1)
+                    .filter(doc => !existingDocTitles.has(doc.toLowerCase()))
+                    .map(doc => ({
+                        title: doc,
+                        serviceTitle: request.service.title,
+                        serviceId: request.service.id,
+                        requestId: request.id
+                    }));
+
+                requirements.push(...docs);
+            }
+        });
+        return requirements;
+    }, [serviceRequests, documents]);
 
     if (isLoading) {
         return (
@@ -189,7 +236,7 @@ export default function ClientVault() {
                             onClick={() => setSelectedFolderId('all')}
                             className="rounded-full h-8"
                         >
-                            All Documents
+                            All Documents ({documents.filter(d => d.status !== 'VERIFIED').length}/{documents.length})
                         </Button>
                         {folders.map(folder => (
                             <Button
@@ -201,7 +248,7 @@ export default function ClientVault() {
                             >
                                 <FolderIcon size={14} fill={selectedFolderId === folder.id ? "currentColor" : "none"} />
                                 {folder.name}
-                                <span className="opacity-60 text-[10px]">({folder.document_count})</span>
+                                <span className="opacity-60 text-[10px]">({folder.unverified_count}/{folder.document_count})</span>
                             </Button>
                         ))}
                         <Button
@@ -213,6 +260,52 @@ export default function ClientVault() {
                             <Plus size={14} className="mr-1" /> New Folder
                         </Button>
                     </div>
+
+                    {/* Service Document Requirements */}
+                    {serviceDocumentRequirements.length > 0 && (
+                        <Card className="border-warning/30 bg-warning/5 overflow-hidden">
+                            <CardHeader className="pb-3 text-warning">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <AlertCircle className="h-5 w-5" />
+                                    Required Documents ({serviceDocumentRequirements.length})
+                                </CardTitle>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Upload these documents for your active services
+                                </p>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <AnimatePresence mode="popLayout">
+                                    {serviceDocumentRequirements.map((req, index) => (
+                                        <motion.div
+                                            key={`${req.serviceId}-${req.title}`}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            layout
+                                            className="flex items-center justify-between p-4 rounded-lg bg-background border border-border shadow-sm hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="flex items-center gap-4 flex-1">
+                                                <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center text-warning shrink-0">
+                                                    <FileText className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold">{req.title}</p>
+                                                    <p className="text-sm text-muted-foreground">Required for: {req.serviceTitle}</p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleUploadClick({ title: req.title, description: `Required for ${req.serviceTitle}` })}
+                                                className="shrink-0"
+                                            >
+                                                <Upload className="mr-2 h-4 w-4" /> Upload
+                                            </Button>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     {requestedDocs.length > 0 && (
                         <Card className="border-warning/30 bg-warning/5 overflow-hidden">

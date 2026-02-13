@@ -1,19 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  LayoutDashboard,
-  Users,
-  FolderOpen,
-  FileSpreadsheet,
-  Receipt,
-  MessageSquare,
-  CreditCard,
-  ChevronLeft,
-  ChevronRight,
-  Shield,
-  Video,
-  Calculator,
-} from 'lucide-react';
+import {LayoutDashboard,Users,FolderOpen,FileSpreadsheet,Receipt,MessageSquare,CreditCard,ChevronLeft,ChevronRight,Shield,Video,Calculator,} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
@@ -36,7 +23,7 @@ const navGroups = [
       { to: '/vault', icon: FolderOpen, label: 'Smart Vault' },
       { to: '/messages', icon: MessageSquare, label: 'Messages' },
       { to: '/consultations', icon: Video, label: 'Consultations' },
-      { to: '/marketplace-leads', icon: TrendingUp, label: 'Marketplace Leads' },
+      // { to: '/marketplace-leads', icon: TrendingUp, label: 'Marketplace Leads' },
     ],
   },
   {
@@ -48,13 +35,13 @@ const navGroups = [
       { to: '/ai-chat', icon: MessageSquare, label: 'AI Chat' },
     ],
   },
-  {
-    label: 'Settings',
-    items: [
-      { to: '/pricing', icon: CreditCard, label: 'Subscription' },
-      { to: '/compliance', icon: Shield, label: 'DPDP Compliance' },
-    ],
-  },
+  // {
+  //   label: 'Settings',
+  //   items: [
+  //     { to: '/pricing', icon: CreditCard, label: 'Subscription' },
+  //     { to: '/compliance', icon: Shield, label: 'DPDP Compliance' },
+  //   ],
+  // },
 ];
 
 export function Sidebar() {

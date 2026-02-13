@@ -39,8 +39,15 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
     const { data: folders = [] } = useQuery({
         queryKey: ['vault-folders'],
         queryFn: () => documentService.listFolders(),
-        enabled: !documentRequest && isOpen,
+        enabled: !documentRequest?.id && isOpen,
     });
+
+    useEffect(() => {
+        if (isOpen) {
+            setTitle(documentRequest?.title || '');
+            setDescription(documentRequest?.description || '');
+        }
+    }, [documentRequest, isOpen]);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -68,22 +75,23 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
     };
 
     const handleUpload = async () => {
-        if (!file && !documentRequest) return;
+        if (!file) return;
 
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
 
-        if (!documentRequest) {
-            formData.append('title', title);
-            formData.append('description', description);
+        // If it's a proactive upload or a requirement without an existing ID
+        if (!documentRequest?.id) {
+            formData.append('title', title || documentRequest?.title);
+            formData.append('description', description || documentRequest?.description);
             if (selectedFolderId !== 'none') {
                 formData.append('folder', selectedFolderId);
             }
         }
 
         try {
-            if (documentRequest) {
+            if (documentRequest?.id) {
                 await documentService.uploadToRequest(
                     documentRequest.id,
                     formData,
@@ -151,7 +159,7 @@ export function UploadModal({ isOpen, onClose, documentRequest = null, onSuccess
                 </DialogHeader>
 
                 <div className="space-y-4 py-4 flex-1 overflow-y-auto px-1">
-                    {!documentRequest && (
+                    {!documentRequest?.title && (
                         <>
                             <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-medium">Document Title</Label>

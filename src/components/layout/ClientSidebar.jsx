@@ -28,12 +28,12 @@ const navItems = [
   { to: '/client', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/client/profile', icon: User, label: 'Profile' },
   { to: '/client/services', icon: Briefcase, label: 'Services' },
+  { to: '/client/vault', icon: Library, label: 'Document  Vault', showBadge: true },
+  { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
+  { to: '/client/meetings', icon: Video, label: 'My Meetings' },
+  { to: '/client/calculators', icon: Calculator, label: 'Financial Calculators' },
   { to: '/client/gst', icon: FileSpreadsheet, label: 'GSTR Reports' },
   // { to: '/client/insights', icon: Brain, label: 'Financial Insights' },
-  { to: '/client/calculators', icon: Calculator, label: 'Financial Calculators' },
-  { to: '/client/vault', icon: Library, label: 'Document  Vault', showBadge: true },
-  { to: '/client/meetings', icon: Video, label: 'My Meetings' },
-  { to: '/client/messages', icon: MessageSquare, label: 'Message Center' },
   // { to: '/client/marketplace', icon: Store, label: 'Marketplace' },
   // { to: '/client/billing', icon: CreditCard, label: 'Billing' },
   // { to: '/client/privacy', icon: Shield, label: 'Privacy & Data' },
@@ -46,8 +46,8 @@ export function ClientSidebar() {
 
   useEffect(() => {
     fetchNotificationCounts();
-    // Poll every 30 seconds to keep the count updated
-    const interval = setInterval(fetchNotificationCounts, 5000);
+    // Poll every 60 seconds to keep the count updated
+    const interval = setInterval(fetchNotificationCounts, 60000);
 
     // Listen for custom document upload events to refresh immediately
     const handleDocumentUpdate = () => {

@@ -28,7 +28,7 @@ export const useAuthStore = create(
                     return { success: true, role: userData.role, is_phone_verified: userData.is_phone_verified };
                 } catch (error) {
                     set({ user: null, isAuthenticated: false, isLoading: false });
-                    const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+                    const errorMessage = error.response?.data?.detail || 'Login failed. Credentials are incorrect.';
                     return { success: false, error: errorMessage };
                 }
             },

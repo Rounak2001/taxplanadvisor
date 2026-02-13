@@ -90,28 +90,32 @@ export default function Vault() {
         name: 'All Documents',
         icon: FileText,
         color: 'text-primary',
-        count: documents.length
+        count: documents.length,
+        unverifiedCount: documents.filter(d => d.status !== 'VERIFIED').length
       },
       {
         id: 'pending',
         name: 'Pending Requests',
         icon: Clock,
         color: 'text-rose-500',
-        count: documents.filter(d => d.status === 'PENDING').length
+        count: documents.filter(d => d.status === 'PENDING').length,
+        unverifiedCount: documents.filter(d => d.status === 'PENDING').length
       },
       {
         id: 'review',
         name: 'Needs Review',
         icon: AlertCircle,
         color: 'text-amber-500',
-        count: documents.filter(d => d.status === 'UPLOADED').length
+        count: documents.filter(d => d.status === 'UPLOADED').length,
+        unverifiedCount: documents.filter(d => d.status === 'UPLOADED').length
       },
       {
         id: 'recent',
         name: 'Recent Uploads',
         icon: CheckCircle2,
         color: 'text-emerald-500',
-        count: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo).length
+        count: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo).length,
+        unverifiedCount: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo && d.status !== 'VERIFIED').length
       }
     ];
 
@@ -125,7 +129,8 @@ export default function Vault() {
           name: name,
           icon: FolderIcon,
           is_system: true,
-          count: docsInThisFolder.length
+          count: docsInThisFolder.length,
+          unverifiedCount: docsInThisFolder.filter(d => d.status !== 'VERIFIED').length
         });
       }
     });
@@ -141,32 +146,33 @@ export default function Vault() {
   // Filter documents by selected client, status, and folder/category
   const filteredDocs = useMemo(() => {
     return documents.filter((doc) => {
-      // 1. Client filter
-      if (selectedClientId !== 'all' && doc.client !== Number(selectedClientId)) return false;
+      // 1. Client filter - be robust to both ID and object formats
+      const docClientId = typeof doc.client === 'object' ? doc.client.id : doc.client;
+      if (selectedClientId !== 'all' && Number(docClientId) !== Number(selectedClientId)) return false;
 
       // 2. Status filter
       if (statusFilter !== 'all' && doc.status !== statusFilter) return false;
 
       // 3. Folder / Smart Category filter
       if (selectedFolderId !== 'all') {
-        if (selectedClientId === 'all') {
-          // Handling Smart Categories
-          if (selectedFolderId === 'pending') return doc.status === 'PENDING';
-          if (selectedFolderId === 'review') return doc.status === 'UPLOADED';
-          if (selectedFolderId === 'recent') {
-            const fortyEightHoursAgo = new Date(Date.now() - (48 * 60 * 60 * 1000));
-            return doc.uploaded_at && new Date(doc.uploaded_at) > fortyEightHoursAgo;
-          }
-          if (selectedFolderId.toString().startsWith('sys-')) {
-            const folderName = selectedFolderId.replace('sys-', '');
-            return doc.folder_name === folderName;
-          }
-          // Default fallthrough for aggregated names if any
-          if (typeof selectedFolderId === 'string' && doc.folder_name !== selectedFolderId) return false;
-        } else {
-          // ID-based for specific client
-          if (typeof selectedFolderId === 'number' && doc.folder !== selectedFolderId) return false;
+        // Handling Smart Categories regardless of client selection
+        if (selectedFolderId === 'pending') return doc.status === 'PENDING';
+        if (selectedFolderId === 'review') return doc.status === 'UPLOADED';
+        if (selectedFolderId === 'recent') {
+          const fortyEightHoursAgo = new Date(Date.now() - (48 * 60 * 60 * 1000));
+          return doc.uploaded_at && new Date(doc.uploaded_at) > fortyEightHoursAgo;
         }
+
+        if (selectedFolderId.toString().startsWith('sys-')) {
+          const folderName = selectedFolderId.replace('sys-', '');
+          return doc.folder_name === folderName;
+        }
+
+        // ID-based for folders
+        if (typeof selectedFolderId === 'number' && doc.folder !== selectedFolderId) return false;
+
+        // Fallback for string matching folder names
+        if (typeof selectedFolderId === 'string' && doc.folder_name !== selectedFolderId) return false;
       }
       return true;
     });
@@ -427,7 +433,9 @@ export default function Vault() {
                           >
                             <Icon size={14} fill={isSelected ? "currentColor" : "none"} className={cn("shrink-0", folder.color)} />
                             <span className="truncate">{folder.name}</span>
-                            <span className="ml-auto text-[10px] opacity-60">({folder.count ?? folder.document_count})</span>
+                            <span className="ml-auto text-[10px] opacity-60">
+                              ({folder.unverified_count ?? folder.unverifiedCount ?? 0}/{folder.document_count ?? folder.count})
+                            </span>
                           </button>
                           {!folder.is_system && !folder.is_aggregated && !folder.icon && (
                             <button

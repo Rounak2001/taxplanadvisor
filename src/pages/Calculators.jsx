@@ -46,6 +46,14 @@ const calculatorCategories = [
                 description: 'Break down your CTC into take-home salary components',
                 icon: DollarSign,
                 path: '/calculators/salary'
+            },
+            {
+                id: 'partnership',
+                title: 'Partnership Calculator',
+                description: 'Calculate interest on capital and partner remuneration (40b)',
+                icon: Building2,
+                path: '/calculators/partnership',
+                badge: 'Professional'
             }
         ]
     },

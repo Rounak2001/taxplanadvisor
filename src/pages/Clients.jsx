@@ -72,17 +72,14 @@ export default function Clients() {
   }, [activeClient, activityFilter]);
 
   const handleOnboardingComplete = (formData) => {
-    console.log("New client onboarded:", formData);
     toast.success(`${formData.businessName} onboarded successfully!`);
   };
 
   const handleMeetingScheduled = (meetingData) => {
-    console.log("Meeting scheduled:", meetingData);
     toast.success(`Meeting scheduled with ${meetingData.clientName}`);
   };
 
   const handleCallLogged = (outcomeData) => {
-    console.log("Call logged:", outcomeData);
     toast.success("Call logged to timeline");
   };
 
@@ -95,16 +92,6 @@ export default function Clients() {
           <p className="text-muted-foreground">
             Unified view of client communications and activities
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setProOnboardingOpen(true)}>
-            <Sparkles size={16} strokeWidth={1.5} className="mr-2 text-primary" />
-            Lovable Pro Onboard
-          </Button>
-          <Button onClick={() => setOnboardingOpen(true)}>
-            <Plus size={16} strokeWidth={1.5} className="mr-2" />
-            Add Client
-          </Button>
         </div>
       </div>
 

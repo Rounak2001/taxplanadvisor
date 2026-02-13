@@ -303,7 +303,7 @@ export default function BookingWizard() {
                                             <Button
                                                 variant={"outline"}
                                                 className={cn(
-                                                    "w-full justify-start text-left font-normal h-12 rounded-xl bg-white/5 border-white/10 hover:bg-white/10 hover:text-white",
+                                                    "w-full justify-start text-left font-normal h-12 rounded-xl bg-white/5 border-white/10",
                                                     !selectedDate && "text-muted-foreground"
                                                 )}
                                             >
