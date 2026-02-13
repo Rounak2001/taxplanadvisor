@@ -46,8 +46,8 @@ export function ClientSidebar() {
 
   useEffect(() => {
     fetchNotificationCounts();
-    // Poll every 30 seconds to keep the count updated
-    const interval = setInterval(fetchNotificationCounts, 5000);
+    // Poll every 60 seconds to keep the count updated
+    const interval = setInterval(fetchNotificationCounts, 60000);
 
     // Listen for custom document upload events to refresh immediately
     const handleDocumentUpdate = () => {

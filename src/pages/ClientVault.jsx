@@ -236,7 +236,7 @@ export default function ClientVault() {
                             onClick={() => setSelectedFolderId('all')}
                             className="rounded-full h-8"
                         >
-                            All Documents
+                            All Documents ({documents.filter(d => d.status !== 'VERIFIED').length}/{documents.length})
                         </Button>
                         {folders.map(folder => (
                             <Button
@@ -248,7 +248,7 @@ export default function ClientVault() {
                             >
                                 <FolderIcon size={14} fill={selectedFolderId === folder.id ? "currentColor" : "none"} />
                                 {folder.name}
-                                <span className="opacity-60 text-[10px]">({folder.document_count})</span>
+                                <span className="opacity-60 text-[10px]">({folder.unverified_count}/{folder.document_count})</span>
                             </Button>
                         ))}
                         <Button

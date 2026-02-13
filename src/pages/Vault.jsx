@@ -90,28 +90,32 @@ export default function Vault() {
         name: 'All Documents',
         icon: FileText,
         color: 'text-primary',
-        count: documents.length
+        count: documents.length,
+        unverifiedCount: documents.filter(d => d.status !== 'VERIFIED').length
       },
       {
         id: 'pending',
         name: 'Pending Requests',
         icon: Clock,
         color: 'text-rose-500',
-        count: documents.filter(d => d.status === 'PENDING').length
+        count: documents.filter(d => d.status === 'PENDING').length,
+        unverifiedCount: documents.filter(d => d.status === 'PENDING').length
       },
       {
         id: 'review',
         name: 'Needs Review',
         icon: AlertCircle,
         color: 'text-amber-500',
-        count: documents.filter(d => d.status === 'UPLOADED').length
+        count: documents.filter(d => d.status === 'UPLOADED').length,
+        unverifiedCount: documents.filter(d => d.status === 'UPLOADED').length
       },
       {
         id: 'recent',
         name: 'Recent Uploads',
         icon: CheckCircle2,
         color: 'text-emerald-500',
-        count: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo).length
+        count: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo).length,
+        unverifiedCount: documents.filter(d => d.uploaded_at && new Date(d.uploaded_at) > fortyEightHoursAgo && d.status !== 'VERIFIED').length
       }
     ];
 
@@ -125,7 +129,8 @@ export default function Vault() {
           name: name,
           icon: FolderIcon,
           is_system: true,
-          count: docsInThisFolder.length
+          count: docsInThisFolder.length,
+          unverifiedCount: docsInThisFolder.filter(d => d.status !== 'VERIFIED').length
         });
       }
     });
@@ -428,7 +433,9 @@ export default function Vault() {
                           >
                             <Icon size={14} fill={isSelected ? "currentColor" : "none"} className={cn("shrink-0", folder.color)} />
                             <span className="truncate">{folder.name}</span>
-                            <span className="ml-auto text-[10px] opacity-60">({folder.count ?? folder.document_count})</span>
+                            <span className="ml-auto text-[10px] opacity-60">
+                              ({folder.unverified_count ?? folder.unverifiedCount ?? 0}/{folder.document_count ?? folder.count})
+                            </span>
                           </button>
                           {!folder.is_system && !folder.is_aggregated && !folder.icon && (
                             <button
