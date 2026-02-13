@@ -29,42 +29,17 @@ export default function CartDrawer({ isOpen, onClose }) {
     const { toast } = useToast();
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const loadRazorpayScript = () => {
-        return new Promise((resolve) => {
-            if (window.Razorpay) {
-                resolve(true);
-                return;
-            }
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
-            document.body.appendChild(script);
-        });
-    };
-
     const handlePayment = async () => {
         if (items.length === 0) return;
 
         setIsProcessing(true);
         try {
-            // 1. Load Razorpay Script
-            const res = await loadRazorpayScript();
-            if (!res) {
-                toast({
-                    title: "Error",
-                    description: "Razorpay SDK failed to load. Please check your connection.",
-                    variant: "destructive",
-                });
-                setIsProcessing(false);
-                return;
-            }
-
-            // 2. Create Order in Backend
+            // 1. Create Order in Backend
             const orderResponse = await api.post('/payments/create-order/', { items });
             const { razorpay_order_id, amount, key_id } = orderResponse.data;
 
-            // 3. Open Razorpay Checkout
+            // 2. Open Razorpay Checkout
+            // Same configuration as BookingWizard.jsx which is working fine
             const options = {
                 key: key_id,
                 amount: amount * 100, // in paise
@@ -74,7 +49,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                 order_id: razorpay_order_id,
                 handler: async function (response) {
                     try {
-                        // 4. Verify Payment in Backend
+                        // 3. Verify Payment in Backend
                         await api.post('/payments/verify-payment/', {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_order_id: response.razorpay_order_id,
@@ -93,14 +68,12 @@ export default function CartDrawer({ isOpen, onClose }) {
                             description: error.response?.data?.error || "Something went wrong.",
                             variant: "destructive",
                         });
+                    } finally {
+                        setIsProcessing(false);
                     }
                 },
-                prefill: {
-                    name: user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username,
-                    email: user?.email,
-                },
                 theme: {
-                    color: "#1d8c6b", // Emerald primary color
+                    color: "#10B981", // Aligning with secondary/meeting primary color
                 },
                 modal: {
                     ondismiss: function () {
