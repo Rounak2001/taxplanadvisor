@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import {Users,FileCheck,TrendingUp,AlertTriangle,ArrowUpRight,ArrowDownRight,Calendar, Clock,AlertCircle,CheckCircle2,Loader2,
+import {
+  Users, FileCheck, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Calendar, Clock, AlertCircle, CheckCircle2, Loader2, RotateCcw,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,7 @@ import { AssignedClientsCard } from '@/components/consultant/AssignedClientsCard
 import { CallLogsTable } from '@/components/consultant/CallLogsTable';
 import { ActivityTimeline } from '@/components/consultant/ActivityTimeline';
 import { consultantService } from '@/api/consultantService';
+import api from '@/api/axios';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -31,6 +33,9 @@ export default function Dashboard() {
     queryFn: consultantService.getDashboard,
     refetchInterval: 5000,
   });
+
+  // Derive revision-pending requests from dashboard data (already fetched above)
+  const revisionRequests = (dashboardData?.assigned_requests || []).filter(r => r.status === 'revision_pending');
 
   const stats = [
     {
@@ -158,6 +163,51 @@ export default function Dashboard() {
         </Card>
       )}
 
+      {/* Revision Alert */}
+      {revisionRequests.length > 0 && (
+        <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <RotateCcw size={24} strokeWidth={1.5} className="text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    Reports Sent Back for Revision
+                    <Badge className="bg-amber-500 text-white animate-pulse">
+                      {revisionRequests.length}
+                    </Badge>
+                  </h3>
+                  <div className="mt-2 space-y-1">
+                    {revisionRequests.map(req => (
+                      <div key={req.id} className="flex items-center gap-2 text-sm">
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        <span className="font-medium">{req.client_email}</span>
+                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">{req.service?.title}</span>
+                        {req.revision_notes && (
+                          <span className="text-xs italic text-amber-700 dark:text-amber-400 truncate max-w-[300px]">
+                            "{req.revision_notes}"
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <Button
+                className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => navigate('/vault')}
+              >
+                <RotateCcw size={16} />
+                Review in Vault
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Service Requests Overview */}
       {dashboardData?.assigned_requests && dashboardData.assigned_requests.length > 0 && (
         <Card>
@@ -192,7 +242,9 @@ export default function Dashboard() {
                         request.status === 'pending' && 'bg-warning',
                         request.status === 'assigned' && 'bg-info',
                         request.status === 'in_progress' && 'bg-primary',
-                        request.status === 'completed' && 'bg-success'
+                        request.status === 'completed' && 'bg-success',
+                        request.status === 'revision_pending' && 'bg-amber-500',
+                        request.status === 'final_review' && 'bg-rose-500'
                       )}
                     />
                     <div>
@@ -207,12 +259,16 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                  <Badge variant={
-                    request.status === 'pending' ? 'secondary' :
-                      request.status === 'in_progress' ? 'default' :
-                        request.status === 'completed' ? 'success' : 'secondary'
-                  }>
-                    {request.status.replace('_', ' ')}
+                  <Badge
+                    variant={
+                      request.status === 'revision_pending' ? 'outline' :
+                        request.status === 'pending' ? 'secondary' :
+                          request.status === 'in_progress' ? 'default' :
+                            request.status === 'completed' ? 'success' : 'secondary'
+                    }
+                    className={request.status === 'revision_pending' ? 'bg-amber-100 text-amber-800 border-amber-300' : ''}
+                  >
+                    {request.status === 'revision_pending' ? 'Revision Pending' : request.status.replace('_', ' ')}
                   </Badge>
                 </div>
               ))}

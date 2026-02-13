@@ -36,4 +36,22 @@ export const consultantService = {
         const response = await api.get('/activity/activities/stats/');
         return response.data;
     },
+
+    /**
+     * Update the status of a service request
+     */
+    updateRequestStatus: async (requestId, status) => {
+        const response = await api.patch(`/consultants/requests/${requestId}/update-status/`, { status });
+        return response.data;
+    },
+
+    /**
+     * Get all clients assigned to the logged-in consultant
+     */
+    getAssignedClients: async () => {
+        const response = await api.get('/consultant/clients/');
+        return response.data;
+    }
 };
+
+export default consultantService;

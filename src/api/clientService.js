@@ -38,12 +38,24 @@ export const clientService = {
         return response.data;
     },
 
-    /**
-     * Smart onboarding for a new client
-     * POST /onboard/
-     */
     onboardClient: async (onboardingData) => {
         const response = await api.post('/onboard/', onboardingData);
+        return response.data;
+    },
+
+    /**
+     * Acknowledge service completion (Client)
+     */
+    confirmService: async (requestId) => {
+        const response = await api.post(`/consultants/requests/${requestId}/acknowledge-completion/`);
+        return response.data;
+    },
+
+    /**
+     * Request service revision (Client)
+     */
+    requestRevision: async (requestId, notes = '') => {
+        const response = await api.post(`/consultants/requests/${requestId}/request-revision/`, { notes });
         return response.data;
     }
 };

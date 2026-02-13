@@ -141,43 +141,6 @@ export default function ClientVault() {
 
     const isLoading = docsLoading || reportsLoading || noticesLoading || foldersLoading || servicesLoading;
 
-    // Extract document requirements from active services
-    const serviceDocumentRequirements = useMemo(() => {
-        const requirements = [];
-        // Get set of all existing document titles to prevent duplicates
-        const existingDocTitles = new Set(
-            documents.map(d => d.title.toLowerCase().trim())
-        );
-
-        // CRITICAL FIX: Only show requirements for ACTIVE services
-        const activeServices = serviceRequests.filter(request =>
-            request.status === 'assigned' || request.status === 'in_progress'
-        );
-
-        activeServices.forEach(request => {
-            if (request.service?.documents_required) {
-                // Split by newline, comma, semicolon, or bullet points
-                const rawDocs = request.service.documents_required;
-
-                // Refined split to avoid breaking words with hyphens (like Passport-size)
-                const docs = rawDocs
-                    .split(/[\n,;•]|\r\n/)
-                    .map(doc => doc.replace(/^[ \-\•\*\d\.]+/g, '').trim()) // Clean leading bullets/dashes/numbers
-                    .filter(doc => doc && doc.length > 1)
-                    .filter(doc => !existingDocTitles.has(doc.toLowerCase()))
-                    .map(doc => ({
-                        title: doc,
-                        serviceTitle: request.service.title,
-                        serviceId: request.service.id,
-                        requestId: request.id
-                    }));
-
-                requirements.push(...docs);
-            }
-        });
-        return requirements;
-    }, [serviceRequests, documents]);
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -218,8 +181,11 @@ export default function ClientVault() {
                     <TabsTrigger value="records" className="gap-2">
                         <FolderOpen className="h-4 w-4" /> Records & Uploads
                     </TabsTrigger>
-                    <TabsTrigger value="reports" className="gap-2">
+                    <TabsTrigger value="reports" className="gap-2 relative">
                         <FileSpreadsheet className="h-4 w-4" /> Analysis & Reports
+                        {serviceRequests.some(r => r.status === 'final_review') && (
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-background animate-pulse" />
+                        )}
                     </TabsTrigger>
                     <TabsTrigger value="notices" className="gap-2">
                         <ShieldAlert className="h-4 w-4" /> Legal & Notices
@@ -261,13 +227,12 @@ export default function ClientVault() {
                         </Button>
                     </div>
 
-                    {/* Service Document Requirements */}
-                    {serviceDocumentRequirements.length > 0 && (
+                    {requestedDocs.length > 0 && (
                         <Card className="border-warning/30 bg-warning/5 overflow-hidden">
                             <CardHeader className="pb-3 text-warning">
                                 <CardTitle className="flex items-center gap-2 text-lg">
                                     <AlertCircle className="h-5 w-5" />
-                                    Required Documents ({serviceDocumentRequirements.length})
+                                    Required Documents ({requestedDocs.length})
                                 </CardTitle>
                                 <p className="text-xs text-muted-foreground mt-1">
                                     Upload these documents for your active services
@@ -275,9 +240,9 @@ export default function ClientVault() {
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <AnimatePresence mode="popLayout">
-                                    {serviceDocumentRequirements.map((req, index) => (
+                                    {requestedDocs.map((doc) => (
                                         <motion.div
-                                            key={`${req.serviceId}-${req.title}`}
+                                            key={doc.id}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
@@ -289,13 +254,13 @@ export default function ClientVault() {
                                                     <FileText className="h-5 w-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold">{req.title}</p>
-                                                    <p className="text-sm text-muted-foreground">Required for: {req.serviceTitle}</p>
+                                                    <p className="font-semibold">{doc.title}</p>
+                                                    <p className="text-sm text-muted-foreground">{doc.description || 'Action required'}</p>
                                                 </div>
                                             </div>
                                             <Button
                                                 size="sm"
-                                                onClick={() => handleUploadClick({ title: req.title, description: `Required for ${req.serviceTitle}` })}
+                                                onClick={() => handleUploadClick(doc)}
                                                 className="shrink-0"
                                             >
                                                 <Upload className="mr-2 h-4 w-4" /> Upload
@@ -303,35 +268,6 @@ export default function ClientVault() {
                                         </motion.div>
                                     ))}
                                 </AnimatePresence>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {requestedDocs.length > 0 && (
-                        <Card className="border-warning/30 bg-warning/5 overflow-hidden">
-                            <CardHeader className="pb-3 text-warning">
-                                <CardTitle className="flex items-center gap-2 text-lg">
-                                    <AlertCircle className="h-5 w-5" />
-                                    Pending Document Requests ({requestedDocs.length})
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {requestedDocs.map((doc) => (
-                                    <div key={doc.id} className="flex items-center justify-between p-4 rounded-lg bg-white border border-border shadow-sm">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                                                <FileText className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold">{doc.title}</p>
-                                                <p className="text-sm text-muted-foreground">{doc.description || 'Action required'}</p>
-                                            </div>
-                                        </div>
-                                        <Button size="sm" onClick={() => handleUploadClick(doc)}>
-                                            <Upload className="mr-2 h-4 w-4" /> Upload
-                                        </Button>
-                                    </div>
-                                ))}
                             </CardContent>
                         </Card>
                     )}
@@ -402,34 +338,127 @@ export default function ClientVault() {
                             <div className="space-y-3">
                                 {reports.length === 0 ? (
                                     <EmptyState icon={FileSpreadsheet} title="No reports shared" description="Analysis reports from your consultant will appear here." />
-                                ) : (
-                                    reports.map((report) => (
-                                        <div key={report.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border/20">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                    <FileSpreadsheet className="h-5 w-5" />
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-semibold">{report.title}</p>
-                                                        <Badge variant="outline" className={cn("text-[10px]", REPORT_TYPE_COLORS[report.report_type])}>
-                                                            {report.report_type}
-                                                        </Badge>
+                                ) : (() => {
+                                    // Sort reports newest first
+                                    const sorted = [...reports].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                                    // Track which consultants we've already shown action buttons for
+                                    const seenConsultants = new Set();
+
+                                    return sorted.map((report) => {
+                                        const consultantId = Number(report.consultant);
+                                        const isNewest = !seenConsultants.has(consultantId);
+                                        seenConsultants.add(consultantId);
+
+                                        // Only the newest report from this consultant gets action buttons
+                                        const associatedRequest = isNewest
+                                            ? serviceRequests.find(r =>
+                                                ['final_review', 'filed'].includes(r.status) &&
+                                                Number(r.assigned_consultant?.user) === consultantId
+                                            )
+                                            : null;
+
+                                        // Check if revision was requested — show badge on older reports
+                                        const revisionRequest = serviceRequests.find(r =>
+                                            r.status === 'revision_pending' &&
+                                            Number(r.assigned_consultant?.user) === consultantId
+                                        );
+
+                                        // Older reports from same consultant: always show "Sent for Revision"
+                                        const isOldRevision = !isNewest;
+
+                                        return (
+                                            <div key={report.id} className={cn(
+                                                "flex items-center justify-between p-4 rounded-lg transition-colors border",
+                                                isOldRevision
+                                                    ? "bg-amber-50/50 border-amber-200 dark:bg-amber-950/20"
+                                                    : "bg-muted/30 hover:bg-muted/50 border-border/20"
+                                            )}>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary relative">
+                                                        <FileSpreadsheet className="h-5 w-5" />
+                                                        {associatedRequest && (
+                                                            <span className="absolute -top-1 -right-1 h-3 w-3 bg-rose-500 rounded-full border-2 border-background animate-bounce" />
+                                                        )}
                                                     </div>
-                                                    <p className="text-xs text-muted-foreground">Shared on {new Date(report.created_at).toLocaleDateString()}</p>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-semibold">{report.title}</p>
+                                                            <Badge variant="outline" className={cn("text-[10px]", REPORT_TYPE_COLORS[report.report_type])}>
+                                                                {report.report_type}
+                                                            </Badge>
+                                                            {isOldRevision && (
+                                                                <Badge className="text-[10px] bg-amber-500 text-white border-amber-600">
+                                                                    Sent for Revision
+                                                                </Badge>
+                                                            )}
+                                                            {isNewest && revisionRequest && (
+                                                                <Badge className="text-[10px] bg-amber-500 text-white border-amber-600">
+                                                                    Sent for Revision
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">Shared on {new Date(report.created_at).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    {associatedRequest && (
+                                                        <div className="flex items-center gap-2 mr-4 pr-4 border-r border-border/50">
+                                                            <Button
+                                                                variant="success"
+                                                                size="sm"
+                                                                className="h-8 gap-2 bg-green-600 hover:bg-green-700 text-white"
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const clientService = (await import('@/api/clientService')).default;
+                                                                        await clientService.confirmService(associatedRequest.id);
+                                                                        const { toast } = await import('sonner');
+                                                                        toast.success('Report approved and service completed!');
+                                                                        queryClient.invalidateQueries(['client-service-requests']);
+                                                                    } catch (err) {
+                                                                        const { toast } = await import('sonner');
+                                                                        toast.error('Failed to approve report.');
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <CheckCircle2 className="h-3.5 w-3.5" /> APPROVE
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                className="h-8 gap-2"
+                                                                onClick={async () => {
+                                                                    const reason = window.prompt('Please provide a reason for requesting a revision:');
+                                                                    if (!reason) return;
+
+                                                                    try {
+                                                                        const clientService = (await import('@/api/clientService')).default;
+                                                                        await clientService.requestRevision(associatedRequest.id, reason);
+                                                                        const { toast } = await import('sonner');
+                                                                        toast.success('Revision request sent to consultant.');
+                                                                        queryClient.invalidateQueries(['client-service-requests']);
+                                                                    } catch (err) {
+                                                                        const { toast } = await import('sonner');
+                                                                        toast.error('Failed to request revision.');
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <AlertCircle className="h-3.5 w-3.5" /> REQ REV
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex gap-1">
+                                                        <Button variant="ghost" size="icon" onClick={() => setViewingDoc({ ...report, type: 'REPORT' })}>
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDownload(report.file, report.title)}>
+                                                            <Download className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-1">
-                                                <Button variant="ghost" size="icon" onClick={() => setViewingDoc({ ...report, type: 'REPORT' })}>
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleDownload(report.file, report.title)}>
-                                                    <Download className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                                        );
+                                    });
+                                })()}
                             </div>
                         </CardContent>
                     </Card>

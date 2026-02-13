@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   useAuthStore
@@ -20,7 +21,8 @@ import {
   Loader2,
   ClipboardList,
   Search,
-  FileCheck
+  FileCheck,
+  AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,10 +36,11 @@ import api from '@/api/axios';
 // Status workflow stages
 const WORKFLOW_STAGES = [
   { key: 'pending', label: 'Pending', icon: Clock },
-  { key: 'assigned', label: 'Assigned', icon: User },
-  { key: 'in_progress', label: 'In Progress', icon: ClipboardList },
+  { key: 'assigned', label: 'TC Assigned', icon: User },
+  { key: 'doc_pending', label: 'Doc Upload', icon: FileText },
+  { key: 'wip', label: 'WIP', icon: ClipboardList },
   { key: 'review', label: 'Review', icon: Search },
-  { key: 'completed', label: 'Completed', icon: CheckCircle2 },
+  { key: 'completed', label: 'Complete', icon: CheckCircle2 },
 ];
 
 // Status Progress Bar Component
@@ -45,14 +48,23 @@ function StatusProgressBar({ currentStatus }) {
   const getStageIndex = (status) => {
     const statusMap = {
       'pending': 0,
-      'assigned': 1,
-      'in_progress': 2,
-      'completed': 4, // Skip review for now, can be added later
+      'assigned': 2,
+      'doc_pending': 2,
+      'under_review': 2,
+      'wip': 3,
+      'under_query': 2,
+      'final_review': 4,
+      'filed': 4,
+      'revision_pending': 4,
+      'completed': 5,
+      'cancelled': -1
     };
     return statusMap[status] ?? 0;
   };
 
   const currentStageIndex = getStageIndex(currentStatus);
+
+  if (currentStageIndex === -1) return null;
 
   return (
     <div className="w-full py-6">
@@ -123,6 +135,7 @@ function StatusProgressBar({ currentStatus }) {
 }
 
 export default function ClientDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const [serviceRequests, setServiceRequests] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
@@ -150,8 +163,16 @@ export default function ClientDashboard() {
   const getStatusBadgeVariant = (status) => {
     switch (status) {
       case 'assigned':
-      case 'in_progress':
+      case 'wip':
+      case 'under_review':
+      case 'final_review':
         return 'default';
+      case 'filed':
+        return 'success';
+      case 'doc_pending':
+      case 'under_query':
+      case 'revision_pending':
+        return 'destructive';
       case 'completed':
         return 'success';
       default:
@@ -160,25 +181,52 @@ export default function ClientDashboard() {
   };
 
   const getStatusLabel = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending Assignment';
-      case 'assigned':
-        return 'Assigned';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      default:
-        return status;
+    const labels = {
+      'pending': 'Pending Assignment',
+      'assigned': 'Expert Assigned',
+      'doc_pending': 'Action Required',
+      'under_review': 'Under Review',
+      'wip': 'Processing',
+      'under_query': 'Clarification Needed',
+      'final_review': 'Final Review',
+      'filed': 'Work Filed/Submitted',
+      'revision_pending': 'Revision Requested',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled'
+    };
+    return labels[status] || status;
+  };
+
+  const handleConfirm = async (id) => {
+    try {
+      const clientService = (await import('@/api/clientService')).default;
+      await clientService.confirmService(id);
+      import('sonner').then(m => m.toast.success('Service confirmed and completed!'));
+      fetchServiceRequests();
+    } catch (err) {
+      import('sonner').then(m => m.toast.error('Failed to confirm service.'));
     }
   };
 
+  const handleRevise = async (id) => {
+    try {
+      const clientService = (await import('@/api/clientService')).default;
+      await clientService.requestRevision(id);
+      import('sonner').then(m => m.toast.success('Revision request sent to consultant.'));
+      fetchServiceRequests();
+    } catch (err) {
+      import('sonner').then(m => m.toast.error('Failed to request revision.'));
+    }
+  };
+
+  const activeServices = serviceRequests.filter(r => !['completed', 'cancelled'].includes(r.status));
+  const completedServices = serviceRequests.filter(r => r.status === 'completed');
+
   const stats = [
-    { title: 'Active Services', value: serviceRequests.length.toString(), icon: FileText, trend: 'Total requests' },
-    { title: 'Assigned', value: serviceRequests.filter(r => r.assigned_consultant).length.toString(), icon: CheckCircle2, trend: 'With consultant' },
-    { title: 'Pending', value: serviceRequests.filter(r => !r.assigned_consultant).length.toString(), icon: Clock, trend: 'Awaiting assignment' },
-    { title: 'Completed', value: serviceRequests.filter(r => r.status === 'completed').length.toString(), icon: TrendingUp, trend: 'Finished' },
+    { title: 'Active Services', value: activeServices.length.toString(), icon: FileText, trend: 'Ongoing requests' },
+    { title: 'Assigned', value: activeServices.filter(r => r.assigned_consultant).length.toString(), icon: CheckCircle2, trend: 'Experts working' },
+    { title: 'Pending', value: activeServices.filter(r => !r.assigned_consultant).length.toString(), icon: Clock, trend: 'Awaiting assignment' },
+    { title: 'Completed', value: completedServices.length.toString(), icon: TrendingUp, trend: 'Finished' },
   ];
 
   if (loading) {
@@ -206,7 +254,7 @@ export default function ClientDashboard() {
           <p className="text-muted-foreground mb-6">
             You haven't purchased any services yet. Browse our services to get started.
           </p>
-          <Button>Browse Services</Button>
+          <Button onClick={() => navigate('/client/services')}>Browse Services</Button>
         </Card>
       </div>
     );
@@ -264,10 +312,10 @@ export default function ClientDashboard() {
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-lg font-semibold">Active Services</h2>
-            <Badge variant="secondary">{serviceRequests.length}</Badge>
+            <Badge variant="secondary">{activeServices.length}</Badge>
           </div>
           <div className="space-y-3">
-            {serviceRequests.map((request) => (
+            {activeServices.map((request) => (
               <Card
                 key={request.id}
                 className={cn(
@@ -278,14 +326,15 @@ export default function ClientDashboard() {
               >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant={getStatusBadgeVariant(request.status)} className="text-[10px]">
-                      {getStatusLabel(request.status)}
-                    </Badge>
-                    {/* <span className="text-[10px] text-muted-foreground">#{request.id}</span> */}
+                    {request.status !== 'revision_pending' && (
+                      <Badge variant={getStatusBadgeVariant(request.status)} className="text-[10px]">
+                        {getStatusLabel(request.status)}
+                      </Badge>
+                    )}
                   </div>
                   <h4 className="font-semibold text-sm line-clamp-1">{request.service?.title || 'Service'}</h4>
                   <p className="text-xs text-muted-foreground mt-1">{request.service?.category?.name || 'General'}</p>
-                  {request.assigned_consultant && (
+                  {request.assigned_consultant && !['completed', 'cancelled'].includes(request.status) && (
                     <div className="mt-3 flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-[10px]">
@@ -300,7 +349,44 @@ export default function ClientDashboard() {
                 </CardContent>
               </Card>
             ))}
+            {activeServices.length === 0 && (
+              <div className="text-center p-4 text-muted-foreground text-sm border border-dashed rounded-lg">
+                No active services
+              </div>
+            )}
           </div>
+
+          {/* Completed Services List */}
+          {completedServices.length > 0 && (
+            <>
+              <div className="flex items-center justify-between px-2 pt-4">
+                <h2 className="text-lg font-semibold text-muted-foreground">Completed</h2>
+                <Badge variant="outline">{completedServices.length}</Badge>
+              </div>
+              <div className="space-y-3 opacity-75">
+                {completedServices.map((request) => (
+                  <Card
+                    key={request.id}
+                    className={cn(
+                      "cursor-pointer transition-all hover:border-primary/50",
+                      selectedService?.id === request.id ? "border-primary bg-primary/5 shadow-md" : "border-border"
+                    )}
+                    onClick={() => setSelectedService(request)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="secondary" className="text-[10px] bg-green-100 text-green-800 hover:bg-green-200">
+                          Completed
+                        </Badge>
+                      </div>
+                      <h4 className="font-semibold text-sm line-clamp-1">{request.service?.title || 'Service'}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{request.service?.category?.name || 'General'}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Detailed Service View */}
@@ -336,7 +422,7 @@ export default function ClientDashboard() {
                     </CardHeader>
                     <CardContent>
                       {/* Consultant Information - Moved to Top */}
-                      {selectedService.assigned_consultant ? (
+                      {selectedService.assigned_consultant && !['completed', 'cancelled'].includes(selectedService.status) ? (
                         <div className="flex flex-col md:flex-row items-center gap-8 py-2 mb-6">
                           <div className="flex items-center gap-6">
                             <div className="relative">

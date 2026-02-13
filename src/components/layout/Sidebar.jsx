@@ -1,12 +1,14 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {LayoutDashboard,Users,FolderOpen,FileSpreadsheet,Receipt,MessageSquare,CreditCard,ChevronLeft,ChevronRight,Shield,Video,Calculator,} from 'lucide-react';
+import { LayoutDashboard, Users, FolderOpen, FileSpreadsheet, Receipt, MessageSquare, CreditCard, ChevronLeft, ChevronRight, Shield, Video, Calculator, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { TrendingUp } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/api/axios';
 
 const navGroups = [
   {
@@ -20,7 +22,7 @@ const navGroups = [
     label: 'Workspace',
     items: [
       { to: '/clients', icon: Users, label: 'Clients' },
-      { to: '/vault', icon: FolderOpen, label: 'Smart Vault' },
+      { to: '/vault', icon: FolderOpen, label: 'Document Vault' },
       { to: '/messages', icon: MessageSquare, label: 'Messages' },
       { to: '/consultations', icon: Video, label: 'Consultations' },
       // { to: '/marketplace-leads', icon: TrendingUp, label: 'Marketplace Leads' },
@@ -47,6 +49,19 @@ const navGroups = [
 export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, toggleSidebar } = useAppStore();
+
+  // Notification for pending reviews
+  const { data: serviceRequests = [] } = useQuery({
+    queryKey: ['client-service-requests-nav'],
+    queryFn: async () => {
+      const response = await api.get('/consultants/requests/');
+      return response.data;
+    },
+    // Only poll occasionally, or rely on cache invalidation from other pages
+    staleTime: 30000,
+  });
+
+  const hasPendingReview = serviceRequests.some(r => r.status === 'final_review');
 
   return (
     <motion.aside
@@ -113,14 +128,19 @@ export function Sidebar() {
                       !isActive && 'text-sidebar-foreground'
                     )}
                   >
-                    <Icon
-                      className={cn(
-                        'shrink-0',
-                        isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
+                    <div className="relative">
+                      <Icon
+                        className={cn(
+                          'shrink-0',
+                          isActive ? 'text-sidebar-primary' : 'text-muted-foreground'
+                        )}
+                        size={20}
+                        strokeWidth={1.5}
+                      />
+                      {item.label === 'Document Vault' && hasPendingReview && (
+                        <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-sidebar animate-pulse" />
                       )}
-                      size={20}
-                      strokeWidth={1.5}
-                    />
+                    </div>
                     <AnimatePresence mode="wait">
                       {!sidebarCollapsed && (
                         <motion.span
